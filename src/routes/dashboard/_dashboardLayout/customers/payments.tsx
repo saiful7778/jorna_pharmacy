@@ -22,7 +22,6 @@ import {
 } from "@/components/shared/dashboard-shell/DashboardShellHeaderSkeleton";
 import { DashboardShellSkeleton } from "@/components/shared/dashboard-shell/DashboardShellSkeleton";
 import { QueryStateBoundary } from "@/components/tanstack-query/query-state-boundary";
-import { TimeRangeFilter } from "@/components/time-range-filter";
 import { Button } from "@/components/ui/button";
 import { RefreshButton } from "@/components/ui/refresh-button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -43,9 +42,8 @@ import {
 import { CustomerSidebar } from "@/features/customer/components/CustomerSidebar";
 import { usePermissionCheck } from "@/hooks/use-permission-check";
 import { head } from "@/lib/head";
-import { querySearchSchema, rangeFilterSchema } from "@/lib/querySearchSchema";
+import { querySearchSchema } from "@/lib/querySearchSchema";
 import { orpcTQClient } from "@/oRPC/orpc";
-import { buildDateRangeFilter } from "@/utils/buildDateRangeFilter";
 import { formatCurrency } from "@/utils/formatCurrency";
 
 const searchFields = ["invoiceNo"];
@@ -63,9 +61,7 @@ export const Route = createFileRoute(
       context.user.id
     );
   },
-  validateSearch: querySearchSchema
-    .extend(rangeFilterSchema.shape)
-    .extend({ customerId: z.uuid().optional() }),
+  validateSearch: querySearchSchema.extend({ customerId: z.uuid().optional() }),
   loaderDeps: ({ search }) => search,
   head: ({ match }) =>
     head({
@@ -91,9 +87,6 @@ export const Route = createFileRoute(
       orpcTQClient.customer.payment.stats.queryOptions({
         input: {
           customerId: deps.customerId,
-          filter: {
-            createdAt: buildDateRangeFilter(deps.startTime, deps.endTime),
-          },
         },
       })
     );
@@ -170,9 +163,6 @@ function CustomerPaymentDetails({ customerId }: { customerId: string }) {
     orpcTQClient.customer.payment.stats.queryOptions({
       input: {
         customerId,
-        filter: {
-          createdAt: buildDateRangeFilter(search.startTime, search.endTime),
-        },
       },
       select: (result) => result.data,
     })
@@ -186,28 +176,19 @@ function CustomerPaymentDetails({ customerId }: { customerId: string }) {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between gap-2">
-        <TimeRangeFilter
-          rangeSearch={{
-            range: search.range,
-            startTime: search.startTime,
-            endTime: search.endTime,
-          }}
-          setRangeSearch={(updatedValue) =>
-            navigate({
-              search: {
-                ...(updatedValue.range && {
-                  range: updatedValue.range,
-                }),
-                ...(updatedValue.startTime && {
-                  startTime: updatedValue.startTime,
-                }),
-                ...(updatedValue.endTime && {
-                  endTime: updatedValue.endTime,
-                }),
-              },
-            })
+        <Button
+          variant="outline"
+          render={
+            <Link
+              to="/dashboard/customers/$customerId"
+              params={{ customerId }}
+              search={{ tab: "details" }}
+            />
           }
-        />
+        >
+          <Eye />
+          <span>Customer Details</span>
+        </Button>
         <div className="flex items-center gap-2">
           {isAllowCreate && (
             <>
@@ -218,6 +199,7 @@ function CustomerPaymentDetails({ customerId }: { customerId: string }) {
               <CustomerPaymentCreateDialog customerId={customerId} />
             </>
           )}
+          <RefreshButton isLoading={false} onButtonClick={handleRefresh} />
         </div>
       </div>
       <QueryStateBoundary
@@ -275,22 +257,6 @@ function CustomerPaymentDetails({ customerId }: { customerId: string }) {
           );
         }}
       </QueryStateBoundary>
-      <div className="flex items-center justify-between gap-2">
-        <Button
-          variant="outline"
-          render={
-            <Link
-              to="/dashboard/customers/$customerId"
-              params={{ customerId }}
-              search={{ tab: "details" }}
-            />
-          }
-        >
-          <Eye />
-          <span>Customer Details</span>
-        </Button>
-        <RefreshButton isLoading={false} onButtonClick={handleRefresh} />
-      </div>
       <QueryStateBoundary
         isLoading={paymentQuery.isLoading}
         isError={paymentQuery.isError}

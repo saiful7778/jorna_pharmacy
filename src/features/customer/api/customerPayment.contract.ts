@@ -88,12 +88,6 @@ const customerPaymentStatsContract = customerPaymentBaseContract
   })
   .input(
     z.object({
-      createdAt: z
-        .object({
-          from: z.coerce.date().describe("Created at from date").optional(),
-          to: z.coerce.date().describe("Created at to date").optional(),
-        })
-        .optional(),
       customerId: z.uuid().optional(),
     })
   )

@@ -1,4 +1,5 @@
 import { and, asc, desc, eq, lt, sql, type SQL } from "drizzle-orm";
+import type { BatchItem } from "drizzle-orm/batch";
 
 import { API_MESSAGES } from "@/constants/apiMessage";
 import {
@@ -136,13 +137,11 @@ export const createCustomerPaymentProcedure = customerImpl.payment.create
     // 2. Check the payment doesn't exceed the total due
     const totalDue = candidateSales.reduce((sum, s) => sum + s.dueAmount, 0);
 
-    console.log(candidateSales);
-
     if (amount > totalDue) throw errors.PAYMENT_EXCEEDS();
 
     // 3. Pay each sale; if the amount is bigger than a sale's due, carry the rest forward
     let remaining = amount;
-    const payments = [];
+    const statements: Array<BatchItem<"sqlite">> = [];
 
     for (const sale of candidateSales) {
       if (remaining <= 0) break;
@@ -150,24 +149,27 @@ export const createCustomerPaymentProcedure = customerImpl.payment.create
       const due = sale.dueAmount;
       const pay = Math.min(due, remaining);
 
-      await context.db
-        .update(SaleTable)
-        .set({ paidAmount: sql`${SaleTable.paidAmount} + ${pay}` })
-        .where(eq(SaleTable.id, sale.id));
-
-      const [payment] = await context.db
-        .insert(CustomerPaymentTable)
-        .values({
+      statements.push(
+        context.db
+          .update(SaleTable)
+          .set({ paidAmount: sql`${SaleTable.paidAmount} + ${pay}` })
+          .where(eq(SaleTable.id, sale.id)),
+        context.db.insert(CustomerPaymentTable).values({
           customerId,
           saleId: sale.id,
           amount: pay,
           note,
           createdBy: context.user.id,
         })
-        .returning();
+      );
 
-      payments.push(payment);
       remaining -= pay;
+    }
+
+    const [firstStatement, ...otherStatements] = statements;
+
+    if (firstStatement) {
+      await context.db.batch([firstStatement, ...otherStatements]);
     }
 
     return apiResponse(API_MESSAGES.CUSTOMER.PAYMENT.CREATE, null);
@@ -181,22 +183,12 @@ export const customerPaymentStatsProcedure = customerImpl.payment.stats
     ])
   )
   .handler(async ({ context, input }) => {
-    const { where } = buildPaginateOptions(
-      {
-        createdAt: CustomerPaymentTable.createdAt,
-      },
-      { filter: input.createdAt }
-    );
-
     const customerWhere: Array<SQL> = [];
     const saleWhere: Array<SQL> = [];
 
     if (input.customerId) {
       customerWhere.push(eq(CustomerPaymentTable.customerId, input.customerId));
       saleWhere.push(eq(SaleTable.customerId, input.customerId));
-    }
-    if (where) {
-      customerWhere.push(where);
     }
 
     const [paymentTotals, saleTotals] = await Promise.all([

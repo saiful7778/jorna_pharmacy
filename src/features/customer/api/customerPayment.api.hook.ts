@@ -53,6 +53,12 @@ export function useCreateCustomerPayment<TFieldNames>({
             }),
             exact: false,
           }),
+          queryClient.invalidateQueries({
+            queryKey: orpcTQClient.sale.stats.queryKey({
+              input: {},
+            }),
+            exact: false,
+          }),
         ]);
         onSuccess?.(message);
       },
