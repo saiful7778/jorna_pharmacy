@@ -17,7 +17,10 @@ import {
 
 import { RoleEnumSchema, type RoleEnumType } from "../../enums/zod-db-enums";
 import { AccountTable } from "../account.table";
+import { CustomerPaymentTable } from "../customer";
+import { PurchaseReturnTable, PurchaseTable } from "../purchase";
 import { UserRoleTable } from "../role-permission";
+import { SaleInvoiceTable, SaleTable } from "../sale";
 import { SessionTable } from "../session.table";
 import { UserDeviceTable } from "./userDevice.table";
 import { UserEventTable } from "./userEvent.table";
@@ -63,6 +66,19 @@ export const UserRelations = relations(UserTable, ({ many }) => ({
   }),
   devices: many(UserDeviceTable, { relationName: "UserDeviceToUser" }),
   events: many(UserEventTable, { relationName: "UserEventToUser" }),
+  customerPayments: many(CustomerPaymentTable, {
+    relationName: "CustomerPaymentToCreatedBy",
+  }),
+  sales: many(SaleTable, { relationName: "SaleToCreatedBy" }),
+  saleInvoices: many(SaleInvoiceTable, {
+    relationName: "saleInvoiceToReservedBy",
+  }),
+  purchases: many(PurchaseTable, {
+    relationName: "PurchaseToCreatedBy",
+  }),
+  purchaseReturns: many(PurchaseReturnTable, {
+    relationName: "PurchaseReturnToCreatedBy",
+  }),
 }));
 
 export const insertUserSchema = createInsertSchema(UserTable, {

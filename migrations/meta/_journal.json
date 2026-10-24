@@ -8,6 +8,27 @@
       "when": 1792803414330,
       "tag": "0000_init",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1792813194779,
+      "tag": "0001_add_company",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1792813232541,
+      "tag": "0002_add_customer_sale",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1792813249391,
+      "tag": "0003_add_medicine_purchase",
+      "breakpoints": true
     }
   ]
 }
