@@ -9,10 +9,12 @@ import {
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
 import { Toaster } from "react-hot-toast";
 
+import { DevPanel } from "@/components/dev-panel";
 import { ThemeProvider } from "@/components/providers/theme-provider";
 import { TanstackQueryProvider } from "@/components/tanstack-query/tanstack-query-provider";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { requireSessions } from "@/features/auth/auth.functions";
+import { env } from "@/lib/env";
 import { globalHead } from "@/lib/head";
 
 interface RouterContextProps {
@@ -46,6 +48,12 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         <TanstackQueryProvider queryClient={context.queryClient}>
           <ThemeProvider defaultTheme="system" storageKey="theme">
             <TooltipProvider>{children}</TooltipProvider>
+            <DevPanel
+              currentEnv={env.VITE_ENVIRONMENT}
+              envVars={Object.entries(import.meta.env)
+                .filter(([k]) => k.startsWith("VITE_"))
+                .map(([key, value]) => ({ key, value: value ?? "" }))}
+            />
             <Toaster
               position="top-center"
               reverseOrder={true}

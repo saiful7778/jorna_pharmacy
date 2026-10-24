@@ -9,7 +9,7 @@ import type {
 
 export type RoutePathType = NonNullable<LinkProps["to"]>;
 
-export type NODE_ENV_TYPE = "development" | "test" | "production";
+export type NODE_ENV_TYPE = "development" | "staging" | "test" | "production";
 
 export type RoleType = {
   roleName: RoleEnumType;
