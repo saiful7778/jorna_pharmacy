@@ -1,3 +1,5 @@
+import { useEffect } from "react";
+
 import { Atom, useAtom } from "@effect-atom/atom-react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Wallet } from "lucide-react";
@@ -36,7 +38,6 @@ export function CustomerPaymentCreateDialog({
 }: {
   customerId: string;
 }) {
-  "use no memo";
   const [open, setOpen] = useAtom(openCustomerPaymentCreateDialog);
 
   const form = useForm<
@@ -53,11 +54,23 @@ export function CustomerPaymentCreateDialog({
     },
   });
 
+  const { reset } = form;
+
+  useEffect(() => {
+    if (!open) return;
+
+    reset({
+      customerId,
+      saleId: undefined,
+      amount: "",
+      note: "",
+    });
+  }, [customerId, open, reset]);
+
   const { mutate, isPending } = useCreateCustomerPayment<
     keyof CustomerPaymentCreateType
   >({
     onSuccess: () => {
-      form.reset({ customerId, saleId: undefined, amount: "", note: "" });
       setOpen(false);
     },
     onValidationErrors: (fields) => {
@@ -68,7 +81,7 @@ export function CustomerPaymentCreateDialog({
   });
 
   const handleSubmit = form.handleSubmit((values) => {
-    mutate(values);
+    mutate({ ...values, customerId });
   });
 
   const formId = "customer_payment_create_form";
