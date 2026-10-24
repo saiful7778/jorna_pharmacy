@@ -30,7 +30,6 @@ import { usePermissionCheck } from "@/hooks/use-permission-check";
 import { orpcTQClient } from "@/oRPC/orpc";
 import { formatCurrency } from "@/utils/formatCurrency";
 
-import type { CustomerDetailsContractType } from "../../api/customer.contract";
 import { CustomerUpdateDialog } from "../CustomerUpdateDialog";
 
 const BALANCE_EPSILON = 0.005;
@@ -57,158 +56,150 @@ export function CustomerDetailsTab({ customerId }: { customerId: string }) {
       data={data}
       loadingFallback={<CustomerDetailsSkeleton />}
     >
-      {(customer) => (
-        <div className="space-y-4">
-          <CustomerSummaryStats summary={customer.summary} />
+      {({ summary, ...customer }) => {
+        const hasDue = summary.dueAmount > BALANCE_EPSILON;
+        const hasAdvance = summary.dueAmount < -BALANCE_EPSILON;
 
-          <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-            <Card className="lg:col-span-2">
-              <CardHeader>
-                <CardTitle>Contact & location</CardTitle>
-                <CardDescription>Customer contact info</CardDescription>
-                <CardAction>
-                  {isAllowUpdate && (
-                    <Button
-                      size="icon"
-                      variant="outline"
-                      onClick={() => setOpenUpdateDialog(true)}
-                    >
-                      <Edit />
-                    </Button>
-                  )}
-                </CardAction>
-              </CardHeader>
-              <CardContent>
-                <dl className="grid gap-6 sm:grid-cols-2">
-                  <DetailsItem
-                    icon={<Phone aria-hidden className="size-4" />}
-                    title="Phone"
-                  >
-                    {customer.phone ? (
-                      <span className="tabular-nums">{customer.phone}</span>
-                    ) : (
-                      <EmptyValue />
+        return (
+          <div className="space-y-4">
+            <div className="grid grid-cols-[repeat(auto-fit,minmax(100px,1fr))] gap-4">
+              <SummaryStat
+                label="Total sales"
+                value={formatCurrency(summary.totalSales)}
+                icon={<Receipt aria-hidden />}
+                color="info"
+                trend={`${summary.saleCount} ${summary.saleCount === 1 ? "sale" : "sales"}`}
+                trendDirection="neutral"
+              />
+              <SummaryStat
+                label="Total paid"
+                value={formatCurrency(summary.totalPaid)}
+                icon={<HandCoins aria-hidden />}
+                color="success"
+                trend={`${summary.paymentCount} ${summary.paymentCount === 1 ? "payment" : "payments"}`}
+                trendDirection="neutral"
+              />
+              <SummaryStat
+                label={hasAdvance ? "Advance balance" : "Due amount"}
+                value={formatCurrency(Math.abs(summary.dueAmount))}
+                icon={<Wallet aria-hidden />}
+                color={hasDue ? "error" : "success"}
+                trend={
+                  hasDue
+                    ? "Outstanding from customer"
+                    : hasAdvance
+                      ? "Customer has advance"
+                      : "Fully settled"
+                }
+                trendDirection={hasDue ? "down" : "neutral"}
+              />
+            </div>
+
+            <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+              <Card className="lg:col-span-2">
+                <CardHeader>
+                  <CardTitle>Contact & location</CardTitle>
+                  <CardDescription>Customer contact info</CardDescription>
+                  <CardAction>
+                    {isAllowUpdate && (
+                      <Button
+                        size="icon"
+                        variant="outline"
+                        onClick={() => setOpenUpdateDialog(true)}
+                      >
+                        <Edit />
+                      </Button>
                     )}
-                  </DetailsItem>
-                  <DetailsItem
-                    icon={<MapPin aria-hidden className="size-4" />}
-                    title="Address"
-                  >
-                    {customer.address ? customer.address : <EmptyValue />}
-                  </DetailsItem>
-                  <DetailsItem
-                    icon={<NotepadText aria-hidden className="size-4" />}
-                    title="Note"
-                  >
-                    {customer.note ? customer.note : <EmptyValue />}
-                  </DetailsItem>
-                </dl>
-              </CardContent>
-            </Card>
+                  </CardAction>
+                </CardHeader>
+                <CardContent>
+                  <dl className="grid gap-6 sm:grid-cols-2">
+                    <DetailsItem
+                      icon={<Phone aria-hidden className="size-4" />}
+                      title="Phone"
+                    >
+                      {customer.phone ? (
+                        <span className="tabular-nums">{customer.phone}</span>
+                      ) : (
+                        <EmptyValue />
+                      )}
+                    </DetailsItem>
+                    <DetailsItem
+                      icon={<MapPin aria-hidden className="size-4" />}
+                      title="Address"
+                    >
+                      {customer.address ? customer.address : <EmptyValue />}
+                    </DetailsItem>
+                    <DetailsItem
+                      icon={<NotepadText aria-hidden className="size-4" />}
+                      title="Note"
+                    >
+                      {customer.note ? customer.note : <EmptyValue />}
+                    </DetailsItem>
+                  </dl>
+                </CardContent>
+              </Card>
 
-            <Card>
-              <CardHeader>
-                <CardTitle>Record</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <dl className="grid gap-6">
-                  <DetailsItem
-                    icon={<ShoppingBag aria-hidden className="size-4" />}
-                    title="Last purchase"
-                  >
-                    {customer.summary.lastPurchaseAt ? (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Record</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <dl className="grid gap-6">
+                    <DetailsItem
+                      icon={<ShoppingBag aria-hidden className="size-4" />}
+                      title="Last purchase"
+                    >
+                      {summary.lastPurchaseAt ? (
+                        <FormatDateCell
+                          format="dd MMM, yyyy hh:mm aa"
+                          value={summary.lastPurchaseAt}
+                        />
+                      ) : (
+                        <EmptyValue />
+                      )}
+                    </DetailsItem>
+                    <DetailsItem
+                      icon={<CalendarDays aria-hidden className="size-4" />}
+                      title="Created at"
+                    >
                       <FormatDateCell
                         format="dd MMM, yyyy hh:mm aa"
-                        value={customer.summary.lastPurchaseAt}
+                        value={customer.createdAt}
                       />
-                    ) : (
-                      <EmptyValue />
-                    )}
-                  </DetailsItem>
-                  <DetailsItem
-                    icon={<CalendarDays aria-hidden className="size-4" />}
-                    title="Created at"
-                  >
-                    <FormatDateCell
-                      format="dd MMM, yyyy hh:mm aa"
-                      value={customer.createdAt}
-                    />
-                  </DetailsItem>
-                  <DetailsItem
-                    icon={<CalendarDays aria-hidden className="size-4" />}
-                    title="Last updated"
-                  >
-                    <FormatDateCell
-                      format="dd MMM, yyyy hh:mm aa"
-                      value={customer.updatedAt}
-                    />
-                  </DetailsItem>
-                </dl>
-              </CardContent>
-            </Card>
+                    </DetailsItem>
+                    <DetailsItem
+                      icon={<CalendarDays aria-hidden className="size-4" />}
+                      title="Last updated"
+                    >
+                      <FormatDateCell
+                        format="dd MMM, yyyy hh:mm aa"
+                        value={customer.updatedAt}
+                      />
+                    </DetailsItem>
+                  </dl>
+                </CardContent>
+              </Card>
+            </div>
+
+            {isAllowUpdate && (
+              <CustomerUpdateDialog
+                open={openUpdateDialog}
+                setOpen={setOpenUpdateDialog}
+                customerId={customerId}
+                customerData={{
+                  name: customer.name,
+                  phone: customer.phone,
+                  address: customer.address,
+                  note: customer.note,
+                  isActive: customer.isActive,
+                }}
+              />
+            )}
           </div>
-
-          {isAllowUpdate && (
-            <CustomerUpdateDialog
-              open={openUpdateDialog}
-              setOpen={setOpenUpdateDialog}
-              customerId={customerId}
-              customerData={{
-                name: customer.name,
-                phone: customer.phone,
-                address: customer.address,
-                note: customer.note,
-                isActive: customer.isActive,
-              }}
-            />
-          )}
-        </div>
-      )}
+        );
+      }}
     </QueryStateBoundary>
-  );
-}
-
-function CustomerSummaryStats({
-  summary,
-}: {
-  summary: CustomerDetailsContractType["output"]["data"]["summary"];
-}) {
-  const hasDue = summary.dueAmount > BALANCE_EPSILON;
-  const hasAdvance = summary.dueAmount < -BALANCE_EPSILON;
-  const balanceLabel = hasAdvance ? "Advance balance" : "Due amount";
-  const balanceTrend = hasDue
-    ? "Outstanding from customer"
-    : hasAdvance
-      ? "Customer has advance"
-      : "Fully settled";
-
-  return (
-    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-      <SummaryStat
-        label="Total purchases"
-        value={formatCurrency(summary.totalPurchased)}
-        icon={<Receipt aria-hidden />}
-        color="info"
-        trend={`${summary.purchaseCount} purchase${summary.purchaseCount === 1 ? "" : "s"}`}
-        trendDirection="neutral"
-      />
-      <SummaryStat
-        label="Total paid"
-        value={formatCurrency(summary.totalPaid)}
-        icon={<HandCoins aria-hidden />}
-        color="success"
-        trend={`${summary.paymentCount} payment${summary.paymentCount === 1 ? "" : "s"}`}
-        trendDirection="neutral"
-      />
-      <SummaryStat
-        label={balanceLabel}
-        value={formatCurrency(Math.abs(summary.dueAmount))}
-        icon={<Wallet aria-hidden />}
-        color={hasDue ? "error" : "success"}
-        trend={balanceTrend}
-        trendDirection={hasDue ? "down" : "neutral"}
-      />
-    </div>
   );
 }
 

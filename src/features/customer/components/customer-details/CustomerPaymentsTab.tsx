@@ -77,7 +77,7 @@ export function CustomerPaymentsTab({ customerId }: { customerId: string }) {
             </CardAction>
           )}
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent>
           <QueryStateBoundary
             isLoading={isLoading}
             isError={isError}
@@ -87,35 +87,37 @@ export function CustomerPaymentsTab({ customerId }: { customerId: string }) {
             loadingFallback={<HistorySkeleton />}
           >
             {({ data: payments, meta }) => (
-              <>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Date</TableHead>
-                      <TableHead>Against</TableHead>
-                      <TableHead className="text-right">Amount</TableHead>
-                      <TableHead>Note</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {payments.length === 0 ? (
+              <div className="space-y-4">
+                <div className="overflow-hidden rounded-md border">
+                  <Table>
+                    <TableHeader>
                       <TableRow>
-                        <TableCell
-                          colSpan={4}
-                          className="py-8 text-center text-muted-foreground"
-                        >
-                          No payments yet
-                        </TableCell>
+                        <TableHead>Date</TableHead>
+                        <TableHead>Against</TableHead>
+                        <TableHead className="text-right">Amount</TableHead>
+                        <TableHead>Note</TableHead>
                       </TableRow>
-                    ) : (
-                      payments.map((payment) => (
-                        <PaymentRow key={payment.id} payment={payment} />
-                      ))
-                    )}
-                  </TableBody>
-                </Table>
+                    </TableHeader>
+                    <TableBody>
+                      {payments.length === 0 ? (
+                        <TableRow>
+                          <TableCell
+                            colSpan={4}
+                            className="py-8 text-center text-muted-foreground"
+                          >
+                            No payments yet
+                          </TableCell>
+                        </TableRow>
+                      ) : (
+                        payments.map((payment) => (
+                          <PaymentRow key={payment.id} payment={payment} />
+                        ))
+                      )}
+                    </TableBody>
+                  </Table>
+                </div>
                 <MetaPagination meta={meta} onPageChange={setPage} />
-              </>
+              </div>
             )}
           </QueryStateBoundary>
         </CardContent>

@@ -1,11 +1,12 @@
 import { useAtomSet } from "@effect-atom/atom-react";
 import { useQuery } from "@tanstack/react-query";
-import { createFileRoute } from "@tanstack/react-router";
-import { Banknote, HandCoins, Plus, ReceiptText, Wallet } from "lucide-react";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { Eye, HandCoins, Plus, Receipt, Wallet } from "lucide-react";
 import z from "zod";
 
 import { FormatDateCell } from "@/components/FormatDateCell";
 import { MetaPagination } from "@/components/MetaPagination";
+import { SummaryStat } from "@/components/SummaryStat";
 import { DataTableEmpty } from "@/components/data-table/data-table-empty";
 import { DataTableSkeleton } from "@/components/data-table/data-table-skeleton";
 import { DataTableToolbarSkeleton } from "@/components/data-table/data-table-toolbar-skeleton";
@@ -23,15 +24,9 @@ import { DashboardShellSkeleton } from "@/components/shared/dashboard-shell/Dash
 import { QueryStateBoundary } from "@/components/tanstack-query/query-state-boundary";
 import { TimeRangeFilter } from "@/components/time-range-filter";
 import { Button } from "@/components/ui/button";
+import { RefreshButton } from "@/components/ui/refresh-button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Spinner } from "@/components/ui/spinner";
-import {
-  Stat,
-  StatIndicator,
-  StatLabel,
-  StatTrend,
-  StatValue,
-} from "@/components/ui/stat";
 import {
   Table,
   TableBody,
@@ -108,7 +103,42 @@ export const Route = createFileRoute(
 });
 
 function RouteComponent() {
-  "use no memo";
+  const navigate = Route.useNavigate();
+  const search = Route.useSearch();
+
+  return (
+    <DashboardShell
+      header={
+        <DashboardShellHeader>
+          <DashboardShellTitle>Customer Payment Management</DashboardShellTitle>
+          <DashboardShellDescription>
+            Manage your customer payments
+          </DashboardShellDescription>
+        </DashboardShellHeader>
+      }
+    >
+      <div className="grid gap-3 lg:grid-cols-3">
+        <CustomerSidebar
+          value={search.customerId}
+          onSelect={(selectedCustomerId) =>
+            navigate({ search: { customerId: selectedCustomerId } })
+          }
+        />
+        <div className="rounded-xl border bg-popover p-4 text-popover-foreground lg:col-span-2">
+          {search.customerId ? (
+            <CustomerPaymentDetails customerId={search.customerId} />
+          ) : (
+            <div className="flex h-full flex-col items-center justify-center gap-2 text-muted-foreground">
+              First select a customer
+            </div>
+          )}
+        </div>
+      </div>
+    </DashboardShell>
+  );
+}
+
+function CustomerPaymentDetails({ customerId }: { customerId: string }) {
   const setCustomerPaymentCreateDialog = useAtomSet(
     openCustomerPaymentCreateDialog
   );
@@ -131,7 +161,7 @@ function RouteComponent() {
         searchFields,
         order: search.order,
         orderField: search.orderField,
-        customerId: search.customerId,
+        customerId,
       },
       select: (result) => result.data,
     })
@@ -139,7 +169,7 @@ function RouteComponent() {
   const paymentStatsQuery = useQuery(
     orpcTQClient.customer.payment.stats.queryOptions({
       input: {
-        customerId: search.customerId,
+        customerId,
         filter: {
           createdAt: buildDateRangeFilter(search.startTime, search.endTime),
         },
@@ -148,204 +178,191 @@ function RouteComponent() {
     })
   );
 
+  const handleRefresh = () => {
+    paymentQuery.refetch();
+    paymentStatsQuery.refetch();
+  };
+
   return (
-    <DashboardShell
-      header={
-        <DashboardShellHeader>
-          <DashboardShellTitle>Customer Payment Management</DashboardShellTitle>
-          <DashboardShellDescription>
-            Manage your customer payments
-          </DashboardShellDescription>
-        </DashboardShellHeader>
-      }
-    >
-      <div className="grid gap-3 lg:grid-cols-3">
-        <CustomerSidebar
-          value={search.customerId}
-          onSelect={(selectedCustomerId) =>
-            navigate({ search: { customerId: selectedCustomerId } })
+    <div className="space-y-4">
+      <div className="flex items-center justify-between gap-2">
+        <TimeRangeFilter
+          rangeSearch={{
+            range: search.range,
+            startTime: search.startTime,
+            endTime: search.endTime,
+          }}
+          setRangeSearch={(updatedValue) =>
+            navigate({
+              search: {
+                ...(updatedValue.range && {
+                  range: updatedValue.range,
+                }),
+                ...(updatedValue.startTime && {
+                  startTime: updatedValue.startTime,
+                }),
+                ...(updatedValue.endTime && {
+                  endTime: updatedValue.endTime,
+                }),
+              },
+            })
           }
         />
-        <div className="overflow-auto rounded-xl bg-popover p-4 text-popover-foreground lg:col-span-2">
-          {search.customerId ? (
-            <div className="space-y-4">
-              <div className="flex items-center justify-between gap-2">
-                <TimeRangeFilter
-                  rangeSearch={{
-                    range: search.range,
-                    startTime: search.startTime,
-                    endTime: search.endTime,
-                  }}
-                  setRangeSearch={(updatedValue) =>
-                    navigate({
-                      search: {
-                        ...(updatedValue.range && {
-                          range: updatedValue.range,
-                        }),
-                        ...(updatedValue.startTime && {
-                          startTime: updatedValue.startTime,
-                        }),
-                        ...(updatedValue.endTime && {
-                          endTime: updatedValue.endTime,
-                        }),
-                      },
-                    })
-                  }
-                />
-                <div className="flex items-center gap-2">
-                  {isAllowCreate && (
-                    <>
-                      <Button
-                        onClick={() => setCustomerPaymentCreateDialog(true)}
-                      >
-                        <Plus />
-                        <span>Add Payment</span>
-                      </Button>
-                      <CustomerPaymentCreateDialog
-                        customerId={search.customerId}
-                      />
-                    </>
-                  )}
-                </div>
-              </div>
-              <QueryStateBoundary
-                isLoading={paymentStatsQuery.isLoading}
-                isError={paymentStatsQuery.isError}
-                error={paymentStatsQuery.error}
-                data={paymentStatsQuery.data}
-                isEmpty={() => false}
-                loadingFallback={
-                  <div className="grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-4">
-                    {Array.from({ length: 3 }).map((_, index) => (
-                      <Skeleton key={index} className="h-28 w-full" />
-                    ))}
-                  </div>
-                }
-              >
-                {(stats) => (
-                  <div className="grid grid-cols-[repeat(auto-fit,minmax(100px,1fr))] gap-4">
-                    <Stat>
-                      <StatLabel>Total Sales</StatLabel>
-                      <StatIndicator variant="icon" color="info">
-                        <Banknote aria-hidden />
-                      </StatIndicator>
-                      <StatValue>{formatCurrency(stats.totalSales)}</StatValue>
-                      <StatTrend trend="neutral">in selected range</StatTrend>
-                    </Stat>
-                    <Stat>
-                      <StatLabel>Total Paid</StatLabel>
-                      <StatIndicator variant="icon" color="success">
-                        <Wallet aria-hidden />
-                      </StatIndicator>
-                      <StatValue>{formatCurrency(stats.totalPaid)}</StatValue>
-                      <StatTrend trend="neutral">in selected range</StatTrend>
-                    </Stat>
-                    <Stat>
-                      <StatLabel>Due Payment</StatLabel>
-                      <StatIndicator variant="icon" color="error">
-                        <HandCoins aria-hidden />
-                      </StatIndicator>
-                      <StatValue>{formatCurrency(stats.dueAmount)}</StatValue>
-                      <StatTrend trend="neutral">
-                        across all purchases
-                      </StatTrend>
-                    </Stat>
-                    <Stat>
-                      <StatLabel>Payments</StatLabel>
-                      <StatIndicator variant="icon" color="info">
-                        <ReceiptText aria-hidden />
-                      </StatIndicator>
-                      <StatValue>{stats.paymentCount}</StatValue>
-                      <StatTrend trend="neutral">in selected range</StatTrend>
-                    </Stat>
-                  </div>
-                )}
-              </QueryStateBoundary>
-              <QueryStateBoundary
-                isLoading={paymentQuery.isLoading}
-                isError={paymentQuery.isError}
-                error={paymentQuery.error}
-                data={paymentQuery.data}
-                isEmpty={() => false}
-                loadingFallback={
-                  <DataTableSkeleton>
-                    <DataTableToolbarSkeleton />
-                  </DataTableSkeleton>
-                }
-                emptyFallback={<DataTableEmpty />}
-              >
-                {(paymentsData) => (
-                  <div className="flex flex-col gap-2">
-                    <div className="overflow-hidden rounded-md border">
-                      <Table>
-                        <TableHeader>
-                          <TableRow>
-                            <TableHead>Date</TableHead>
-                            <TableHead>Against</TableHead>
-                            <TableHead className="text-right">Amount</TableHead>
-                            <TableHead>Note</TableHead>
-                          </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                          {paymentsData.data.map((payment) => (
-                            <TableRow key={payment.id}>
-                              <TableCell className="text-muted-foreground">
-                                <FormatDateCell
-                                  format="dd MMM, yyyy"
-                                  value={payment.createdAt}
-                                />
-                              </TableCell>
-                              <TableCell>
-                                {payment.invoiceNo ? (
-                                  <span className="font-medium">
-                                    {payment.invoiceNo}
-                                  </span>
-                                ) : (
-                                  <span className="text-muted-foreground">
-                                    General payment
-                                  </span>
-                                )}
-                              </TableCell>
-                              <TableCell className="text-right font-medium tabular-nums">
-                                {formatCurrency(payment.amount)}
-                              </TableCell>
-                              <TableCell className="max-w-xs">
-                                {payment.note ? (
-                                  <span
-                                    className="line-clamp-1"
-                                    title={payment.note}
-                                  >
-                                    {payment.note}
-                                  </span>
-                                ) : (
-                                  <span className="text-muted-foreground">
-                                    —
-                                  </span>
-                                )}
-                              </TableCell>
-                            </TableRow>
-                          ))}
-                        </TableBody>
-                      </Table>
-                    </div>
-                    <MetaPagination
-                      meta={paymentsData.meta}
-                      onPageChange={(page) => {
-                        navigate({ search: { page } });
-                      }}
-                    />
-                  </div>
-                )}
-              </QueryStateBoundary>
-            </div>
-          ) : (
-            <div className="flex h-full flex-col items-center justify-center gap-2 text-muted-foreground">
-              First select a customer
-            </div>
+        <div className="flex items-center gap-2">
+          {isAllowCreate && (
+            <>
+              <Button onClick={() => setCustomerPaymentCreateDialog(true)}>
+                <Plus />
+                <span>Add Payment</span>
+              </Button>
+              <CustomerPaymentCreateDialog customerId={customerId} />
+            </>
           )}
         </div>
       </div>
-    </DashboardShell>
+      <QueryStateBoundary
+        isLoading={paymentStatsQuery.isLoading}
+        isError={paymentStatsQuery.isError}
+        error={paymentStatsQuery.error}
+        data={paymentStatsQuery.data}
+        isEmpty={() => false}
+        loadingFallback={
+          <div className="grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-4">
+            {Array.from({ length: 3 }).map((_, index) => (
+              <Skeleton key={index} className="h-28 w-full" />
+            ))}
+          </div>
+        }
+      >
+        {(stats) => {
+          const BALANCE_EPSILON = 0.005;
+          const hasDue = stats.dueAmount > BALANCE_EPSILON;
+          const hasAdvance = stats.dueAmount < -BALANCE_EPSILON;
+
+          return (
+            <div className="grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-4">
+              <SummaryStat
+                label="Total sales"
+                value={formatCurrency(stats.totalSales)}
+                icon={<Receipt aria-hidden />}
+                color="info"
+                trend={`${stats.saleCount} ${stats.saleCount === 1 ? "sale" : "sales"} is selected range`}
+                trendDirection="neutral"
+              />
+              <SummaryStat
+                label="Total paid"
+                value={formatCurrency(stats.totalPaid)}
+                icon={<HandCoins aria-hidden />}
+                color="success"
+                trend={`${stats.paymentCount} ${stats.paymentCount === 1 ? "payment" : "payments"} is selected range`}
+                trendDirection="neutral"
+              />
+              <SummaryStat
+                label={hasAdvance ? "Advance balance" : "Due amount"}
+                value={formatCurrency(Math.abs(stats.dueAmount))}
+                icon={<Wallet aria-hidden />}
+                color={hasDue ? "error" : "success"}
+                trend={
+                  hasDue
+                    ? "Outstanding from customer"
+                    : hasAdvance
+                      ? "Customer has advance"
+                      : "Fully settled"
+                }
+                trendDirection={hasDue ? "down" : "neutral"}
+              />
+            </div>
+          );
+        }}
+      </QueryStateBoundary>
+      <div className="flex items-center justify-between gap-2">
+        <Button
+          variant="outline"
+          render={
+            <Link
+              to="/dashboard/customers/$customerId"
+              params={{ customerId }}
+              search={{ tab: "details" }}
+            />
+          }
+        >
+          <Eye />
+          <span>Customer Details</span>
+        </Button>
+        <RefreshButton isLoading={false} onButtonClick={handleRefresh} />
+      </div>
+      <QueryStateBoundary
+        isLoading={paymentQuery.isLoading}
+        isError={paymentQuery.isError}
+        error={paymentQuery.error}
+        data={paymentQuery.data}
+        isEmpty={() => false}
+        loadingFallback={
+          <DataTableSkeleton>
+            <DataTableToolbarSkeleton />
+          </DataTableSkeleton>
+        }
+        emptyFallback={<DataTableEmpty />}
+      >
+        {(paymentsData) => (
+          <div className="space-y-4">
+            <div className="overflow-hidden rounded-md border">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Date</TableHead>
+                    <TableHead>Invoice No</TableHead>
+                    <TableHead className="text-right">Amount</TableHead>
+                    <TableHead>Note</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {paymentsData.data.map((payment) => (
+                    <TableRow key={payment.id}>
+                      <TableCell className="text-muted-foreground">
+                        <FormatDateCell
+                          format="dd MMM, yyyy"
+                          value={payment.createdAt}
+                        />
+                      </TableCell>
+                      <TableCell>
+                        {payment.invoiceNo ? (
+                          <span className="font-medium">
+                            {payment.invoiceNo}
+                          </span>
+                        ) : (
+                          <span className="text-muted-foreground">
+                            General payment
+                          </span>
+                        )}
+                      </TableCell>
+                      <TableCell className="text-right font-medium tabular-nums">
+                        {formatCurrency(payment.amount)}
+                      </TableCell>
+                      <TableCell className="max-w-xs">
+                        {payment.note ? (
+                          <span className="line-clamp-1" title={payment.note}>
+                            {payment.note}
+                          </span>
+                        ) : (
+                          <span className="text-muted-foreground">—</span>
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+            <MetaPagination
+              meta={paymentsData.meta}
+              onPageChange={(page) => {
+                navigate({ search: { page } });
+              }}
+            />
+          </div>
+        )}
+      </QueryStateBoundary>
+    </div>
   );
 }
 

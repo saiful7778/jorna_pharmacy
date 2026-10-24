@@ -50,7 +50,7 @@ export function CustomerSidebar({
   };
 
   return (
-    <div className="space-y-2 rounded-xl bg-popover">
+    <div className="relative h-auto space-y-4 rounded-xl border bg-popover">
       <div className="px-4 pt-4">
         <InputGroup className="h-9">
           <InputGroupAddon>
@@ -98,14 +98,14 @@ export function CustomerSidebar({
           )}
         >
           {(customers) => (
-            <div>
+            <div className="no-scrollbar min-h-auto overflow-y-auto">
               {customers.map((customer) => (
                 <button
                   type="button"
                   key={customer.id}
                   onClick={() => onSelect(customer.id)}
                   data-checked={customer.id === value}
-                  className="group/command-item transation-colors block flex w-full cursor-pointer items-center rounded-md px-2.5 py-1.5 text-left duration-300 hover:bg-muted data-checked:bg-muted data-checked:text-foreground"
+                  className="group/command-item transation-colors block flex w-full cursor-pointer items-center rounded-md border border-transparent px-2.5 py-1.5 text-left duration-300 hover:bg-muted data-checked:border-border data-checked:bg-muted data-checked:text-foreground"
                 >
                   <span className="flex flex-col">
                     <span className="truncate text-sm font-medium">

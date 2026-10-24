@@ -213,7 +213,6 @@ export const customerPaymentStatsProcedure = customerImpl.payment.stats
       context.db
         .select({
           totalSales: sql<number>`COALESCE(SUM(${SaleTable.totalAmount}), 0)`,
-          totalPaid: sql<number>`COALESCE(SUM(${SaleTable.paidAmount}), 0)`,
           count: sql<number>`COUNT(*)`,
           lastPurchaseAt: sql<number>`MAX(${SaleTable.createdAt})`,
         })
@@ -222,16 +221,15 @@ export const customerPaymentStatsProcedure = customerImpl.payment.stats
     ]);
 
     const totalSales = Number(saleTotals[0]?.totalSales ?? 0);
-    const totalPaidFromSales = Number(saleTotals[0]?.totalPaid ?? 0);
-    const totalPaidFromPayments = Number(paymentTotals[0]?.total ?? 0);
+    const totalPaid = Number(paymentTotals[0]?.total ?? 0);
     const lastPurchaseAt = saleTotals[0]?.lastPurchaseAt;
 
-    // Due amount = Total sales - Total paid (from sales table)
-    const dueAmount = totalSales - totalPaidFromSales;
+    const dueAmount = totalSales - totalPaid;
 
     return apiResponse(API_MESSAGES.CUSTOMER.PAYMENT.GET_STATS, {
-      totalPaid: totalPaidFromPayments,
+      totalPaid,
       dueAmount,
+      saleCount: Number(saleTotals[0]?.count ?? 0),
       paymentCount: Number(paymentTotals[0]?.count ?? 0),
       totalSales,
       lastPurchaseAt: lastPurchaseAt ? new Date(lastPurchaseAt) : undefined,

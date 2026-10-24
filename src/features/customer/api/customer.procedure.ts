@@ -218,10 +218,10 @@ export const customerDetailsProcedure = customerImpl.details
       throw errors.NOT_FOUND();
     }
 
-    const [salesTotals, paymentTotals] = await Promise.all([
+    const [saleTotals, paymentTotals] = await Promise.all([
       context.db
         .select({
-          total: sql<number>`COALESCE(SUM(${SaleTable.totalAmount}), 0)`,
+          totalSales: sql<number>`COALESCE(SUM(${SaleTable.totalAmount}), 0)`,
           count: sql<number>`COUNT(*)`,
           lastPurchaseAt: sql<number | null>`MAX(${SaleTable.createdAt})`,
         })
@@ -236,18 +236,20 @@ export const customerDetailsProcedure = customerImpl.details
         .where(eq(CustomerPaymentTable.customerId, input.customerId)),
     ]);
 
-    const totalPurchased = Number(salesTotals[0]?.total ?? 0);
+    const totalSales = Number(saleTotals[0]?.totalSales ?? 0);
     const totalPaid = Number(paymentTotals[0]?.total ?? 0);
-    const lastPurchaseAt = salesTotals[0]?.lastPurchaseAt;
+    const lastPurchaseAt = saleTotals[0]?.lastPurchaseAt;
+
+    const dueAmount = totalSales - totalPaid;
 
     return apiResponse(API_MESSAGES.CUSTOMER.GET_DETAILS, {
       ...customer,
       summary: {
-        totalPurchased,
         totalPaid,
-        dueAmount: totalPurchased - totalPaid,
-        purchaseCount: Number(salesTotals[0]?.count ?? 0),
+        dueAmount,
+        saleCount: Number(saleTotals[0]?.count ?? 0),
         paymentCount: Number(paymentTotals[0]?.count ?? 0),
+        totalSales,
         lastPurchaseAt: lastPurchaseAt ? new Date(lastPurchaseAt) : undefined,
       },
     });

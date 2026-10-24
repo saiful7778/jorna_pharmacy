@@ -102,6 +102,7 @@ const customerPaymentStatsContract = customerPaymentBaseContract
       z.object({
         totalPaid: z.number(),
         dueAmount: z.number(),
+        saleCount: z.number(),
         paymentCount: z.number(),
         totalSales: z.number(),
         lastPurchaseAt: z.date().optional(),

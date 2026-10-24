@@ -114,11 +114,11 @@ const customerDetailsContract = customerBaseContract
     apiOutputSchema(
       selectCustomerSchema.extend({
         summary: z.object({
-          totalPurchased: z.number(),
           totalPaid: z.number(),
           dueAmount: z.number(),
-          purchaseCount: z.number(),
+          saleCount: z.number(),
           paymentCount: z.number(),
+          totalSales: z.number(),
           lastPurchaseAt: z.date().optional(),
         }),
       })

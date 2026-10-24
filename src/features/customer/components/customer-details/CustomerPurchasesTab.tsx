@@ -43,7 +43,7 @@ export function CustomerPurchasesTab({ customerId }: { customerId: string }) {
         <CardTitle>Purchases</CardTitle>
         <CardDescription>All purchases made by this customer</CardDescription>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent>
         <QueryStateBoundary
           isLoading={isLoading}
           isError={isError}
@@ -53,37 +53,39 @@ export function CustomerPurchasesTab({ customerId }: { customerId: string }) {
           loadingFallback={<HistorySkeleton />}
         >
           {({ data: purchases, meta }) => (
-            <>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Date</TableHead>
-                    <TableHead>Invoice</TableHead>
-                    <TableHead className="text-right">Total</TableHead>
-                    <TableHead className="text-right">Paid</TableHead>
-                    <TableHead className="text-right">Due</TableHead>
-                    <TableHead>Status</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {purchases.length === 0 ? (
+            <div className="space-y-4">
+              <div className="overflow-hidden rounded-md border">
+                <Table>
+                  <TableHeader>
                     <TableRow>
-                      <TableCell
-                        colSpan={6}
-                        className="py-8 text-center text-muted-foreground"
-                      >
-                        No purchases yet
-                      </TableCell>
+                      <TableHead>Date</TableHead>
+                      <TableHead>Invoice</TableHead>
+                      <TableHead className="text-right">Total</TableHead>
+                      <TableHead className="text-right">Paid</TableHead>
+                      <TableHead className="text-right">Due</TableHead>
+                      <TableHead>Status</TableHead>
                     </TableRow>
-                  ) : (
-                    purchases.map((purchase) => (
-                      <PurchaseRow key={purchase.id} purchase={purchase} />
-                    ))
-                  )}
-                </TableBody>
-              </Table>
+                  </TableHeader>
+                  <TableBody>
+                    {purchases.length === 0 ? (
+                      <TableRow>
+                        <TableCell
+                          colSpan={6}
+                          className="py-8 text-center text-muted-foreground"
+                        >
+                          No purchases yet
+                        </TableCell>
+                      </TableRow>
+                    ) : (
+                      purchases.map((purchase) => (
+                        <PurchaseRow key={purchase.id} purchase={purchase} />
+                      ))
+                    )}
+                  </TableBody>
+                </Table>
+              </div>
               <MetaPagination meta={meta} onPageChange={setPage} />
-            </>
+            </div>
           )}
         </QueryStateBoundary>
       </CardContent>

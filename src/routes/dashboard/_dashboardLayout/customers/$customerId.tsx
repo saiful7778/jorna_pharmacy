@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Banknote, BookAlert, CreditCard } from "lucide-react";
 import z from "zod";
 
 import { LinkButton } from "@/components/LinkButton";
@@ -88,9 +88,18 @@ function RouteComponent() {
         routeId="/dashboard/_dashboardLayout/customers/$customerId"
       >
         <TabNavigationList variant="line">
-          <TabNavigationTrigger value="details">Details</TabNavigationTrigger>
-          <TabNavigationTrigger value="purchase">Purchase</TabNavigationTrigger>
-          <TabNavigationTrigger value="payment">Payments</TabNavigationTrigger>
+          <TabNavigationTrigger value="details">
+            <BookAlert />
+            <span>Details</span>
+          </TabNavigationTrigger>
+          <TabNavigationTrigger value="purchase">
+            <CreditCard />
+            <span>Purchases</span>
+          </TabNavigationTrigger>
+          <TabNavigationTrigger value="payment">
+            <Banknote />
+            <span>Payments</span>
+          </TabNavigationTrigger>
         </TabNavigationList>
         <TabNavigationContent value="details">
           <CustomerDetailsTab customerId={customerId} />
