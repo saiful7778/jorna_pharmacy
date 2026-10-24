@@ -74,7 +74,7 @@ const createCustomerPaymentContract = customerPaymentBaseContract
     tags,
   })
   .input(customerPaymentCreateSchema)
-  .output(apiOutputSchema(selectCustomerPaymentSchema));
+  .output(apiOutputSchema(z.null()));
 export type CreateCustomerPaymentContractType = InferContractRouterType<
   typeof createCustomerPaymentContract
 >;
@@ -103,6 +103,8 @@ const customerPaymentStatsContract = customerPaymentBaseContract
         totalPaid: z.number(),
         dueAmount: z.number(),
         paymentCount: z.number(),
+        totalSales: z.number(),
+        lastPurchaseAt: z.date().optional(),
       })
     )
   );

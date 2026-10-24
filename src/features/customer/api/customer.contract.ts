@@ -119,7 +119,7 @@ const customerDetailsContract = customerBaseContract
           dueAmount: z.number(),
           purchaseCount: z.number(),
           paymentCount: z.number(),
-          lastPurchaseAt: z.date().nullable(),
+          lastPurchaseAt: z.date().optional(),
         }),
       })
     )

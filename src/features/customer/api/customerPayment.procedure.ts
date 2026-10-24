@@ -1,5 +1,4 @@
-import { ORPCError } from "@orpc/client";
-import { and, desc, eq, sql, type SQL } from "drizzle-orm";
+import { and, asc, desc, eq, lt, sql, type SQL } from "drizzle-orm";
 
 import { API_MESSAGES } from "@/constants/apiMessage";
 import {
@@ -63,6 +62,10 @@ export const listCustomerPaymentsProcedure = customerImpl.payment.list
         })
         .from(CustomerPaymentTable)
         .leftJoin(SaleTable, eq(CustomerPaymentTable.saleId, SaleTable.id))
+        .leftJoin(
+          SaleInvoiceTable,
+          eq(SaleTable.invoiceId, SaleInvoiceTable.id)
+        )
         .where(paymentWhere)
         .orderBy(desc(CustomerPaymentTable.createdAt), orderBy)
         .limit(limit)
@@ -88,7 +91,7 @@ export const createCustomerPaymentProcedure = customerImpl.payment.create
     const { customerId, saleId, amount, note } = input;
 
     const [customer] = await context.db
-      .select()
+      .select({ id: CustomerTable.id })
       .from(CustomerTable)
       .where(eq(CustomerTable.id, customerId))
       .limit(1);
@@ -97,47 +100,77 @@ export const createCustomerPaymentProcedure = customerImpl.payment.create
       throw errors.CUSTOMER_NOT_FOUND();
     }
 
-    if (saleId) {
-      const [sale] = await context.db
-        .select()
-        .from(SaleTable)
-        .where(eq(SaleTable.id, saleId))
-        .limit(1);
+    // 1. Candidate sales
+    const candidateSales = saleId
+      ? await context.db
+          .select({
+            id: SaleTable.id,
+            dueAmount:
+              sql<number>`${SaleTable.totalAmount} - ${SaleTable.paidAmount}`.as(
+                "due_amount"
+              ),
+          })
+          .from(SaleTable)
+          .where(
+            and(eq(SaleTable.customerId, customerId), eq(SaleTable.id, saleId))
+          )
+      : await context.db
+          .select({
+            id: SaleTable.id,
+            dueAmount:
+              sql<number>`${SaleTable.totalAmount} - ${SaleTable.paidAmount}`.as(
+                "due_amount"
+              ),
+          })
+          .from(SaleTable)
+          .where(
+            and(
+              eq(SaleTable.customerId, customerId),
+              lt(SaleTable.paidAmount, SaleTable.totalAmount)
+            )
+          )
+          .orderBy(asc(SaleTable.createdAt));
 
-      if (!sale || sale.customerId !== customerId) {
-        throw errors.SALE_NOT_FOUND();
-      }
+    if (saleId && candidateSales.length === 0) throw errors.SALE_NOT_FOUND();
 
-      if (amount > sale.totalAmount - sale.paidAmount) {
-        throw errors.PAYMENT_EXCEEDS();
-      }
-    }
+    // 2. Check the payment doesn't exceed the total due
+    const totalDue = candidateSales.reduce((sum, s) => sum + s.dueAmount, 0);
 
-    const [payment] = await context.db
-      .insert(CustomerPaymentTable)
-      .values({
-        customerId,
-        saleId,
-        amount,
-        note,
-        createdBy: context.user.id,
-      })
-      .returning();
+    console.log(candidateSales);
 
-    if (!payment) {
-      throw new ORPCError("INTERNAL_SERVER_ERROR", {
-        message: API_MESSAGES.CUSTOMER.PAYMENT.NOT_CREATE,
-      });
-    }
+    if (amount > totalDue) throw errors.PAYMENT_EXCEEDS();
 
-    if (saleId) {
+    // 3. Pay each sale; if the amount is bigger than a sale's due, carry the rest forward
+    let remaining = amount;
+    const payments = [];
+
+    for (const sale of candidateSales) {
+      if (remaining <= 0) break;
+
+      const due = sale.dueAmount;
+      const pay = Math.min(due, remaining);
+
       await context.db
         .update(SaleTable)
-        .set({ paidAmount: sql`${SaleTable.paidAmount} + ${amount}` })
-        .where(eq(SaleTable.id, saleId));
+        .set({ paidAmount: sql`${SaleTable.paidAmount} + ${pay}` })
+        .where(eq(SaleTable.id, sale.id));
+
+      const [payment] = await context.db
+        .insert(CustomerPaymentTable)
+        .values({
+          customerId,
+          saleId: sale.id,
+          amount: pay,
+          note,
+          createdBy: context.user.id,
+        })
+        .returning();
+
+      payments.push(payment);
+      remaining -= pay;
     }
 
-    return apiResponse(API_MESSAGES.CUSTOMER.PAYMENT.CREATE, payment);
+    return apiResponse(API_MESSAGES.CUSTOMER.PAYMENT.CREATE, null);
   });
 
 export const customerPaymentStatsProcedure = customerImpl.payment.stats
@@ -156,21 +189,18 @@ export const customerPaymentStatsProcedure = customerImpl.payment.stats
     );
 
     const customerWhere: Array<SQL> = [];
+    const saleWhere: Array<SQL> = [];
 
     if (input.customerId) {
       customerWhere.push(eq(CustomerPaymentTable.customerId, input.customerId));
+      saleWhere.push(eq(SaleTable.customerId, input.customerId));
     }
     if (where) {
       customerWhere.push(where);
     }
 
-    const saleWhere: Array<SQL> = [];
-
-    if (input.customerId) {
-      saleWhere.push(eq(SaleTable.customerId, input.customerId));
-    }
-
-    const [paymentTotals, dueTotals] = await Promise.all([
+    const [paymentTotals, saleTotals] = await Promise.all([
+      // Get total paid amount
       context.db
         .select({
           total: sql<number>`COALESCE(SUM(${CustomerPaymentTable.amount}), 0)`,
@@ -178,19 +208,32 @@ export const customerPaymentStatsProcedure = customerImpl.payment.stats
         })
         .from(CustomerPaymentTable)
         .where(and(...customerWhere)),
+
+      // Get total sales amount and paid amount from sales table
       context.db
         .select({
-          total: sql<number>`COALESCE(SUM(${SaleTable.totalAmount}), 0)`,
+          totalSales: sql<number>`COALESCE(SUM(${SaleTable.totalAmount}), 0)`,
+          totalPaid: sql<number>`COALESCE(SUM(${SaleTable.paidAmount}), 0)`,
           count: sql<number>`COUNT(*)`,
-          lastPurchaseAt: sql<number | null>`MAX(${SaleTable.createdAt})`,
+          lastPurchaseAt: sql<number>`MAX(${SaleTable.createdAt})`,
         })
         .from(SaleTable)
         .where(and(...saleWhere)),
     ]);
 
+    const totalSales = Number(saleTotals[0]?.totalSales ?? 0);
+    const totalPaidFromSales = Number(saleTotals[0]?.totalPaid ?? 0);
+    const totalPaidFromPayments = Number(paymentTotals[0]?.total ?? 0);
+    const lastPurchaseAt = saleTotals[0]?.lastPurchaseAt;
+
+    // Due amount = Total sales - Total paid (from sales table)
+    const dueAmount = totalSales - totalPaidFromSales;
+
     return apiResponse(API_MESSAGES.CUSTOMER.PAYMENT.GET_STATS, {
-      totalPaid: Number(paymentTotals[0]?.total ?? 0),
-      dueAmount: Number(dueTotals[0]?.total ?? 0),
+      totalPaid: totalPaidFromPayments,
+      dueAmount,
       paymentCount: Number(paymentTotals[0]?.count ?? 0),
+      totalSales,
+      lastPurchaseAt: lastPurchaseAt ? new Date(lastPurchaseAt) : undefined,
     });
   });

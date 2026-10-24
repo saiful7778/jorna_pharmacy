@@ -95,18 +95,15 @@ export const listCustomerProcedure = customerImpl.list
 
     const totalCount = Number(totalCountResult[0]?.count ?? 0);
 
-    const data = customers.map((customer) => ({
-      ...customer,
-      dueAmount: Number(customer.dueAmount),
-      lastPurchaseAt:
-        customer.lastPurchaseAt == null
-          ? null
-          : new Date(Number(customer.lastPurchaseAt)),
-    }));
-
     return apiResponse(API_MESSAGES.CUSTOMER.GET_ALL, {
-      meta: buildPaginationMeta(totalCount, data.length, page, limit),
-      data,
+      meta: buildPaginationMeta(totalCount, customers.length, page, limit),
+      data: customers.map((customer) => ({
+        ...customer,
+        lastPurchaseAt:
+          customer.lastPurchaseAt == null
+            ? null
+            : new Date(customer.lastPurchaseAt),
+      })),
     });
   });
 
@@ -251,8 +248,7 @@ export const customerDetailsProcedure = customerImpl.details
         dueAmount: totalPurchased - totalPaid,
         purchaseCount: Number(salesTotals[0]?.count ?? 0),
         paymentCount: Number(paymentTotals[0]?.count ?? 0),
-        lastPurchaseAt:
-          lastPurchaseAt == null ? null : new Date(Number(lastPurchaseAt)),
+        lastPurchaseAt: lastPurchaseAt ? new Date(lastPurchaseAt) : undefined,
       },
     });
   });
