@@ -1,4 +1,12 @@
-import { House, Settings, ShieldUser, User, UsersRound } from "lucide-react";
+import {
+  Banknote,
+  Contact,
+  House,
+  Settings,
+  ShieldUser,
+  User,
+  UsersRound,
+} from "lucide-react";
 
 import type {
   PermissionType,
@@ -25,6 +33,25 @@ export const sidebarMenuLinks: Array<SidebarGroupMenuLinkType> = [
         path: "/dashboard",
         pathRegex: /^\/dashboard\/?$/,
         icon: <House />,
+      },
+    ],
+  },
+  {
+    groupName: "Sales",
+    items: [
+      {
+        title: "Customers",
+        path: "/dashboard/customers",
+        pathRegex: /^\/dashboard\/customers$/,
+        permissions: manageOrList("customer"),
+        icon: <Contact />,
+      },
+      {
+        title: "Customer Payments",
+        path: "/dashboard/customers/payments",
+        pathRegex: /^\/dashboard\/customers\/payments$/,
+        permissions: manageOrList("customer_payment"),
+        icon: <Banknote />,
       },
     ],
   },

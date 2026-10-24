@@ -6,8 +6,15 @@ import {
   DashboardShellHeader,
   DashboardShellTitle,
 } from "@/components/shared/dashboard-shell/DashboardShellHeader";
+import { head } from "@/lib/head";
 
 export const Route = createFileRoute("/dashboard/_dashboardLayout/")({
+  head: ({ match }) =>
+    head({
+      pathname: match.pathname,
+      titleByTemplate: "Dashboard",
+      description: "Manage your dashboard",
+    }),
   component: RouteComponent,
 });
 
