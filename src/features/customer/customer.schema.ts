@@ -25,14 +25,10 @@ export type CustomerUpdateInputType = z.input<typeof customerUpdateSchema>;
 export const customerPaymentCreateSchema = z.object({
   customerId: z.uuid("Customer is required"),
   saleId: z.uuid().optional(),
-  amount: z
-    .string()
+  amount: z.coerce
+    .number()
     .min(1, "Payment amount is required")
-    .refine(
-      (value) => Number(value) > 0,
-      "Payment amount must be greater than 0"
-    )
-    .transform((value) => Number(value)),
+    .positive("Payment amount must be greater than 0"),
   note: emptyStrSchema.optional(),
 });
 export type CustomerPaymentCreateType = z.infer<
