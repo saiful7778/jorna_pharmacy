@@ -19,9 +19,10 @@ import {
 
 interface InputAddonFieldProps<
   TFieldValues extends FieldValues,
+  TTransformedValues = TFieldValues,
 > extends React.ComponentProps<"input"> {
   name: Path<TFieldValues>;
-  control: Control<TFieldValues>;
+  control: Control<TFieldValues, any, TTransformedValues>;
   label?: string;
   description?: string;
   isDescriptionInfoIconShow?: boolean;
@@ -32,7 +33,10 @@ interface InputAddonFieldProps<
   valueModifier?: (value: string) => string;
 }
 
-function InputAddonField<TFieldValues extends FieldValues>({
+function InputAddonField<
+  TFieldValues extends FieldValues,
+  TTransformedValues = TFieldValues,
+>({
   name,
   control,
   label,
@@ -45,7 +49,7 @@ function InputAddonField<TFieldValues extends FieldValues>({
   onValueChange,
   valueModifier,
   ...props
-}: InputAddonFieldProps<TFieldValues>) {
+}: InputAddonFieldProps<TFieldValues, TTransformedValues>) {
   const fieldId = useId();
   return (
     <Controller

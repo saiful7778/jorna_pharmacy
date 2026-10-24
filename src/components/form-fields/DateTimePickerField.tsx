@@ -13,9 +13,12 @@ import type { ButtonProps } from "../ui/button";
 import { type CalendarCompProps, DateTimePicker } from "../ui/date-time-picker";
 import { Field, FieldDescription, FieldError, FieldLabel } from "../ui/field";
 
-interface DateTimePickerFieldProps<TFieldValues extends FieldValues> {
+interface DateTimePickerFieldProps<
+  TFieldValues extends FieldValues,
+  TTransformedValues = TFieldValues,
+> {
   name: Path<TFieldValues>;
-  control: Control<TFieldValues>;
+  control: Control<TFieldValues, any, TTransformedValues>;
   label?: string;
   description?: string;
   isDescriptionInfoIconShow?: boolean;
@@ -30,7 +33,10 @@ interface DateTimePickerFieldProps<TFieldValues extends FieldValues> {
   timezone?: string | null | undefined;
 }
 
-export function DateTimePickerField<TFieldValues extends FieldValues>({
+export function DateTimePickerField<
+  TFieldValues extends FieldValues,
+  TTransformedValues = TFieldValues,
+>({
   name,
   control,
   label,
@@ -45,7 +51,7 @@ export function DateTimePickerField<TFieldValues extends FieldValues>({
   showTimeSelection = true,
   onValueChange,
   timezone,
-}: DateTimePickerFieldProps<TFieldValues>) {
+}: DateTimePickerFieldProps<TFieldValues, TTransformedValues>) {
   const fieldId = useId();
 
   return (

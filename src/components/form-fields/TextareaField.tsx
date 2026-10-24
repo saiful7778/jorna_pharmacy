@@ -15,9 +15,10 @@ import { Textarea } from "../ui/textarea";
 
 interface TextareaFieldProps<
   TFieldValues extends FieldValues,
+  TTransformedValues = TFieldValues,
 > extends React.ComponentProps<"textarea"> {
   name: Path<TFieldValues>;
-  control: Control<TFieldValues>;
+  control: Control<TFieldValues, any, TTransformedValues>;
   label?: string;
   description?: string;
   isDescriptionInfoIconShow?: boolean;
@@ -25,7 +26,10 @@ interface TextareaFieldProps<
   onValueChange?: (value: string) => void;
 }
 
-function TextareaField<TFieldValues extends FieldValues>({
+function TextareaField<
+  TFieldValues extends FieldValues,
+  TTransformedValues = TFieldValues,
+>({
   name,
   control,
   label,
@@ -35,7 +39,7 @@ function TextareaField<TFieldValues extends FieldValues>({
   disabled,
   onValueChange,
   ...props
-}: TextareaFieldProps<TFieldValues>) {
+}: TextareaFieldProps<TFieldValues, TTransformedValues>) {
   const fieldId = useId();
   return (
     <Controller

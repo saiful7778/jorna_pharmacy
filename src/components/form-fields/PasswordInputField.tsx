@@ -15,9 +15,10 @@ import { PasswordInput } from "../ui/password-input";
 
 interface PasswordInputFieldProps<
   TFieldValues extends FieldValues,
+  TTransformedValues = TFieldValues,
 > extends React.ComponentProps<"input"> {
   name: Path<TFieldValues>;
-  control: Control<TFieldValues>;
+  control: Control<TFieldValues, any, TTransformedValues>;
   label?: string;
   description?: string;
   requiredField?: boolean;
@@ -25,7 +26,10 @@ interface PasswordInputFieldProps<
   valueModifier?: (value: string) => string;
 }
 
-function PasswordInputField<TFieldValues extends FieldValues>({
+function PasswordInputField<
+  TFieldValues extends FieldValues,
+  TTransformedValues = TFieldValues,
+>({
   name,
   control,
   label,
@@ -35,7 +39,7 @@ function PasswordInputField<TFieldValues extends FieldValues>({
   onValueChange,
   valueModifier,
   ...props
-}: PasswordInputFieldProps<TFieldValues>) {
+}: PasswordInputFieldProps<TFieldValues, TTransformedValues>) {
   const fieldId = useId();
   return (
     <Controller

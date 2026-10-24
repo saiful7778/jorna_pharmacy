@@ -19,9 +19,12 @@ import {
   FieldLabel,
 } from "../ui/field";
 
-interface CheckboxFieldProps<TFieldValues extends FieldValues> {
+interface CheckboxFieldProps<
+  TFieldValues extends FieldValues,
+  TTransformedValues = TFieldValues,
+> {
   name: Path<TFieldValues>;
-  control: Control<TFieldValues>;
+  control: Control<TFieldValues, any, TTransformedValues>;
   label: string;
   description?: string;
   isDescriptionInfoIconShow?: boolean;
@@ -30,7 +33,10 @@ interface CheckboxFieldProps<TFieldValues extends FieldValues> {
   onValueChange?: (value: boolean) => void;
 }
 
-export function CheckboxField<TFieldValues extends FieldValues>({
+export function CheckboxField<
+  TFieldValues extends FieldValues,
+  TTransformedValues = TFieldValues,
+>({
   name,
   control,
   label,
@@ -39,7 +45,7 @@ export function CheckboxField<TFieldValues extends FieldValues>({
   requiredField = false,
   disabled,
   onValueChange,
-}: CheckboxFieldProps<TFieldValues>) {
+}: CheckboxFieldProps<TFieldValues, TTransformedValues>) {
   const fieldId = useId();
   return (
     <Controller

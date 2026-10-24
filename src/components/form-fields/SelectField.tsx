@@ -20,9 +20,12 @@ import {
   SelectValue,
 } from "../ui/select";
 
-interface SelectFieldProps<TFieldValues extends FieldValues> {
+interface SelectFieldProps<
+  TFieldValues extends FieldValues,
+  TTransformedValues = TFieldValues,
+> {
   name: Path<TFieldValues>;
-  control: Control<TFieldValues>;
+  control: Control<TFieldValues, any, TTransformedValues>;
   className?: string;
   label?: string;
   description?: string;
@@ -34,7 +37,10 @@ interface SelectFieldProps<TFieldValues extends FieldValues> {
   onValueChange?: (value: string) => void;
 }
 
-function SelectField<TFieldValues extends FieldValues>({
+function SelectField<
+  TFieldValues extends FieldValues,
+  TTransformedValues = TFieldValues,
+>({
   control,
   name,
   className,
@@ -46,7 +52,7 @@ function SelectField<TFieldValues extends FieldValues>({
   isDescriptionInfoIconShow = false,
   disabled,
   onValueChange,
-}: SelectFieldProps<TFieldValues>) {
+}: SelectFieldProps<TFieldValues, TTransformedValues>) {
   const fieldId = useId();
 
   return (

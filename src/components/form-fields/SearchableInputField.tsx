@@ -17,19 +17,24 @@ import {
 interface SearchableInputFieldProps<
   TFieldValues extends FieldValues,
   TOption,
+  TTransformedValues = TFieldValues,
 > extends Omit<
   SearchableInputProps<TOption>,
   "id" | "name" | "value" | "onChange" | "onBlur" | "inputRef" | "aria-invalid"
 > {
   name: Path<TFieldValues>;
-  control: Control<TFieldValues>;
+  control: Control<TFieldValues, any, TTransformedValues>;
   label?: string;
   description?: string;
   isDescriptionInfoIconShow?: boolean;
   requiredField?: boolean;
 }
 
-function SearchableInputField<TFieldValues extends FieldValues, TOption>({
+function SearchableInputField<
+  TFieldValues extends FieldValues,
+  TOption,
+  TTransformedValues = TFieldValues,
+>({
   name,
   control,
   label,
@@ -38,7 +43,7 @@ function SearchableInputField<TFieldValues extends FieldValues, TOption>({
   requiredField = false,
   disabled = false,
   ...props
-}: SearchableInputFieldProps<TFieldValues, TOption>) {
+}: SearchableInputFieldProps<TFieldValues, TOption, TTransformedValues>) {
   const fieldId = useId();
 
   return (

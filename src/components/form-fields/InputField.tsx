@@ -15,9 +15,10 @@ import { Input } from "../ui/input";
 
 interface InputFieldProps<
   TFieldValues extends FieldValues,
+  TTransformedValues = TFieldValues,
 > extends React.ComponentProps<"input"> {
   name: Path<TFieldValues>;
-  control: Control<TFieldValues>;
+  control: Control<TFieldValues, any, TTransformedValues>;
   onValueChange?: (value: string) => void;
   valueModifier?: (value: string) => string;
   label?: string;
@@ -26,7 +27,10 @@ interface InputFieldProps<
   requiredField?: boolean;
 }
 
-function InputField<TFieldValues extends FieldValues>({
+function InputField<
+  TFieldValues extends FieldValues,
+  TTransformedValues = TFieldValues,
+>({
   name,
   control,
   onValueChange,
@@ -37,7 +41,7 @@ function InputField<TFieldValues extends FieldValues>({
   requiredField = false,
   disabled = false,
   ...props
-}: InputFieldProps<TFieldValues>) {
+}: InputFieldProps<TFieldValues, TTransformedValues>) {
   const fieldId = useId();
   return (
     <Controller

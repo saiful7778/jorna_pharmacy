@@ -16,9 +16,10 @@ import { PhoneInput } from "../ui/phone-input";
 
 interface PhoneInputFieldProps<
   TFieldValues extends FieldValues,
+  TTransformedValues = TFieldValues,
 > extends React.ComponentProps<"input"> {
   name: Path<TFieldValues>;
-  control: Control<TFieldValues>;
+  control: Control<TFieldValues, any, TTransformedValues>;
   label?: string;
   description?: string;
   requiredField?: boolean;
@@ -27,7 +28,10 @@ interface PhoneInputFieldProps<
   valueModifier?: (value: string) => string;
 }
 
-function PhoneInputField<TFieldValues extends FieldValues>({
+function PhoneInputField<
+  TFieldValues extends FieldValues,
+  TTransformedValues = TFieldValues,
+>({
   name,
   control,
   label,
@@ -37,7 +41,7 @@ function PhoneInputField<TFieldValues extends FieldValues>({
   onValueChange,
   valueModifier,
   ...props
-}: PhoneInputFieldProps<TFieldValues>) {
+}: PhoneInputFieldProps<TFieldValues, TTransformedValues>) {
   const fieldId = useId();
   return (
     <Controller
