@@ -49,6 +49,7 @@ export const API_MESSAGES = {
   },
   SALE: {
     GET_ALL: "Sales loaded successfully.",
+    GET_STATS: "Sale statistics loaded successfully.",
     NOT_FOUND: "Sale not found.",
   },
 };

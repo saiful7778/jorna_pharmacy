@@ -67,6 +67,42 @@ export type ListSaleContractType = InferContractRouterType<
   typeof listSaleContract
 >;
 
+const saleStatsContract = baseContract
+  .route({
+    method: "GET",
+    path: "/sales/stats",
+    description: "Get sale totals, revenue, collected amount, and due",
+    tags,
+  })
+  .input(
+    z.object({
+      filter: z
+        .object({
+          createdAt: z
+            .object({
+              from: z.coerce.date().describe("Created at from date").optional(),
+              to: z.coerce.date().describe("Created at to date").optional(),
+            })
+            .optional(),
+        })
+        .optional(),
+    })
+  )
+  .output(
+    apiOutputSchema(
+      z.object({
+        saleCount: z.number(),
+        totalRevenue: z.number(),
+        totalPaid: z.number(),
+        dueAmount: z.number(),
+      })
+    )
+  );
+export type SaleStatsContractType = InferContractRouterType<
+  typeof saleStatsContract
+>;
+
 export const saleContract = {
   list: listSaleContract,
+  stats: saleStatsContract,
 };

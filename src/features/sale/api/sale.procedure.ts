@@ -32,7 +32,7 @@ export const listSaleProcedure = saleImpl.list
     ])
   )
   .handler(async ({ context, input }) => {
-    const { customerId, unpaidOnly, ...paginateInput } = input;
+    const { customerId, unpaidOnly, filter, ...paginateInput } = input;
 
     const { where, page, offset, limit } = buildPaginateOptions(
       {
@@ -41,7 +41,13 @@ export const listSaleProcedure = saleImpl.list
         customerPhone: CustomerTable.phone,
         createdAt: SaleTable.createdAt,
       },
-      paginateInput
+      {
+        ...paginateInput,
+        filter:
+          filter?.from || filter?.to
+            ? { createdAt: { from: filter.from, to: filter.to } }
+            : undefined,
+      }
     );
 
     const whereSql: Array<SQL> = [];
@@ -114,5 +120,45 @@ export const listSaleProcedure = saleImpl.list
         ...sale,
         itemCount: Number(sale.itemCount),
       })),
+    });
+  });
+
+export const saleStatsProcedure = saleImpl.stats
+  .use(
+    userPermissionMiddleware([
+      { level: "system", resource: "sale", action: "manage" },
+      { level: "system", resource: "sale", action: "list" },
+    ])
+  )
+  .handler(async ({ context, input }) => {
+    const { where } = buildPaginateOptions(
+      { createdAt: SaleTable.createdAt },
+      {
+        filter: input.filter,
+      }
+    );
+
+    console.log(where);
+
+    const [totals] = await context.db
+      .select({
+        saleCount: sql<number>`COUNT(*)`,
+        totalRevenue: sql<number>`COALESCE(SUM(${SaleTable.totalAmount}), 0)`,
+        totalPaid: sql<number>`COALESCE(SUM(${SaleTable.paidAmount}), 0)`,
+      })
+      .from(SaleTable)
+      .where(where);
+
+    console.log(totals);
+
+    const totalRevenue = Number(totals?.totalRevenue ?? 0);
+    const totalPaid = Number(totals?.totalPaid ?? 0);
+    const dueAmount = totalRevenue - totalPaid;
+
+    return apiResponse(API_MESSAGES.SALE.GET_STATS, {
+      saleCount: Number(totals?.saleCount ?? 0),
+      totalRevenue,
+      totalPaid,
+      dueAmount,
     });
   });
