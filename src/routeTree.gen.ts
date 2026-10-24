@@ -25,6 +25,7 @@ import { Route as DashboardDashboardLayoutRolesRouteImport } from './routes/dash
 import { Route as DashboardDashboardLayoutCustomersIndexRouteImport } from './routes/dashboard/_dashboardLayout/customers/index'
 import { Route as DashboardDashboardLayoutCustomersCustomerIdRouteImport } from './routes/dashboard/_dashboardLayout/customers/$customerId'
 import { Route as DashboardDashboardLayoutCustomersPaymentsRouteImport } from './routes/dashboard/_dashboardLayout/customers/payments'
+import { Route as DashboardDashboardLayoutSalesIndexRouteImport } from './routes/dashboard/_dashboardLayout/sales/index'
 import { Route as DashboardDashboardLayoutSettingsSettingsLayoutRouteImport } from './routes/dashboard/_dashboardLayout/settings/_settingsLayout'
 import { Route as DashboardDashboardLayoutUsersIndexRouteImport } from './routes/dashboard/_dashboardLayout/users/index'
 import { Route as DashboardDashboardLayoutUsersUserIdRouteImport } from './routes/dashboard/_dashboardLayout/users/$userId'
@@ -122,6 +123,12 @@ const DashboardDashboardLayoutCustomersPaymentsRoute =
     path: '/customers/payments',
     getParentRoute: () => DashboardDashboardLayoutRoute,
   } as any)
+const DashboardDashboardLayoutSalesIndexRoute =
+  DashboardDashboardLayoutSalesIndexRouteImport.update({
+    id: '/sales/',
+    path: '/sales/',
+    getParentRoute: () => DashboardDashboardLayoutRoute,
+  } as any)
 const DashboardDashboardLayoutSettingsSettingsLayoutRoute =
   DashboardDashboardLayoutSettingsSettingsLayoutRouteImport.update({
     id: '/settings/_settingsLayout',
@@ -193,6 +200,7 @@ export interface FileRoutesByFullPath {
   '/dashboard/settings': typeof DashboardDashboardLayoutSettingsSettingsLayoutRouteWithChildren
   '/dashboard/users/$userId': typeof DashboardDashboardLayoutUsersUserIdRoute
   '/dashboard/customers/': typeof DashboardDashboardLayoutCustomersIndexRoute
+  '/dashboard/sales/': typeof DashboardDashboardLayoutSalesIndexRoute
   '/dashboard/users/': typeof DashboardDashboardLayoutUsersIndexRoute
   '/dashboard/settings/connected-apps': typeof DashboardDashboardLayoutSettingsSettingsLayoutConnectedAppsRoute
   '/dashboard/settings/profile': typeof DashboardDashboardLayoutSettingsSettingsLayoutProfileRoute
@@ -216,6 +224,7 @@ export interface FileRoutesByTo {
   '/dashboard/customers/payments': typeof DashboardDashboardLayoutCustomersPaymentsRoute
   '/dashboard/users/$userId': typeof DashboardDashboardLayoutUsersUserIdRoute
   '/dashboard/customers': typeof DashboardDashboardLayoutCustomersIndexRoute
+  '/dashboard/sales': typeof DashboardDashboardLayoutSalesIndexRoute
   '/dashboard/users': typeof DashboardDashboardLayoutUsersIndexRoute
   '/dashboard/settings/connected-apps': typeof DashboardDashboardLayoutSettingsSettingsLayoutConnectedAppsRoute
   '/dashboard/settings/profile': typeof DashboardDashboardLayoutSettingsSettingsLayoutProfileRoute
@@ -243,6 +252,7 @@ export interface FileRoutesById {
   '/dashboard/_dashboardLayout/settings/_settingsLayout': typeof DashboardDashboardLayoutSettingsSettingsLayoutRouteWithChildren
   '/dashboard/_dashboardLayout/users/$userId': typeof DashboardDashboardLayoutUsersUserIdRoute
   '/dashboard/_dashboardLayout/customers/': typeof DashboardDashboardLayoutCustomersIndexRoute
+  '/dashboard/_dashboardLayout/sales/': typeof DashboardDashboardLayoutSalesIndexRoute
   '/dashboard/_dashboardLayout/users/': typeof DashboardDashboardLayoutUsersIndexRoute
   '/dashboard/_dashboardLayout/settings/_settingsLayout/connected-apps': typeof DashboardDashboardLayoutSettingsSettingsLayoutConnectedAppsRoute
   '/dashboard/_dashboardLayout/settings/_settingsLayout/profile': typeof DashboardDashboardLayoutSettingsSettingsLayoutProfileRoute
@@ -270,6 +280,7 @@ export interface FileRouteTypes {
     | '/dashboard/settings'
     | '/dashboard/users/$userId'
     | '/dashboard/customers/'
+    | '/dashboard/sales/'
     | '/dashboard/users/'
     | '/dashboard/settings/connected-apps'
     | '/dashboard/settings/profile'
@@ -293,6 +304,7 @@ export interface FileRouteTypes {
     | '/dashboard/customers/payments'
     | '/dashboard/users/$userId'
     | '/dashboard/customers'
+    | '/dashboard/sales'
     | '/dashboard/users'
     | '/dashboard/settings/connected-apps'
     | '/dashboard/settings/profile'
@@ -319,6 +331,7 @@ export interface FileRouteTypes {
     | '/dashboard/_dashboardLayout/settings/_settingsLayout'
     | '/dashboard/_dashboardLayout/users/$userId'
     | '/dashboard/_dashboardLayout/customers/'
+    | '/dashboard/_dashboardLayout/sales/'
     | '/dashboard/_dashboardLayout/users/'
     | '/dashboard/_dashboardLayout/settings/_settingsLayout/connected-apps'
     | '/dashboard/_dashboardLayout/settings/_settingsLayout/profile'
@@ -449,6 +462,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardDashboardLayoutCustomersPaymentsRouteImport
       parentRoute: typeof DashboardDashboardLayoutRoute
     }
+    '/dashboard/_dashboardLayout/sales/': {
+      id: '/dashboard/_dashboardLayout/sales/'
+      path: '/sales'
+      fullPath: '/dashboard/sales/'
+      preLoaderRoute: typeof DashboardDashboardLayoutSalesIndexRouteImport
+      parentRoute: typeof DashboardDashboardLayoutRoute
+    }
     '/dashboard/_dashboardLayout/settings/_settingsLayout': {
       id: '/dashboard/_dashboardLayout/settings/_settingsLayout'
       path: '/settings'
@@ -564,6 +584,7 @@ interface DashboardDashboardLayoutRouteChildren {
   DashboardDashboardLayoutSettingsSettingsLayoutRoute: typeof DashboardDashboardLayoutSettingsSettingsLayoutRouteWithChildren
   DashboardDashboardLayoutUsersUserIdRoute: typeof DashboardDashboardLayoutUsersUserIdRoute
   DashboardDashboardLayoutCustomersIndexRoute: typeof DashboardDashboardLayoutCustomersIndexRoute
+  DashboardDashboardLayoutSalesIndexRoute: typeof DashboardDashboardLayoutSalesIndexRoute
   DashboardDashboardLayoutUsersIndexRoute: typeof DashboardDashboardLayoutUsersIndexRoute
 }
 
@@ -582,6 +603,8 @@ const DashboardDashboardLayoutRouteChildren: DashboardDashboardLayoutRouteChildr
       DashboardDashboardLayoutUsersUserIdRoute,
     DashboardDashboardLayoutCustomersIndexRoute:
       DashboardDashboardLayoutCustomersIndexRoute,
+    DashboardDashboardLayoutSalesIndexRoute:
+      DashboardDashboardLayoutSalesIndexRoute,
     DashboardDashboardLayoutUsersIndexRoute:
       DashboardDashboardLayoutUsersIndexRoute,
   }

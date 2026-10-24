@@ -2,6 +2,7 @@ import {
   Banknote,
   Contact,
   House,
+  Receipt,
   Settings,
   ShieldUser,
   User,
@@ -39,6 +40,13 @@ export const sidebarMenuLinks: Array<SidebarGroupMenuLinkType> = [
   {
     groupName: "Sales",
     items: [
+      {
+        title: "Sales",
+        path: "/dashboard/sales",
+        pathRegex: /^\/dashboard\/sales\/?$/,
+        permissions: manageOrList("sale"),
+        icon: <Receipt />,
+      },
       {
         title: "Customers",
         path: "/dashboard/customers",
