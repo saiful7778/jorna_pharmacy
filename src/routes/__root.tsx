@@ -12,6 +12,7 @@ import { Toaster } from "react-hot-toast";
 import { ThemeProvider } from "@/components/providers/theme-provider";
 import { TanstackQueryProvider } from "@/components/tanstack-query/tanstack-query-provider";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { requireSessions } from "@/features/auth/auth.functions";
 import { globalHead } from "@/lib/head";
 
 interface RouterContextProps {
@@ -19,6 +20,16 @@ interface RouterContextProps {
 }
 
 export const Route = createRootRouteWithContext<RouterContextProps>()({
+  beforeLoad: async () => {
+    const result = await requireSessions();
+
+    return {
+      user: result?.user,
+      session: result?.session,
+      roles: result?.roles,
+      permissions: result?.permissions,
+    };
+  },
   head: () => globalHead(),
   shellComponent: RootDocument,
 });
