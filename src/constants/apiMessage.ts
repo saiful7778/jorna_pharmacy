@@ -30,4 +30,25 @@ export const API_MESSAGES = {
       NOT_FOUND: "Role not found.",
     },
   },
+  CUSTOMER: {
+    GET_ALL: "Customers loaded successfully.",
+    GET_ALL_FOR_SEARCH: "Customers loaded successfully.",
+    GET_DETAILS: "Customer details loaded successfully.",
+    CREATE: "Customer created successfully.",
+    UPDATE: "Customer updated successfully.",
+    NOT_FOUND: "Customer not found.",
+    NOT_CREATE: "Failed to create customer. Please try again.",
+    NOT_UPDATE: "Failed to update customer. Please try again.",
+    PAYMENT: {
+      GET_ALL: "Customer payments loaded successfully.",
+      CREATE: "Customer payment recorded successfully.",
+      NOT_CREATE: "Failed to record customer payment. Please try again.",
+      EXCEEDS_BALANCE: "Payment amount exceeds the remaining sale balance.",
+      GET_STATS: "Payment stats loaded successfully.",
+    },
+  },
+  SALE: {
+    GET_ALL: "Sales loaded successfully.",
+    NOT_FOUND: "Sale not found.",
+  },
 };
