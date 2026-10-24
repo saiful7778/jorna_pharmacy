@@ -71,6 +71,10 @@ export const listSaleProcedure = saleImpl.list
       context.db
         .select({ count: sql<number>`COUNT(*)` })
         .from(SaleTable)
+        .innerJoin(
+          SaleInvoiceTable,
+          eq(SaleInvoiceTable.id, SaleTable.invoiceId)
+        )
         .leftJoin(CustomerTable, eq(SaleTable.customerId, CustomerTable.id))
         .where(and(...whereSql)),
       context.db
@@ -90,6 +94,10 @@ export const listSaleProcedure = saleImpl.list
           createdAt: SaleTable.createdAt,
         })
         .from(SaleTable)
+        .innerJoin(
+          SaleInvoiceTable,
+          eq(SaleInvoiceTable.id, SaleTable.invoiceId)
+        )
         .leftJoin(CustomerTable, eq(SaleTable.customerId, CustomerTable.id))
         .leftJoin(itemCounts, eq(itemCounts.saleId, SaleTable.id))
         .where(and(...whereSql))
