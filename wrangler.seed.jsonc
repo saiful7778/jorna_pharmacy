@@ -1,0 +1,41 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "compatibility_date": "2026-08-04",
+  "compatibility_flags": ["nodejs_compat"],
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "jornapharmacy-db-local",
+      "database_id": "00000000-0000-0000-0000-000000000000",
+      "migrations_dir": "migrations",
+      "migrations_table": "d1_migrations",
+      "remote": false,
+    },
+  ],
+  "env": {
+    "staging": {
+      "d1_databases": [
+        {
+          "binding": "DB",
+          "database_name": "jornapharmacy-db-stage",
+          "database_id": "de4b3ccb-e702-4dcc-b1eb-48976f3ff259",
+          "migrations_dir": "migrations",
+          "migrations_table": "d1_migrations",
+          "remote": true,
+        },
+      ],
+    },
+    "production": {
+      "d1_databases": [
+        {
+          "binding": "DB",
+          "database_name": "jornapharmacy-db",
+          "database_id": "d16c4eed-1424-4880-8b08-823c4bb8fbca",
+          "migrations_dir": "migrations",
+          "migrations_table": "d1_migrations",
+          "remote": true,
+        },
+      ],
+    },
+  },
+}

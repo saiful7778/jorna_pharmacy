@@ -1,0 +1,65 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "web",
+  "compatibility_date": "2026-08-04",
+  "compatibility_flags": ["nodejs_compat"],
+  "main": "@tanstack/react-start/server-entry",
+  "observability": {
+    "enabled": true,
+  },
+  "upload_source_maps": true,
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "jornapharmacy-db-local",
+      "database_id": "00000000-0000-0000-0000-000000000000",
+      "migrations_dir": "migrations",
+      "migrations_table": "d1_migrations",
+      "remote": false,
+    },
+  ],
+  "env": {
+    "staging": {
+      "name": "web-staging",
+      "vars": {
+        "ENVIRONMENT": "staging",
+        "VITE_ENVIRONMENT": "staging",
+        "SKIP_ENV_VALIDATION": "true",
+        "MAIL_USER": "milon.chandra.dey.92@gmail.com",
+        "VITE_MAIL": "milon.chandra.dey.92@gmail.com",
+        "VITE_SITE_URL": "https://web-staging.jorna-pharmacy.workers.dev",
+      },
+      "d1_databases": [
+        {
+          "binding": "DB",
+          "database_name": "jornapharmacy-db-stage",
+          "database_id": "de4b3ccb-e702-4dcc-b1eb-48976f3ff259",
+          "migrations_dir": "migrations",
+          "migrations_table": "d1_migrations",
+          "remote": true,
+        },
+      ],
+    },
+    "production": {
+      "name": "web",
+      "vars": {
+        "ENVIRONMENT": "production",
+        "VITE_ENVIRONMENT": "production",
+        "SKIP_ENV_VALIDATION": "true",
+        "MAIL_USER": "milon.chandra.dey.92@gmail.com",
+        "VITE_MAIL": "milon.chandra.dey.92@gmail.com",
+        "VITE_SITE_URL": "https://web.jorna-pharmacy.workers.dev",
+      },
+      "d1_databases": [
+        {
+          "binding": "DB",
+          "database_name": "jornapharmacy-db",
+          "database_id": "d16c4eed-1424-4880-8b08-823c4bb8fbca",
+          "migrations_dir": "migrations",
+          "migrations_table": "d1_migrations",
+          "remote": true,
+        },
+      ],
+    },
+  },
+}

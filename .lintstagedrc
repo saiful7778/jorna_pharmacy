@@ -1,0 +1,7 @@
+{
+  "src/**/*.{ts,tsx}": [
+    "prettier --write",
+    "eslint --max-warnings 0 --config eslint.config.js"
+  ],
+  "*.md": ["prettier --write"]
+}
