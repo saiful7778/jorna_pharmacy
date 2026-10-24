@@ -83,9 +83,9 @@ ID prefixes are listed per document. IDs are stable: never renumber an existing 
 
 ## Document index
 
-| Area | Document | Source scope |
-| ---- | -------- | ------------ |
-|      |          |              |
+| Area     | Document                     | Source scope               |
+| -------- | ---------------------------- | -------------------------- |
+| Customer | [customer.md](./customer.md) | `src/features/customer/**` |
 
 ## Out of scope
 
