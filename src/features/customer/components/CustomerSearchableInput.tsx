@@ -16,8 +16,7 @@ import type { ListCustomerForSearchContractType } from "../api/customer.contract
 export type CustomerOptionType =
   ListCustomerForSearchContractType["output"]["data"][number];
 
-const getOptionLabel = (customer: CustomerOptionType) =>
-  [customer.name, customer.phone].filter(Boolean).join(" - ");
+const getOptionLabel = (customer: CustomerOptionType) => customer.name;
 
 export interface CustomerSearchableInputProps extends Omit<
   SearchableInputProps<CustomerOptionType>,
@@ -28,12 +27,15 @@ export interface CustomerSearchableInputProps extends Omit<
   | "onSearch"
   | "firstAddon"
   | "secondAddon"
-> {}
+> {
+  onReset?: () => void;
+}
 
 export function CustomerSearchableInput({
   placeholder = "Search customer",
   onChange,
   onValueChange,
+  onReset,
   ...props
 }: CustomerSearchableInputProps) {
   const [search, setSearch] = useState<string | undefined>(undefined);
@@ -53,6 +55,7 @@ export function CustomerSearchableInput({
 
   const handleReset = () => {
     setSearch(undefined);
+    onReset?.();
     onChange?.("");
     onValueChange?.("");
   };
