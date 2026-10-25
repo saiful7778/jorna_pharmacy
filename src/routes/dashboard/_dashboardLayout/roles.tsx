@@ -15,7 +15,6 @@ import {
 import { DashboardShellSkeleton } from "@/components/shared/dashboard-shell/DashboardShellSkeleton";
 import { requirePermissions } from "@/features/auth/auth.functions";
 import { RoleManagementTable } from "@/features/role/components/role-table/RoleManagementTable";
-import { querySearchSchema } from "@/lib/querySearchSchema";
 
 export const Route = createFileRoute("/dashboard/_dashboardLayout/roles")({
   beforeLoad: ({ context }) => {
@@ -25,7 +24,6 @@ export const Route = createFileRoute("/dashboard/_dashboardLayout/roles")({
       context.user.id
     );
   },
-  validateSearch: querySearchSchema,
   pendingComponent: LoadingComponent,
   component: RouteComponent,
 });
