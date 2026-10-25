@@ -1,17 +1,15 @@
 import { useState } from "react";
 
-import { useAtomSet } from "@effect-atom/atom-react";
+import { Atom, useAtom, useAtomSet } from "@effect-atom/atom-react";
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Eye, HandCoins, Plus, Receipt, Wallet } from "lucide-react";
-import z from "zod";
+import { Eye, HandCoins, Plus, Receipt, User, Wallet } from "lucide-react";
 
 import { FormatDateCell } from "@/components/FormatDateCell";
 import { MetaPagination } from "@/components/MetaPagination";
 import { SummaryStat } from "@/components/SummaryStat";
 import { DataTableEmpty } from "@/components/data-table/data-table-empty";
 import { DataTableSkeleton } from "@/components/data-table/data-table-skeleton";
-import { DataTableToolbarSkeleton } from "@/components/data-table/data-table-toolbar-skeleton";
 import { DashboardShell } from "@/components/shared/dashboard-shell";
 import {
   DashboardShellDescription,
@@ -25,6 +23,13 @@ import {
 import { DashboardShellSkeleton } from "@/components/shared/dashboard-shell/DashboardShellSkeleton";
 import { QueryStateBoundary } from "@/components/tanstack-query/query-state-boundary";
 import { Button } from "@/components/ui/button";
+import {
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from "@/components/ui/empty";
 import { RefreshButton } from "@/components/ui/refresh-button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Spinner } from "@/components/ui/spinner";
@@ -42,15 +47,12 @@ import {
   openCustomerPaymentCreateDialog,
 } from "@/features/customer/components/CustomerPaymentCreateDialog";
 import { CustomerSearchableInput } from "@/features/customer/components/CustomerSearchableInput";
-import { CustomerSidebar } from "@/features/customer/components/CustomerSidebar";
 import { usePermissionCheck } from "@/hooks/use-permission-check";
 import { useSearchNavigate } from "@/hooks/use-search-navigate";
 import { head } from "@/lib/head";
 import { querySearchSchema } from "@/lib/querySearchSchema";
 import { orpcTQClient } from "@/oRPC/orpc";
 import { formatCurrency } from "@/utils/formatCurrency";
-
-const searchFields = ["invoiceNo"];
 
 export const Route = createFileRoute(
   "/dashboard/_dashboardLayout/customers/payments"
@@ -65,7 +67,7 @@ export const Route = createFileRoute(
       context.user.id
     );
   },
-  validateSearch: querySearchSchema.extend({ customerId: z.uuid().optional() }),
+  validateSearch: querySearchSchema.pick({ page: true, limit: true }),
   loaderDeps: ({ search }) => search,
   head: ({ match }) =>
     head({
@@ -73,35 +75,17 @@ export const Route = createFileRoute(
       titleByTemplate: "Customer Payments",
       description: "Manage your customer payments",
     }),
-  loader: async ({ context: { queryClient }, deps }) => {
-    await queryClient.query(
-      orpcTQClient.customer.payment.list.queryOptions({
-        input: {
-          page: deps.page,
-          limit: deps.limit,
-          search: deps.search,
-          searchFields,
-          order: deps.order,
-          orderField: deps.orderField,
-          customerId: deps.customerId,
-        },
-      })
-    );
-    await queryClient.query(
-      orpcTQClient.customer.payment.stats.queryOptions({
-        input: {
-          customerId: deps.customerId,
-        },
-      })
-    );
-  },
   pendingComponent: LoadingComponent,
   component: RouteComponent,
 });
 
+const customerIdAtom = Atom.make<string | undefined>(undefined).pipe(
+  Atom.keepAlive
+);
+
 function RouteComponent() {
-  const navigate = Route.useNavigate();
-  const search = Route.useSearch();
+  const [customerId, setCustomerId] = useAtom(customerIdAtom);
+  const [customerSearch, setCustomerSearch] = useState("");
 
   return (
     <DashboardShell
@@ -114,35 +98,40 @@ function RouteComponent() {
         </DashboardShellHeader>
       }
     >
-      <div className="grid gap-3 lg:grid-cols-3">
-        <CustomerSidebar
-          value={search.customerId}
-          onSelect={(selectedCustomerId) =>
-            navigate({ search: { customerId: selectedCustomerId } })
-          }
+      <div className="space-y-4 rounded-xl border bg-popover p-4">
+        <CustomerSearchableInput
+          value={customerSearch}
+          onChange={(value) => {
+            setCustomerSearch(value);
+          }}
+          onOptionSelect={(customerData) => setCustomerId(customerData.id)}
         />
-        <div className="rounded-xl border bg-popover p-4 text-popover-foreground lg:col-span-2">
-          {search.customerId ? (
-            <CustomerPaymentDetails customerId={search.customerId} />
-          ) : (
-            <div className="flex h-full flex-col items-center justify-center gap-2 text-muted-foreground">
-              First select a customer
-            </div>
-          )}
-        </div>
+        {customerId ? (
+          <CustomerPaymentDetails customerId={customerId} />
+        ) : (
+          <Empty className="min-h-[50dvh]">
+            <EmptyHeader>
+              <EmptyMedia className="size-10" variant="icon">
+                <User className="size-8" strokeWidth={1} />
+              </EmptyMedia>
+              <EmptyTitle>No customer</EmptyTitle>
+              <EmptyDescription>
+                First select a customer to see payments
+              </EmptyDescription>
+            </EmptyHeader>
+          </Empty>
+        )}
       </div>
     </DashboardShell>
   );
 }
 
 function CustomerPaymentDetails({ customerId }: { customerId: string }) {
+  const searchNavigate = useSearchNavigate(Route.fullPath);
+  const search = Route.useSearch();
   const setCustomerPaymentCreateDialog = useAtomSet(
     openCustomerPaymentCreateDialog
   );
-  const [customerSearch, setCustomerSearch] = useState("");
-  const searchNavigate = useSearchNavigate(Route.fullPath);
-
-  const search = Route.useSearch();
   const isAllowCreate = usePermissionCheck([
     {
       level: "system",
@@ -156,15 +145,12 @@ function CustomerPaymentDetails({ customerId }: { customerId: string }) {
       input: {
         page: search.page,
         limit: search.limit,
-        search: search.search,
-        searchFields,
-        order: search.order,
-        orderField: search.orderField,
         customerId,
       },
       select: (result) => result.data,
     })
   );
+
   const paymentStatsQuery = useQuery(
     orpcTQClient.customer.payment.stats.queryOptions({
       input: {
@@ -181,18 +167,6 @@ function CustomerPaymentDetails({ customerId }: { customerId: string }) {
 
   return (
     <div className="space-y-4">
-      <CustomerSearchableInput
-        value={customerSearch}
-        onValueChange={(value) => {
-          setCustomerSearch(value);
-        }}
-        onOptionSelect={(customerData) =>
-          searchNavigate((prev) => ({
-            ...prev,
-            customerId: customerData.id,
-          }))
-        }
-      />
       <div className="flex items-center justify-between gap-2">
         <Button
           variant="outline"
@@ -282,11 +256,7 @@ function CustomerPaymentDetails({ customerId }: { customerId: string }) {
         error={paymentQuery.error}
         data={paymentQuery.data}
         isEmpty={() => false}
-        loadingFallback={
-          <DataTableSkeleton>
-            <DataTableToolbarSkeleton />
-          </DataTableSkeleton>
-        }
+        loadingFallback={<DataTableSkeleton rows={3} />}
         emptyFallback={<DataTableEmpty />}
       >
         {(paymentsData) => (
