@@ -34,6 +34,7 @@ export default [
       "sort-imports": "off",
       "@typescript-eslint/array-type": "off",
       "@typescript-eslint/require-await": "off",
+      "@eslint-react/no-array-index-key": "off",
     },
   },
   ...storybook.configs["flat/recommended"],
