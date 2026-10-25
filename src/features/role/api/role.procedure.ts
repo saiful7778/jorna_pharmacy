@@ -8,7 +8,6 @@ import {
   RoleTable,
   UserRoleTable,
 } from "@/db/schemas";
-import { jsonGroupArray } from "@/db/utils/sql-helpers";
 import { apiResponse } from "@/lib/apiResponse";
 import {
   authMiddleware,
@@ -31,34 +30,54 @@ export const listRoleProcedure = roleImpl.listRole
     ])
   )
   .handler(async ({ context }) => {
-    const result = await context.db
+    const roles = await context.db
       .select({
         id: RoleTable.id,
         roleName: RoleTable.roleName,
         description: RoleTable.description,
         totalUsers: sql<number>`COALESCE(COUNT(DISTINCT ${UserRoleTable.userId}), 0)`,
-        permissions: jsonGroupArray(
-          {
-            id: PermissionTable.id,
-            level: PermissionTable.level,
-            action: PermissionTable.action,
-            resource: PermissionTable.resource,
-            description: PermissionTable.description,
-          },
-          PermissionTable.id
-        ),
       })
       .from(RoleTable)
       .leftJoin(UserRoleTable, eq(RoleTable.id, UserRoleTable.roleId))
-      .leftJoin(
-        RolePermissionTable,
-        eq(RoleTable.id, RolePermissionTable.roleId)
-      )
-      .leftJoin(
+      .groupBy(RoleTable.id);
+
+    // 2. Permissions per role (flat rows)
+    const rolePermissions = await context.db
+      .select({
+        roleId: RolePermissionTable.roleId,
+        id: PermissionTable.id,
+        level: PermissionTable.level,
+        action: PermissionTable.action,
+        resource: PermissionTable.resource,
+        description: PermissionTable.description,
+      })
+      .from(RolePermissionTable)
+      .innerJoin(
         PermissionTable,
         eq(RolePermissionTable.permissionId, PermissionTable.id)
-      )
-      .groupBy(RoleTable.id);
+      );
+
+    // 3. Group permissions by roleId using a Map
+    const permissionsByRole = new Map<
+      string,
+      Array<Omit<(typeof rolePermissions)[number], "roleId">>
+    >();
+
+    for (const rolePermission of rolePermissions) {
+      const { roleId, ...permission } = rolePermission;
+      const list = permissionsByRole.get(roleId);
+      if (list) {
+        list.push(permission);
+      } else {
+        permissionsByRole.set(roleId, [permission]);
+      }
+    }
+
+    // 4. Join roles with their permissions
+    const result = roles.map((role) => ({
+      ...role,
+      permissions: permissionsByRole.get(role.id) ?? [],
+    }));
 
     return apiResponse(API_MESSAGES.USER.ROLE.GET_ALL, result);
   });
