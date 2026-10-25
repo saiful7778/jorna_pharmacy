@@ -334,6 +334,7 @@ function createAuth() {
       },
     },
     session: {
+      freshAge: 0, // disables the freshness check
       cookieCache: {
         enabled: true,
         maxAge: 5 * 60, // Cache duration in seconds

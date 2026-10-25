@@ -3,6 +3,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { getRequestHeaders } from "@tanstack/react-start/server";
 
 import { DEFAULT_AUTH_PATH } from "@/constants";
+import { SessionTable } from "@/db/schemas";
 import type { PermissionType } from "@/db/seed/permission.seed";
 import { db } from "@/lib/db.server";
 
@@ -54,5 +55,12 @@ export const requireSessions = createServerFn({ method: "GET" }).handler(
       roles: rolesPermissions.roles,
       permissions: rolesPermissions.permissions,
     };
+  }
+);
+
+export const getSessions = createServerFn({ method: "GET" }).handler(
+  async () => {
+    const sessions = await db.select().from(SessionTable);
+    return sessions;
   }
 );

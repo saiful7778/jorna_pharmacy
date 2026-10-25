@@ -1,15 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { createServerFn } from "@tanstack/react-start";
-import { getRequestHeaders } from "@tanstack/react-start/server";
 
 import { Spinner } from "@/components/ui/spinner";
-import { getAuth } from "@/features/auth/auth.server";
+import { getSessions } from "@/features/auth/auth.functions";
 import { SessionManagement } from "@/features/auth/components/SessionManagement";
-
-const getSessions = createServerFn({ method: "GET" }).handler(async () => {
-  const headers = getRequestHeaders();
-  return getAuth().api.listSessions({ headers });
-});
 
 export const Route = createFileRoute(
   "/dashboard/_dashboardLayout/settings/_settingsLayout/sessions"

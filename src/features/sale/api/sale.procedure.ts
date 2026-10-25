@@ -138,8 +138,6 @@ export const saleStatsProcedure = saleImpl.stats
       }
     );
 
-    console.log(where);
-
     const [totals] = await context.db
       .select({
         saleCount: sql<number>`COUNT(*)`,
@@ -148,8 +146,6 @@ export const saleStatsProcedure = saleImpl.stats
       })
       .from(SaleTable)
       .where(where);
-
-    console.log(totals);
 
     const totalRevenue = Number(totals?.totalRevenue ?? 0);
     const totalPaid = Number(totals?.totalPaid ?? 0);
