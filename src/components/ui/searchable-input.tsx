@@ -2,6 +2,7 @@ import {
   useCallback,
   useId,
   useLayoutEffect,
+  useMemo,
   useRef,
   useState,
   type ChangeEvent,
@@ -13,9 +14,10 @@ import { createPortal } from "react-dom";
 
 import { cn } from "cn";
 
+import { useComposedRefs } from "@/hooks/use-composed-refs";
 import { useDebouncedCallback } from "@/hooks/use-debounced-callback";
 
-import { Input } from "./input";
+import { InputGroup, InputGroupAddon, InputGroupInput } from "./input-group";
 
 interface SearchableInputPosition {
   top: number;
@@ -42,6 +44,8 @@ interface SearchableInputProps<TOption> {
   getOptionLabel: (option: TOption) => string;
   renderOption?: (option: TOption) => ReactNode;
   onOptionSelect?: (option: TOption) => void;
+  firstAddon?: React.ReactNode;
+  secondAddon?: React.ReactNode;
 }
 
 function SearchableInput<TOption>({
@@ -55,7 +59,6 @@ function SearchableInput<TOption>({
   placeholder,
   disabled = false,
   className,
-  "aria-invalid": ariaInvalid,
   options,
   onSearch,
   searchDebounceMs = 300,
@@ -63,10 +66,14 @@ function SearchableInput<TOption>({
   getOptionLabel,
   renderOption,
   onOptionSelect,
+  firstAddon,
+  secondAddon,
+  ...props
 }: SearchableInputProps<TOption>) {
   const generatedId = useId();
   const listboxId = useId();
   const inputRef = useRef<HTMLInputElement | null>(null);
+  const setInputRef = useComposedRefs(inputRef, externalInputRef);
   const [isOpenRequested, setIsOpenRequested] = useState(false);
   const [activeIndex, setActiveIndex] = useState(-1);
   const [position, setPosition] = useState<SearchableInputPosition | null>(
@@ -74,7 +81,7 @@ function SearchableInput<TOption>({
   );
 
   const inputId = id ?? generatedId;
-  const items = options ?? [];
+  const items = useMemo(() => options ?? [], [options]);
   const isOpen = isOpenRequested && items.length > 0;
 
   const debouncedSearch = useDebouncedCallback(
@@ -168,43 +175,40 @@ function SearchableInput<TOption>({
     closeList();
   }, [closeList, onBlur]);
 
-  const setInputRef = useCallback(
-    (element: HTMLInputElement | null) => {
-      inputRef.current = element;
-
-      if (typeof externalInputRef === "function") {
-        externalInputRef(element);
-      } else if (externalInputRef) {
-        externalInputRef.current = element;
-      }
-    },
-    [externalInputRef]
-  );
-
   return (
     <>
-      <Input
-        ref={setInputRef}
-        id={inputId}
-        name={name}
-        role="combobox"
-        type="text"
-        autoComplete="off"
-        className={className}
-        aria-autocomplete="list"
-        aria-expanded={isOpen}
-        aria-controls={isOpen ? listboxId : undefined}
-        aria-activedescendant={
-          isOpen && activeIndex >= 0 ? `${listboxId}-${activeIndex}` : undefined
-        }
-        aria-invalid={ariaInvalid}
-        placeholder={placeholder}
-        disabled={disabled}
-        value={value}
-        onChange={handleOnChange}
-        onKeyDown={handleOnKeyDown}
-        onBlur={handleOnBlur}
-      />
+      <InputGroup>
+        {firstAddon && (
+          <InputGroupAddon align="inline-start">{firstAddon}</InputGroupAddon>
+        )}
+        <InputGroupInput
+          {...props}
+          ref={setInputRef}
+          id={inputId}
+          name={name}
+          role="combobox"
+          type="text"
+          autoComplete="off"
+          className={className}
+          aria-autocomplete="list"
+          aria-expanded={isOpen}
+          aria-controls={isOpen ? listboxId : undefined}
+          aria-activedescendant={
+            isOpen && activeIndex >= 0
+              ? `${listboxId}-${activeIndex}`
+              : undefined
+          }
+          placeholder={placeholder}
+          disabled={disabled}
+          value={value}
+          onChange={handleOnChange}
+          onKeyDown={handleOnKeyDown}
+          onBlur={handleOnBlur}
+        />
+        {secondAddon && (
+          <InputGroupAddon align="inline-end">{secondAddon}</InputGroupAddon>
+        )}
+      </InputGroup>
       {isOpen && position && (
         <SearchableInputContent position={position}>
           <SearchableInputList id={listboxId}>
