@@ -23,19 +23,12 @@ import {
 } from "@/db/schemas";
 import { RoleEnumSchema } from "@/db/schemas/enums/zod-db-enums";
 import { db } from "@/lib/db.server";
+import { getIp } from "@/utils/getIp";
 
 import { env } from "../../lib/env";
 import { mail } from "../../lib/mail.server";
 import { systemAc, systemRoles } from "./access-control";
 import { parseUserAgent } from "./device-fingerprint";
-
-function getIp(headers: Headers): string {
-  return (
-    headers.get("x-forwarded-for")?.split(",")[0] ||
-    headers.get("x-real-ip") ||
-    "127.0.0.1"
-  );
-}
 
 async function createUserEvent(database: DatabaseType, value: InsertUserEvent) {
   return await database.insert(UserEventTable).values(value);
