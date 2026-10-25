@@ -4,14 +4,14 @@ import { DataTableEmpty } from "@/components/data-table/data-table-empty";
 import { DataTableSkeleton } from "@/components/data-table/data-table-skeleton";
 import { DataTableToolbarSkeleton } from "@/components/data-table/data-table-toolbar-skeleton";
 import { QueryStateBoundary } from "@/components/tanstack-query/query-state-boundary";
-import { useQuerySearch } from "@/hooks/use-query-search";
+import { useSearchFilter } from "@/hooks/use-search-filter";
 import { orpcTQClient } from "@/oRPC/orpc";
 
 import { RoleTable } from "./RoleTable";
 
 export function RoleManagementTable() {
   "use no memo";
-  const { filters, setFilters } = useQuerySearch(
+  const { filters, setFilters } = useSearchFilter(
     "/dashboard/_dashboardLayout/roles"
   );
 
@@ -47,8 +47,8 @@ export function RoleManagementTable() {
             setFilters({
               page: updatedFilters.page,
               limit: updatedFilters.limit,
-              order: updatedFilters.order,
-              orderField: updatedFilters.orderField,
+              order: updatedFilters.order ?? undefined,
+              orderField: updatedFilters.orderField ?? undefined,
             });
           }}
         />

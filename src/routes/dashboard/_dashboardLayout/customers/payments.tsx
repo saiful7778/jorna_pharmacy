@@ -1,3 +1,5 @@
+import { useState } from "react";
+
 import { useAtomSet } from "@effect-atom/atom-react";
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
@@ -39,8 +41,10 @@ import {
   CustomerPaymentCreateDialog,
   openCustomerPaymentCreateDialog,
 } from "@/features/customer/components/CustomerPaymentCreateDialog";
+import { CustomerSearchableInput } from "@/features/customer/components/CustomerSearchableInput";
 import { CustomerSidebar } from "@/features/customer/components/CustomerSidebar";
 import { usePermissionCheck } from "@/hooks/use-permission-check";
+import { useSearchNavigate } from "@/hooks/use-search-navigate";
 import { head } from "@/lib/head";
 import { querySearchSchema } from "@/lib/querySearchSchema";
 import { orpcTQClient } from "@/oRPC/orpc";
@@ -135,7 +139,9 @@ function CustomerPaymentDetails({ customerId }: { customerId: string }) {
   const setCustomerPaymentCreateDialog = useAtomSet(
     openCustomerPaymentCreateDialog
   );
-  const navigate = Route.useNavigate();
+  const [customerSearch, setCustomerSearch] = useState("");
+  const searchNavigate = useSearchNavigate(Route.fullPath);
+
   const search = Route.useSearch();
   const isAllowCreate = usePermissionCheck([
     {
@@ -175,9 +181,22 @@ function CustomerPaymentDetails({ customerId }: { customerId: string }) {
 
   return (
     <div className="space-y-4">
+      <CustomerSearchableInput
+        value={customerSearch}
+        onValueChange={(value) => {
+          setCustomerSearch(value);
+        }}
+        onOptionSelect={(customerData) =>
+          searchNavigate((prev) => ({
+            ...prev,
+            customerId: customerData.id,
+          }))
+        }
+      />
       <div className="flex items-center justify-between gap-2">
         <Button
           variant="outline"
+          nativeButton={false}
           render={
             <Link
               to="/dashboard/customers/$customerId"
@@ -210,8 +229,8 @@ function CustomerPaymentDetails({ customerId }: { customerId: string }) {
         isEmpty={() => false}
         loadingFallback={
           <div className="grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-4">
-            {Array.from({ length: 3 }).map((_, index) => (
-              <Skeleton key={index} className="h-28 w-full" />
+            {Array.from({ length: 3 }).map((_, idx) => (
+              <Skeleton key={idx} className="h-28 w-full" />
             ))}
           </div>
         }
@@ -322,7 +341,7 @@ function CustomerPaymentDetails({ customerId }: { customerId: string }) {
             <MetaPagination
               meta={paymentsData.meta}
               onPageChange={(page) => {
-                navigate({ search: { page } });
+                searchNavigate((prev) => ({ ...prev, page }));
               }}
             />
           </div>

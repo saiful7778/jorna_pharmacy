@@ -1,8 +1,8 @@
-import * as React from "react";
+import { useState } from "react";
 
 import type { Meta, StoryObj } from "@storybook/tanstack-react";
 
-import { SliderFilter } from "./slider-filter";
+import { SliderFilter, type SliderFilterProps } from "./slider-filter";
 
 const meta = {
   title: "UI/slider-filter",
@@ -24,14 +24,14 @@ export const Default: Story = {
     step: 10,
     unit: "$",
   },
-  render: (args) => {
-    const [value, setValue] = React.useState<[number, number] | undefined>([
-      100, 500,
-    ]);
-
-    return <SliderFilter {...args} value={value} onValueChange={setValue} />;
-  },
+  render: DefaultSliderFilter,
 };
+
+function DefaultSliderFilter(args: SliderFilterProps) {
+  const [value, setValue] = useState<[number, number] | undefined>([100, 500]);
+
+  return <SliderFilter {...args} value={value} onValueChange={setValue} />;
+}
 
 export const LargeRange: Story = {
   args: {
@@ -40,11 +40,11 @@ export const LargeRange: Story = {
     max: 100,
     step: 1,
   },
-  render: (args) => {
-    const [value, setValue] = React.useState<[number, number] | undefined>([
-      20, 80,
-    ]);
-
-    return <SliderFilter {...args} value={value} onValueChange={setValue} />;
-  },
+  render: LargeRangeSliderFilter,
 };
+
+function LargeRangeSliderFilter(args: SliderFilterProps) {
+  const [value, setValue] = useState<[number, number] | undefined>([20, 80]);
+
+  return <SliderFilter {...args} value={value} onValueChange={setValue} />;
+}

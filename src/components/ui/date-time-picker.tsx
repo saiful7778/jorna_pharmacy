@@ -208,7 +208,9 @@ function DateTimePickerContent({
   className,
   ...props
 }: DateTimePickerContentProps) {
-  const [pendingDate, setPendingDate] = useState<Date>(value ?? new Date());
+  const [pendingDate, setPendingDate] = useState<Date>(
+    () => value ?? new Date()
+  );
 
   const handleConfirm = useCallback(() => {
     onSelectValue(pendingDate);

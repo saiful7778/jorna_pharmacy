@@ -1,8 +1,8 @@
 import {
   createContext,
   Fragment,
+  use,
   useCallback,
-  useContext,
   useMemo,
   useState,
 } from "react";
@@ -50,7 +50,7 @@ const SearchableSelectorContext =
   createContext<SearchableSelectorContextProps | null>(null);
 
 function useSearchableSelectorContext() {
-  const context = useContext(SearchableSelectorContext);
+  const context = use(SearchableSelectorContext);
   if (!context) {
     throw new Error(
       "SearchableSelector components must be used within a SearchableSelector"
@@ -158,11 +158,11 @@ export function SearchableSelector<
   const WrapperComp = isMobile ? Drawer : Popover;
 
   return (
-    <SearchableSelectorContext.Provider value={contextValue}>
+    <SearchableSelectorContext value={contextValue}>
       <WrapperComp open={open} onOpenChange={handleSetOpen}>
         {children}
       </WrapperComp>
-    </SearchableSelectorContext.Provider>
+    </SearchableSelectorContext>
   );
 }
 

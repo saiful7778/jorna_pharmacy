@@ -1,7 +1,7 @@
 import React, {
   createContext,
+  use,
   useCallback,
-  useContext,
   useEffect,
   useRef,
   useState,
@@ -118,7 +118,7 @@ function DevPanelContextProvider({
   }, [logs, isOpen]);
 
   return (
-    <DevPanelContext.Provider
+    <DevPanelContext
       value={{
         currentEnv,
         envVars,
@@ -138,12 +138,12 @@ function DevPanelContextProvider({
       }}
     >
       {children}
-    </DevPanelContext.Provider>
+    </DevPanelContext>
   );
 }
 
 function useDevPanelContext() {
-  const context = useContext(DevPanelContext);
+  const context = use(DevPanelContext);
   if (context === null) {
     throw new Error(
       "useDevPanelContext must be used within a DevPanelProvider"

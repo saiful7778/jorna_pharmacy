@@ -14,6 +14,8 @@ import {
 
 import { EmailLink } from "./EmailLink";
 
+const CURRENT_YEAR = new Date().getFullYear();
+
 export function EmailLayout({
   previewText,
   appName,
@@ -67,7 +69,7 @@ export function EmailLayout({
                 </EmailLink>
               </Text>
               <Text className="text-mutated-foreground text-xs">
-                © {new Date().getFullYear()} {appName}. All rights reserved.
+                {`© ${CURRENT_YEAR} ${appName}. All rights reserved.`}
               </Text>
             </Section>
           </Container>

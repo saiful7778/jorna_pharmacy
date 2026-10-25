@@ -1,10 +1,10 @@
-import * as React from "react";
+import { useState } from "react";
 
 import type { Meta, StoryObj } from "@storybook/tanstack-react";
 import { addDays } from "date-fns";
 import type { DateRange } from "react-day-picker";
 
-import { DateFilter } from "./date-filter";
+import { DateFilter, type DateFilterProps } from "./date-filter";
 
 const meta = {
   title: "UI/DateFilter",
@@ -23,41 +23,45 @@ export const Default: Story = {
     placeholder: "Single Date",
     isInRange: false,
   },
-  render: (args) => {
-    const [value, setValue] = React.useState<Date | DateRange | undefined>(
-      new Date()
-    );
-
-    return (
-      <DateFilter
-        {...args}
-        value={value}
-        onValueChange={setValue}
-        onApply={(v) => console.log("Apply", v)}
-      />
-    );
-  },
+  render: DefaultDateFilter,
 };
+
+function DefaultDateFilter(args: DateFilterProps) {
+  const [value, setValue] = useState<Date | DateRange | undefined>(
+    () => new Date()
+  );
+
+  return (
+    <DateFilter
+      {...args}
+      value={value}
+      onValueChange={setValue}
+      onApply={(v) => console.log("Apply", v)}
+    />
+  );
+}
 
 export const Range: Story = {
   args: {
     placeholder: "Date Range",
     isInRange: true,
   },
-  render: (args) => {
-    const [value, setValue] = React.useState<Date | DateRange | undefined>({
-      from: new Date(),
-      to: addDays(new Date(), 7),
-    });
-
-    return (
-      <DateFilter
-        {...args}
-        value={value}
-        onValueChange={setValue}
-        onApply={(v) => console.log("Apply", v)}
-        onCancel={() => setValue(undefined)}
-      />
-    );
-  },
+  render: RangeDateFilter,
 };
+
+function RangeDateFilter(args: DateFilterProps) {
+  const [value, setValue] = useState<Date | DateRange | undefined>(() => ({
+    from: new Date(),
+    to: addDays(new Date(), 7),
+  }));
+
+  return (
+    <DateFilter
+      {...args}
+      value={value}
+      onValueChange={setValue}
+      onApply={(v) => console.log("Apply", v)}
+      onCancel={() => setValue(undefined)}
+    />
+  );
+}

@@ -41,56 +41,60 @@ export function PerformancePanel() {
         { transfer: 0, encoded: 0, decoded: 0 }
       );
 
-      setPerf([
-        {
-          label: "DNS Lookup",
-          value: nav
-            ? formatDuration(nav.domainLookupEnd - nav.domainLookupStart)
-            : "N/A",
-        },
-        {
-          label: "TCP Connect",
-          value: nav
-            ? formatDuration(nav.connectEnd - nav.connectStart)
-            : "N/A",
-        },
-        {
-          label: "TTFB",
-          value: nav
-            ? formatDuration(nav.responseStart - nav.requestStart)
-            : "N/A",
-        },
-        {
-          label: "DOM Load",
-          value: nav
-            ? formatDuration(nav.domContentLoadedEventEnd - nav.startTime)
-            : "N/A",
-        },
-        {
-          label: "Page Load",
-          value: nav ? formatDuration(nav.loadEventEnd - nav.startTime) : "N/A",
-        },
-        {
-          label: "JS Transfer",
-          value: formatBytes(jsTotals.transfer),
-        },
-        {
-          label: "JS (gzipped)",
-          value: formatBytes(jsTotals.encoded),
-        },
-        {
-          label: "JS (parsed)",
-          value: formatBytes(jsTotals.decoded),
-        },
-        {
-          label: "JS Heap",
-          value: mem ? formatBytes(mem.usedJSHeapSize) : "N/A",
-        },
-        {
-          label: "Viewport",
-          value: `${window.innerWidth} × ${window.innerHeight}px · ${window.devicePixelRatio}x`,
-        },
-      ]);
+      queueMicrotask(() => {
+        setPerf([
+          {
+            label: "DNS Lookup",
+            value: nav
+              ? formatDuration(nav.domainLookupEnd - nav.domainLookupStart)
+              : "N/A",
+          },
+          {
+            label: "TCP Connect",
+            value: nav
+              ? formatDuration(nav.connectEnd - nav.connectStart)
+              : "N/A",
+          },
+          {
+            label: "TTFB",
+            value: nav
+              ? formatDuration(nav.responseStart - nav.requestStart)
+              : "N/A",
+          },
+          {
+            label: "DOM Load",
+            value: nav
+              ? formatDuration(nav.domContentLoadedEventEnd - nav.startTime)
+              : "N/A",
+          },
+          {
+            label: "Page Load",
+            value: nav
+              ? formatDuration(nav.loadEventEnd - nav.startTime)
+              : "N/A",
+          },
+          {
+            label: "JS Transfer",
+            value: formatBytes(jsTotals.transfer),
+          },
+          {
+            label: "JS (gzipped)",
+            value: formatBytes(jsTotals.encoded),
+          },
+          {
+            label: "JS (parsed)",
+            value: formatBytes(jsTotals.decoded),
+          },
+          {
+            label: "JS Heap",
+            value: mem ? formatBytes(mem.usedJSHeapSize) : "N/A",
+          },
+          {
+            label: "Viewport",
+            value: `${window.innerWidth} × ${window.innerHeight}px · ${window.devicePixelRatio}x`,
+          },
+        ]);
+      });
     };
 
     // Run after full load for better accuracy

@@ -6,7 +6,9 @@ import { Eye, EyeClosed } from "lucide-react";
 import { Button } from "./button";
 import { Input } from "./input";
 
-function PasswordInput({ className, ...props }: React.ComponentProps<"input">) {
+export type PasswordInputProps = React.ComponentProps<"input">;
+
+function PasswordInput({ className, ...props }: PasswordInputProps) {
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const disabled =
     props.value === "" || props.value === undefined || props.disabled;

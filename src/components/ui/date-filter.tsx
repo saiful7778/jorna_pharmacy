@@ -88,18 +88,18 @@ export function DateFilter({
         setOpen(false);
       }
     },
-    [onValueChange, isInRange, onApply]
+    [onValueChange, isInRange, onApply, setOpen]
   );
 
   const handleApply = useCallback(() => {
     onApply?.(value);
     setOpen(false);
-  }, [onApply, value]);
+  }, [onApply, value, setOpen]);
 
   const handleCancel = useCallback(() => {
     onCancel?.();
     setOpen(false);
-  }, [onCancel]);
+  }, [onCancel, setOpen]);
 
   const trigger = (
     <DateFilterTrigger

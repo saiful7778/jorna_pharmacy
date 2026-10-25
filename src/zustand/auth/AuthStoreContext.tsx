@@ -1,4 +1,4 @@
-import { createContext, useContext, useState } from "react";
+import { createContext, use, useState } from "react";
 
 import { useStore } from "zustand";
 import type { StoreApi } from "zustand";
@@ -32,17 +32,13 @@ export function AuthStoreProvider({
     authStore(user, session, roles, permissions, isAdminUser)
   );
 
-  return (
-    <AuthStoreContext.Provider value={store}>
-      {children}
-    </AuthStoreContext.Provider>
-  );
+  return <AuthStoreContext value={store}>{children}</AuthStoreContext>;
 }
 
 export function useAuthStore<T>(
   selector: (state: AuthStoreState & AuthStoreAction) => T
 ) {
-  const store = useContext(AuthStoreContext);
+  const store = use(AuthStoreContext);
   if (!store) {
     throw new Error("AuthStoreProvider is not found");
   }

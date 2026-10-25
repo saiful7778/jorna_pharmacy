@@ -1,8 +1,12 @@
-import * as React from "react";
+import { useState } from "react";
 
 import type { Meta, StoryObj } from "@storybook/tanstack-react";
 
-import { FacetedFilter, type Option } from "./faceted-filter";
+import {
+  FacetedFilter,
+  type FacetedFilterProps,
+  type Option,
+} from "./faceted-filter";
 
 const options: Option[] = [
   { label: "Active", value: "active" },
@@ -46,33 +50,35 @@ export const Default: Story = {
     placeholder: "Status",
     isMultiple: true,
   },
-  render: (args) => {
-    const [selectedValues, setSelectedValues] = React.useState<Set<string>>(
-      new Set()
-    );
-
-    const onSelect = (option: Option, isSelected: boolean) => {
-      const newSelectedValues = new Set(selectedValues);
-      if (isSelected) {
-        newSelectedValues.delete(option.value);
-      } else {
-        newSelectedValues.add(option.value);
-      }
-      setSelectedValues(newSelectedValues);
-    };
-
-    const onReset = () => setSelectedValues(new Set());
-
-    return (
-      <FacetedFilter
-        {...args}
-        selectedValues={selectedValues}
-        onSelect={onSelect}
-        onReset={onReset}
-      />
-    );
-  },
+  render: DefaultFacetedFilter,
 };
+
+function DefaultFacetedFilter(args: FacetedFilterProps) {
+  const [selectedValues, setSelectedValues] = useState<Set<string>>(
+    () => new Set()
+  );
+
+  const onSelect = (option: Option, isSelected: boolean) => {
+    const newSelectedValues = new Set(selectedValues);
+    if (isSelected) {
+      newSelectedValues.delete(option.value);
+    } else {
+      newSelectedValues.add(option.value);
+    }
+    setSelectedValues(newSelectedValues);
+  };
+
+  const onReset = () => setSelectedValues(new Set());
+
+  return (
+    <FacetedFilter
+      {...args}
+      selectedValues={selectedValues}
+      onSelect={onSelect}
+      onReset={onReset}
+    />
+  );
+}
 
 export const SingleSelect: Story = {
   args: {
@@ -80,27 +86,29 @@ export const SingleSelect: Story = {
     placeholder: "Status",
     isMultiple: false,
   },
-  render: (args) => {
-    const [selectedValues, setSelectedValues] = React.useState<Set<string>>(
-      new Set()
-    );
-
-    const onSelect = (option: Option, isSelected: boolean) => {
-      setSelectedValues(isSelected ? new Set() : new Set([option.value]));
-    };
-
-    const onReset = () => setSelectedValues(new Set());
-
-    return (
-      <FacetedFilter
-        {...args}
-        selectedValues={selectedValues}
-        onSelect={onSelect}
-        onReset={onReset}
-      />
-    );
-  },
+  render: SingleSelectFacetedFilter,
 };
+
+function SingleSelectFacetedFilter(args: FacetedFilterProps) {
+  const [selectedValues, setSelectedValues] = useState<Set<string>>(
+    () => new Set()
+  );
+
+  const onSelect = (option: Option, isSelected: boolean) => {
+    setSelectedValues(isSelected ? new Set() : new Set([option.value]));
+  };
+
+  const onReset = () => setSelectedValues(new Set());
+
+  return (
+    <FacetedFilter
+      {...args}
+      selectedValues={selectedValues}
+      onSelect={onSelect}
+      onReset={onReset}
+    />
+  );
+}
 
 export const WithCounts: Story = {
   args: {
@@ -113,30 +121,32 @@ export const WithCounts: Story = {
     placeholder: "Priority",
     isMultiple: true,
   },
-  render: (args) => {
-    const [selectedValues, setSelectedValues] = React.useState<Set<string>>(
-      new Set()
-    );
-
-    const onSelect = (option: Option, isSelected: boolean) => {
-      const newSelectedValues = new Set(selectedValues);
-      if (isSelected) {
-        newSelectedValues.delete(option.value);
-      } else {
-        newSelectedValues.add(option.value);
-      }
-      setSelectedValues(newSelectedValues);
-    };
-
-    const onReset = () => setSelectedValues(new Set());
-
-    return (
-      <FacetedFilter
-        {...args}
-        selectedValues={selectedValues}
-        onSelect={onSelect}
-        onReset={onReset}
-      />
-    );
-  },
+  render: WithCountsFacetedFilter,
 };
+
+function WithCountsFacetedFilter(args: FacetedFilterProps) {
+  const [selectedValues, setSelectedValues] = useState<Set<string>>(
+    () => new Set()
+  );
+
+  const onSelect = (option: Option, isSelected: boolean) => {
+    const newSelectedValues = new Set(selectedValues);
+    if (isSelected) {
+      newSelectedValues.delete(option.value);
+    } else {
+      newSelectedValues.add(option.value);
+    }
+    setSelectedValues(newSelectedValues);
+  };
+
+  const onReset = () => setSelectedValues(new Set());
+
+  return (
+    <FacetedFilter
+      {...args}
+      selectedValues={selectedValues}
+      onSelect={onSelect}
+      onReset={onReset}
+    />
+  );
+}

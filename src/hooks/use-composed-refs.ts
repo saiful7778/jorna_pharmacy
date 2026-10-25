@@ -70,6 +70,6 @@ export function composeRefs<T>(
 export function useComposedRefs<T>(
   ...refs: PossibleRef<T>[]
 ): React.RefCallback<T> {
-  // eslint-disable-next-line @eslint-react/exhaustive-deps, react-hooks/exhaustive-deps, react-hooks/use-memo
+  // eslint-disable-next-line react-hooks/exhaustive-deps, react-hooks/use-memo, @eslint-react/exhaustive-deps
   return useCallback(composeRefs(...refs), refs);
 }

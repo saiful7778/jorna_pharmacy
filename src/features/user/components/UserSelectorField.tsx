@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useId, useState } from "react";
+import { useCallback, useEffect, useId, useMemo, useState } from "react";
 
 import { useQuery } from "@tanstack/react-query";
 import { Asterisk, Info, UserSearch, X } from "lucide-react";
@@ -137,26 +137,28 @@ function UserSelectorFieldRender<TFieldValues extends FieldValues>({
 
   useEffect(() => {
     if (!data) return;
-    setKnownUsers((prev) => {
-      let changed = false;
-      const next = new Map(prev);
-      for (const user of data) {
-        if (!next.has(user.id)) {
-          next.set(user.id, user);
-          changed = true;
+    queueMicrotask(() => {
+      setKnownUsers((prev) => {
+        let changed = false;
+        const next = new Map(prev);
+        for (const user of data) {
+          if (!next.has(user.id)) {
+            next.set(user.id, user);
+            changed = true;
+          }
         }
-      }
-      return changed ? next : prev;
+        return changed ? next : prev;
+      });
     });
   }, [data]);
 
   const fieldValue = field.value as string | Array<string> | undefined;
 
-  const selectedIds: Array<string> = Array.isArray(fieldValue)
-    ? fieldValue
-    : fieldValue
-      ? [fieldValue]
-      : [];
+  const selectedIds: Array<string> = useMemo(
+    () =>
+      Array.isArray(fieldValue) ? fieldValue : fieldValue ? [fieldValue] : [],
+    [fieldValue]
+  );
 
   const selectedUsers = selectedIds
     .map((userId) => knownUsers.get(userId))

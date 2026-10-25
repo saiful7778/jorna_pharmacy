@@ -187,6 +187,7 @@ export function useDataTable<TData>({
     [debouncedSetFilterValues, filterableColumns, enableAdvancedFilter]
   );
 
+  // eslint-disable-next-line react-hooks/incompatible-library
   return useReactTable({
     ...props,
     pageCount,

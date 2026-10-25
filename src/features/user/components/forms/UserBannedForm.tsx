@@ -26,6 +26,8 @@ interface UserBannedFormProps {
   onSuccess?: () => void;
 }
 
+const now = Date.now();
+
 export function UserBannedForm({
   initialData,
   onSuccess,
@@ -45,7 +47,7 @@ export function UserBannedForm({
       let banExpiresIn: number = 60 * 60 * 24 * 10;
 
       if (e.banExpires) {
-        banExpiresIn = e.banExpires.getTime() - Date.now();
+        banExpiresIn = e.banExpires.getTime() - now;
       }
 
       await authClient.admin.banUser({
@@ -154,7 +156,7 @@ export function UserBannedForm({
                 showTimeSelection={false}
                 calendarProps={{
                   disabled: {
-                    before: new Date(),
+                    before: new Date(now),
                   },
                 }}
               />

@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, use, useEffect, useState } from "react";
 
 export type Theme = "dark" | "light" | "system";
 
@@ -45,13 +45,13 @@ export function ThemeProvider({
   defaultTheme = "system",
   storageKey = "theme",
 }: ThemeProviderProps) {
-  const [theme, setThemeState] = useState<Theme>(defaultTheme);
+  const [currentTheme, setCurrentTheme] = useState<Theme>(defaultTheme);
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     const stored = localStorage.getItem(storageKey);
     queueMicrotask(() => {
-      setThemeState(
+      setCurrentTheme(
         stored === "light" || stored === "dark" || stored === "system"
           ? stored
           : defaultTheme
@@ -64,27 +64,28 @@ export function ThemeProvider({
 
   useEffect(() => {
     if (!mounted) return;
-    applyTheme(theme);
-  }, [theme, mounted]);
+    applyTheme(currentTheme);
+  }, [currentTheme, mounted]);
 
   useEffect(() => {
-    if (!mounted || theme !== "system") return;
+    if (!mounted || currentTheme !== "system") return;
 
     const media = window.matchMedia("(prefers-color-scheme: dark)");
     const onChange = () => applyTheme("system");
     media.addEventListener("change", onChange);
     return () => media.removeEventListener("change", onChange);
-  }, [theme, mounted]);
+  }, [currentTheme, mounted]);
 
   const setTheme = (next: Theme) => {
     localStorage.setItem(storageKey, next);
-    setThemeState(next);
+    setCurrentTheme(next);
   };
 
   return (
-    <ThemeProviderContext value={{ theme, setTheme }}>
+    <ThemeProviderContext value={{ theme: currentTheme, setTheme }}>
       <script
         suppressHydrationWarning
+        // eslint-disable-next-line @eslint-react/dom-no-dangerously-set-innerhtml
         dangerouslySetInnerHTML={{
           __html: getThemeScript(storageKey, defaultTheme),
         }}
@@ -95,6 +96,6 @@ export function ThemeProvider({
 }
 
 export function useTheme() {
-  const context = useContext(ThemeProviderContext);
+  const context = use(ThemeProviderContext);
   return context;
 }
