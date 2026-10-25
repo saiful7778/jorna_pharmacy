@@ -6,8 +6,7 @@ import { DataTableSkeleton } from "@/components/data-table/data-table-skeleton";
 import { DataTableToolbarSkeleton } from "@/components/data-table/data-table-toolbar-skeleton";
 import { QueryStateBoundary } from "@/components/tanstack-query/query-state-boundary";
 import { TimeRangeFilter } from "@/components/time-range-filter";
-import { useDebouncedCallback } from "@/hooks/use-debounced-callback";
-import { useQuerySearch } from "@/hooks/use-query-search";
+import { useSearchFilter } from "@/hooks/use-search-filter";
 import { orpcTQClient } from "@/oRPC/orpc";
 import { buildDateRangeFilter } from "@/utils/buildDateRangeFilter";
 
@@ -20,7 +19,7 @@ export function SaleManagementTable({
   searchFields: string[];
 }) {
   "use no memo";
-  const { filters, setFilters, setSearchFilter } = useQuerySearch(
+  const { filters, setFilters, setSearchFilter } = useSearchFilter(
     "/dashboard/_dashboardLayout/sales/"
   );
 
@@ -39,11 +38,6 @@ export function SaleManagementTable({
     })
   );
 
-  const globalSearch = useDebouncedCallback(
-    (searchValue: string | undefined) => setSearchFilter(searchValue),
-    500
-  );
-
   return (
     <div className="space-y-3">
       <TimeRangeFilter
@@ -52,19 +46,18 @@ export function SaleManagementTable({
           startTime: filters.startTime,
           endTime: filters.endTime,
         }}
-        setRangeSearch={(updatedRange) => {
+        setRangeSearch={(updatedRange) =>
           setFilters({
             range: updatedRange.range,
             startTime: updatedRange.startTime,
             endTime: updatedRange.endTime,
-            page: undefined,
-          });
-        }}
+          })
+        }
       />
       <SaleStats startTime={filters.startTime} endTime={filters.endTime} />
       <DataTableGlobalSearch
         searchValue={filters.search}
-        setSearchValue={globalSearch}
+        setSearchValue={setSearchFilter}
         refresh={refetch}
       ></DataTableGlobalSearch>
       <QueryStateBoundary
@@ -90,14 +83,14 @@ export function SaleManagementTable({
               order: filters.order,
               orderField: filters.orderField,
             }}
-            setFilters={(updatedFilters) => {
+            setFilters={(updatedFilters) =>
               setFilters({
                 page: updatedFilters.page,
                 limit: updatedFilters.limit,
-                order: updatedFilters.order,
-                orderField: updatedFilters.orderField,
-              });
-            }}
+                order: updatedFilters.order ?? undefined,
+                orderField: updatedFilters.orderField ?? undefined,
+              })
+            }
           />
         )}
       </QueryStateBoundary>

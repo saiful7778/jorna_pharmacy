@@ -6,7 +6,7 @@ import { DataTableSkeleton } from "@/components/data-table/data-table-skeleton";
 import { DataTableToolbarSkeleton } from "@/components/data-table/data-table-toolbar-skeleton";
 import { QueryStateBoundary } from "@/components/tanstack-query/query-state-boundary";
 import { useDebouncedCallback } from "@/hooks/use-debounced-callback";
-import { useQuerySearch } from "@/hooks/use-query-search";
+import { useSearchFilter } from "@/hooks/use-search-filter";
 import { orpcTQClient } from "@/oRPC/orpc";
 
 import { UsersTable } from "./UsersTable";
@@ -17,7 +17,7 @@ export function UserManagementTable({
   searchFields: string[];
 }) {
   "use no memo";
-  const { filters, setFilters, setSearchFilter } = useQuerySearch(
+  const { filters, setFilters, setSearchFilter } = useSearchFilter(
     "/dashboard/_dashboardLayout/users/"
   );
 
@@ -73,8 +73,8 @@ export function UserManagementTable({
               setFilters({
                 page: updatedFilters.page,
                 limit: updatedFilters.limit,
-                order: updatedFilters.order,
-                orderField: updatedFilters.orderField,
+                order: updatedFilters.order ?? undefined,
+                orderField: updatedFilters.orderField ?? undefined,
               });
             }}
           />

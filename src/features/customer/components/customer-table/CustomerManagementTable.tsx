@@ -10,7 +10,7 @@ import { QueryStateBoundary } from "@/components/tanstack-query/query-state-boun
 import { Button } from "@/components/ui/button";
 import { useDebouncedCallback } from "@/hooks/use-debounced-callback";
 import { usePermissionCheck } from "@/hooks/use-permission-check";
-import { useQuerySearch } from "@/hooks/use-query-search";
+import { useSearchFilter } from "@/hooks/use-search-filter";
 import { orpcTQClient } from "@/oRPC/orpc";
 
 import {
@@ -26,7 +26,7 @@ export function CustomerManagementTable({
 }) {
   "use no memo";
   const setOpenCustomerCreateDialog = useAtomSet(openCustomerCreateDialog);
-  const { filters, setFilters, setSearchFilter } = useQuerySearch(
+  const { filters, setFilters, setSearchFilter } = useSearchFilter(
     "/dashboard/_dashboardLayout/customers/"
   );
 
@@ -101,8 +101,8 @@ export function CustomerManagementTable({
               setFilters({
                 page: updatedFilters.page,
                 limit: updatedFilters.limit,
-                order: updatedFilters.order,
-                orderField: updatedFilters.orderField,
+                order: updatedFilters.order ?? undefined,
+                orderField: updatedFilters.orderField ?? undefined,
               });
             }}
           />
