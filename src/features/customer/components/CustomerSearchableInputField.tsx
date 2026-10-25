@@ -23,7 +23,7 @@ import {
 interface CustomerSearchableInputFieldProps<
   TFieldValues extends FieldValues,
   TTransformedValues = TFieldValues,
-> extends Omit<CustomerSearchableInputProps, "onChange"> {
+> extends Omit<CustomerSearchableInputProps, "onChange" | "value"> {
   name: Path<TFieldValues>;
   control: Control<TFieldValues, any, TTransformedValues>;
   label?: string;
