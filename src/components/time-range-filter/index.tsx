@@ -41,9 +41,9 @@ import { MonthRangeSelect } from "./month-range-select";
 import { WeekRangeSelect } from "./week-range-select";
 
 interface TimeRangeState {
-  range: RangeSearchEnum | null | undefined;
-  startTime?: string | null;
-  endTime?: string | null;
+  range: RangeSearchEnum | undefined;
+  startTime?: string | undefined;
+  endTime?: string | undefined;
 }
 
 interface TimeRangeFilterProps {
@@ -174,9 +174,9 @@ export function TimeRangeFilter({
     (event: React.MouseEvent) => {
       event.stopPropagation();
       setRangeSearch({
-        range: null,
-        startTime: null,
-        endTime: null,
+        range: undefined,
+        startTime: undefined,
+        endTime: undefined,
       });
       setOpenDropdown(false);
     },
