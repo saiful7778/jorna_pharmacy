@@ -3,11 +3,17 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Spinner } from "@/components/ui/spinner";
 import { getSessions } from "@/features/auth/auth.functions";
 import { SessionManagement } from "@/features/auth/components/SessionManagement";
+import { head } from "@/lib/head";
 
 export const Route = createFileRoute(
   "/dashboard/_dashboardLayout/settings/_settingsLayout/sessions"
 )({
   loader: () => getSessions(),
+  head: ({ match }) =>
+    head({
+      pathname: match.pathname,
+      titleByTemplate: "Sessions",
+    }),
   pendingComponent: LoadingComponent,
   component: RouteComponent,
 });

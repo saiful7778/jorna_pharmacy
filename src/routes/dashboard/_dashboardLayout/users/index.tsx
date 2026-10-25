@@ -16,6 +16,7 @@ import { DashboardShellSkeleton } from "@/components/shared/dashboard-shell/Dash
 import { requirePermissions } from "@/features/auth/auth.functions";
 import { UserStats } from "@/features/user/components/UserStats";
 import { UserManagementTable } from "@/features/user/components/user-table/UserManagementTable";
+import { head } from "@/lib/head";
 import { querySearchSchema } from "@/lib/querySearchSchema";
 import { orpcTQClient } from "@/oRPC/orpc";
 
@@ -50,6 +51,8 @@ export const Route = createFileRoute("/dashboard/_dashboardLayout/users/")({
 
     await queryClient.query(orpcTQClient.user.stats.queryOptions());
   },
+  head: ({ match }) =>
+    head({ pathname: match.pathname, titleByTemplate: "Users" }),
   pendingComponent: LoadingComponent,
   component: RouteComponent,
 });

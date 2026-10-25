@@ -45,6 +45,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { head } from "@/lib/head";
 import { formatEnumValue } from "@/utils/formatEnum";
 import { resolveUserImage } from "@/utils/resolveUserImage";
 import { strInitials } from "@/utils/strInitials";
@@ -56,6 +57,11 @@ export const Route = createFileRoute("/dashboard/_dashboardLayout/profile")({
       .optional()
       .default("details"),
   }),
+  head: ({ match }) =>
+    head({
+      pathname: match.pathname,
+      titleByTemplate: "My Profile",
+    }),
   pendingComponent: LoadingComponent,
   component: RouteComponent,
 });

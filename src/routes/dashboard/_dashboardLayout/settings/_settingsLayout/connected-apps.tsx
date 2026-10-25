@@ -5,6 +5,7 @@ import { getRequestHeaders } from "@tanstack/react-start/server";
 import { Spinner } from "@/components/ui/spinner";
 import { getAuth } from "@/features/auth/auth.server";
 import LinkingApps from "@/features/auth/components/LinkingApps";
+import { head } from "@/lib/head";
 
 const getConnectedAccounts = createServerFn({ method: "GET" }).handler(
   async () => {
@@ -17,6 +18,11 @@ export const Route = createFileRoute(
   "/dashboard/_dashboardLayout/settings/_settingsLayout/connected-apps"
 )({
   loader: () => getConnectedAccounts(),
+  head: ({ match }) =>
+    head({
+      pathname: match.pathname,
+      titleByTemplate: "Connections",
+    }),
   pendingComponent: LoadingComponent,
   component: RouteComponent,
 });

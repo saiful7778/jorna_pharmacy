@@ -13,6 +13,7 @@ import { Spinner } from "@/components/ui/spinner";
 import { getAuth } from "@/features/auth/auth.server";
 import SetPasswordButton from "@/features/auth/components/SetPasswordButton";
 import UpdatePasswordForm from "@/features/auth/components/forms/UpdatePasswordForm";
+import { head } from "@/lib/head";
 
 const getAccounts = createServerFn({ method: "GET" }).handler(async () => {
   const headers = getRequestHeaders();
@@ -23,6 +24,11 @@ export const Route = createFileRoute(
   "/dashboard/_dashboardLayout/settings/_settingsLayout/update-password"
 )({
   loader: () => getAccounts(),
+  head: ({ match }) =>
+    head({
+      pathname: match.pathname,
+      titleByTemplate: "Update password",
+    }),
   pendingComponent: LoadingComponent,
   component: RouteComponent,
 });

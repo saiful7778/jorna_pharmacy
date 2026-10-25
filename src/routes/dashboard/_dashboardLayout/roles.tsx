@@ -15,6 +15,7 @@ import {
 import { DashboardShellSkeleton } from "@/components/shared/dashboard-shell/DashboardShellSkeleton";
 import { requirePermissions } from "@/features/auth/auth.functions";
 import { RoleManagementTable } from "@/features/role/components/role-table/RoleManagementTable";
+import { head } from "@/lib/head";
 
 export const Route = createFileRoute("/dashboard/_dashboardLayout/roles")({
   beforeLoad: ({ context }) => {
@@ -24,6 +25,8 @@ export const Route = createFileRoute("/dashboard/_dashboardLayout/roles")({
       context.user.id
     );
   },
+  head: ({ match }) =>
+    head({ pathname: match.pathname, titleByTemplate: "Roles & Permissions" }),
   pendingComponent: LoadingComponent,
   component: RouteComponent,
 });

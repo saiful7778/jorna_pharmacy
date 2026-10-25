@@ -25,6 +25,7 @@ import { ButtonSkeleton } from "@/components/ui/button-skeleton";
 import { Spinner } from "@/components/ui/spinner";
 import { requirePermissions } from "@/features/auth/auth.functions";
 import { DetailsStep } from "@/features/user/components/user-details/DetailsStep";
+import { head } from "@/lib/head";
 import { orpcTQClient } from "@/oRPC/orpc";
 import { resolveUserImage } from "@/utils/resolveUserImage";
 import { strInitials } from "@/utils/strInitials";
@@ -56,6 +57,11 @@ export const Route = createFileRoute(
         },
       })
     ),
+  head: ({ match, loaderData }) =>
+    head({
+      pathname: match.pathname,
+      titleByTemplate: loaderData ? `'${loaderData.data.name}' user` : "Users",
+    }),
   pendingComponent: LoadingComponent,
   component: RouteComponent,
 });
