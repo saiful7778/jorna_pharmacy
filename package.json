@@ -31,7 +31,7 @@
     "test:ui": "vitest --ui",
     "test:coverage": "vitest run --coverage",
     "deploy:prod": "CLOUDFLARE_ENV=production pnpm run build && wrangler deploy",
-    "deploy:stage": "CLOUDFLARE_ENV=staging pnpm run build && wrangler deploy",
+    "deploy:stage": "CLOUDFLARE_ENV=staging pnpm run build --mode staging && wrangler deploy",
     "cf-typegen": "wrangler types --config=\"wrangler.jsonc\" --env-file=\".env.local\"",
     "storybook:dev": "storybook dev -p 6006",
     "storybook:build": "storybook build",
