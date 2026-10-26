@@ -15,6 +15,19 @@ export async function clearAll(db: DatabaseType) {
   await db.delete(schema.SessionTable);
   await db.delete(schema.VerificationTable);
 
+  await db.delete(schema.CustomerPaymentTable);
+  await db.delete(schema.CompanyPaymentTable);
+  await db.delete(schema.SaleItemTable);
+  await db.delete(schema.SaleTable);
+  await db.delete(schema.SaleInvoiceTable);
+  await db.delete(schema.PurchaseReturnItemTable);
+  await db.delete(schema.PurchaseReturnTable);
+  await db.delete(schema.PurchaseItemTable);
+  await db.delete(schema.PurchaseTable);
+  await db.delete(schema.MedicineTable);
+  await db.delete(schema.CustomerTable);
+  await db.delete(schema.CompanyTable);
+
   await db.delete(schema.UserTable);
 
   await db.delete(schema.RoleTable);
