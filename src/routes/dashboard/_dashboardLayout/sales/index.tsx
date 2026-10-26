@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import z from "zod";
 
 import { DataTableSkeleton } from "@/components/data-table/data-table-skeleton";
 import { DataTableToolbarSkeleton } from "@/components/data-table/data-table-toolbar-skeleton";
@@ -33,7 +34,9 @@ export const Route = createFileRoute("/dashboard/_dashboardLayout/sales/")({
       context.user.id
     );
   },
-  validateSearch: querySearchSchema.extend(rangeFilterSchema.shape),
+  validateSearch: querySearchSchema
+    .extend(rangeFilterSchema.shape)
+    .extend({ saleCreateDialog: z.boolean().optional().default(false) }),
   loaderDeps: ({ search }) => search,
   head: ({ match }) =>
     head({

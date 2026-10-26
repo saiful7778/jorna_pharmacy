@@ -1,4 +1,3 @@
-import { useAtomSet } from "@effect-atom/atom-react";
 import { useQuery } from "@tanstack/react-query";
 import { Plus } from "lucide-react";
 
@@ -14,7 +13,7 @@ import { useSearchFilter } from "@/hooks/use-search-filter";
 import { orpcTQClient } from "@/oRPC/orpc";
 import { buildDateRangeFilter } from "@/utils/buildDateRangeFilter";
 
-import { openSaleCreateDialog, SaleCreateDialog } from "../SaleCreateDialog";
+import { SaleCreateDialog } from "../SaleCreateDialog";
 import { SaleStats } from "../SaleStats";
 import { SaleTable } from "./SaleTable";
 
@@ -23,7 +22,6 @@ export function SaleManagementTable({
 }: {
   searchFields: string[];
 }) {
-  const setOpenSaleCreateDialog = useAtomSet(openSaleCreateDialog);
   const isAllowSaleCreate = usePermissionCheck([
     { level: "system", resource: "sale", action: "manage" },
     { level: "system", resource: "sale", action: "create" },
@@ -71,7 +69,11 @@ export function SaleManagementTable({
       >
         {isAllowSaleCreate && (
           <>
-            <Button onClick={() => setOpenSaleCreateDialog(true)}>
+            <Button
+              onClick={() =>
+                setFilters((prev) => ({ ...prev, saleCreateDialog: true }))
+              }
+            >
               <Plus />
               <span>New Sale</span>
             </Button>

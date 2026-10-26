@@ -1,7 +1,7 @@
-import { useCallback, useEffect, useMemo, useRef } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 
-import { Atom, useAtom } from "@effect-atom/atom-react";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useSearch } from "@tanstack/react-router";
 import { Plus, Trash } from "lucide-react";
 import {
   useFieldArray,
@@ -31,19 +31,22 @@ import type { CustomerOptionType } from "@/features/customer/components/Customer
 import { CustomerSearchableInputField } from "@/features/customer/components/CustomerSearchableInputField";
 import type { MedicineOptionType } from "@/features/medicine/components/MedicineSearchableInput";
 import { MedicineSearchableInputField } from "@/features/medicine/components/MedicineSearchableInputField";
+import { useSearchNavigate } from "@/hooks/use-search-navigate";
+import { formatCurrency } from "@/utils/formatCurrency";
 
+import { useSaleCreate } from "../api/sale.api.hook";
 import {
   saleCreateFormSchema,
   type SaleCreateFormInputType,
   type SaleCreateFormType,
+  type SaleCreateType,
 } from "../sale.schema";
-
-export const openSaleCreateDialog = Atom.make(false).pipe(Atom.keepAlive);
 
 const defaultItemValue: SaleCreateFormInputType["items"][number] = {
   medicineId: "",
   medicineName: "",
   price: 0,
+  stock: 0,
   quantity: "",
 };
 
@@ -54,11 +57,14 @@ const formInitialValue: SaleCreateFormInputType = {
   items: [],
   totalAmount: "",
   discountAmount: "",
-  paidAmount: "",
+  paidAmount: "0",
 };
 
 export function SaleCreateDialog() {
-  const [open, setOpen] = useAtom(openSaleCreateDialog);
+  const { saleCreateDialog } = useSearch({
+    from: "/dashboard/_dashboardLayout/sales/",
+  });
+  const searchNavigate = useSearchNavigate("/dashboard/sales/");
   const form = useForm<SaleCreateFormInputType, unknown, SaleCreateFormType>({
     resolver: zodResolver(saleCreateFormSchema),
     defaultValues: formInitialValue,
@@ -66,11 +72,28 @@ export function SaleCreateDialog() {
 
   const { reset, handleSubmit, control, setValue, getValues } = form;
 
-  const isPending = false;
+  const handleDialog = (value: boolean) => {
+    searchNavigate((prev) => ({ ...prev, saleCreateDialog: value }));
+  };
+
+  const { mutate, isPending } = useSaleCreate<keyof SaleCreateType>({
+    onSuccess: () => {
+      form.reset();
+      handleDialog(false);
+    },
+    onValidationErrors: (fields) => {
+      fields.forEach(({ fieldName, message }) => {
+        form.setError(fieldName, {
+          message,
+        });
+      });
+    },
+  });
 
   const itemsValue = useWatch({ control, name: "items" });
   const totalAmountValue = useWatch({ control, name: "totalAmount" });
   const discountAmount = useWatch({ control, name: "discountAmount" });
+  const paidAmount = useWatch({ control, name: "paidAmount" });
 
   const subtotalAmount = useMemo(
     () =>
@@ -88,6 +111,11 @@ export function SaleCreateDialog() {
     [subtotalAmount, totalAmountValue, discountAmount]
   );
 
+  const dueAmount = useMemo(
+    () => totalAmount - (Number(paidAmount) || 0),
+    [totalAmount, paidAmount]
+  );
+
   useEffect(() => {
     const next = totalAmount > 0 ? String(totalAmount) : "";
     if (getValues("totalAmount") !== next) {
@@ -102,7 +130,19 @@ export function SaleCreateDialog() {
   }, [reset]);
 
   const onSubmit = handleSubmit((values) => {
-    console.log(values);
+    mutate({
+      customerName: values.customerName,
+      customerId: values.customerId,
+      customerAddress: values.customerAddress,
+      customerPhone: values.customerPhone,
+      totalAmount: values.totalAmount,
+      discountAmount: values.discountAmount,
+      paidAmount: values.paidAmount,
+      items: values.items.map((item) => ({
+        medicineId: item.medicineId,
+        quantity: item.quantity,
+      })),
+    });
   });
 
   const formId = "sale_create_form";
@@ -138,7 +178,11 @@ export function SaleCreateDialog() {
   );
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog
+      defaultOpen={saleCreateDialog}
+      open={saleCreateDialog}
+      onOpenChange={handleDialog}
+    >
       <DialogResponsiveContent className="max-w-full rounded-none sm:max-w-5xl sm:rounded-lg">
         <DialogStickyHeader>
           <DialogTitle>New Sale</DialogTitle>
@@ -158,7 +202,6 @@ export function SaleCreateDialog() {
                   description="Type customer name to search"
                   onReset={onCustomerFieldReset}
                   onOptionSelect={onCustomerSelect}
-                  requiredField
                   disabled={isPending}
                 />
                 <InputField
@@ -232,7 +275,7 @@ export function SaleCreateDialog() {
                     />
                   </div>
 
-                  <div className="border-r border-b p-2">
+                  <div className="border-r p-2">
                     <Label>Paid amount</Label>
                   </div>
                   <div>
@@ -248,6 +291,21 @@ export function SaleCreateDialog() {
                       disabled={isPending}
                     />
                   </div>
+
+                  {dueAmount > 0 && (
+                    <>
+                      <div className="border-t border-r p-2">
+                        <Label className="text-muted-foreground">
+                          Due amount
+                        </Label>
+                      </div>
+                      <div className="border-t px-2 py-0.5">
+                        <span className="text-xs text-muted-foreground">
+                          {formatCurrency(dueAmount)}
+                        </span>
+                      </div>
+                    </>
+                  )}
                 </div>
               </div>
             </FieldGroup>
@@ -285,12 +343,15 @@ function SaleMedicineItems({
         <div className="border">
           {/* header */}
           <div className="grid grid-cols-12 items-center">
-            <div className="col-span-7 border-r p-2">
+            <div className="col-span-5 border-r p-2">
               <Label>Medicine name</Label>
             </div>
             <div className="col-span-2 border-r p-2">
+              <Label>Stock</Label>
+            </div>
+            <div className="col-span-2 border-r p-2">
               <Label>Price</Label>
-            </div>{" "}
+            </div>
             <div className="col-span-2 border-r p-2">
               <Label>Qty</Label>
             </div>
@@ -336,7 +397,6 @@ function SaleMedicineItem({
   isPending?: boolean;
 }) {
   const { control, setValue } = form;
-  const qtyInputRef = useRef<HTMLInputElement>(null);
 
   const onMedicineSelect = useCallback(
     (selectedMedicine: MedicineOptionType, idx: number) => {
@@ -348,9 +408,9 @@ function SaleMedicineItem({
         toast.error("This medicine might not exist");
         return;
       }
-      if (qtyInputRef.current) {
-        qtyInputRef.current.placeholder = `${selectedMedicine.stock} ${selectedMedicine.stock === 1 ? "item" : "items"} remain`;
-      }
+      setValue(`items.${idx}.stock`, selectedMedicine.stock, {
+        shouldDirty: true,
+      });
       setValue(`items.${idx}.medicineId`, selectedMedicine.id, {
         shouldDirty: true,
       });
@@ -363,7 +423,7 @@ function SaleMedicineItem({
 
   return (
     <>
-      <div className="col-span-7 border-t border-r">
+      <div className="col-span-5 border-t border-r">
         <MedicineSearchableInputField
           control={control}
           showAddon={false}
@@ -381,9 +441,22 @@ function SaleMedicineItem({
       <div className="col-span-2 border-t border-r">
         <InputField
           control={control}
+          name={`items.${fieldIdx}.stock`}
+          className="rounded-none border-none"
+          placeholder="Stock"
+          requiredField
+          readOnly
+          showError={false}
+          disabled={isPending}
+        />
+      </div>
+      <div className="col-span-2 border-t border-r">
+        <InputField
+          control={control}
           name={`items.${fieldIdx}.price`}
           className="rounded-none border-none"
           placeholder="Price"
+          valueModifier={(value) => formatCurrency(Number(value) || 0)}
           requiredField
           readOnly
           showError={false}
@@ -397,7 +470,6 @@ function SaleMedicineItem({
           className="rounded-none border-none"
           placeholder="Quantity"
           requiredField
-          ref={qtyInputRef}
           showError={false}
           disabled={isPending}
         />
