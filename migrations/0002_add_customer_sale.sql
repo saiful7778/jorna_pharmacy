@@ -31,7 +31,7 @@ CREATE INDEX `customerPayment_saleId_idx` ON `customer_payments` (`sale_id`);-->
 CREATE INDEX `customerPayment_createdAt_idx` ON `customer_payments` (`created_at`);--> statement-breakpoint
 CREATE TABLE `sales` (
 	`id` text PRIMARY KEY NOT NULL,
-	`invoice_no` text NOT NULL,
+	`invoiceId` text NOT NULL,
 	`customer_id` text,
 	`subtotal` real NOT NULL,
 	`discount` real DEFAULT 0 NOT NULL,
@@ -41,12 +41,12 @@ CREATE TABLE `sales` (
 	`created_at` integer DEFAULT (unixepoch() * 1000) NOT NULL,
 	`updated_at` integer DEFAULT (unixepoch() * 1000) NOT NULL,
 	FOREIGN KEY (`customer_id`) REFERENCES `customers`(`id`) ON UPDATE no action ON DELETE restrict,
-	FOREIGN KEY (`invoice_no`) REFERENCES `sale_invoices`(`id`) ON UPDATE no action ON DELETE restrict,
+	FOREIGN KEY (`invoiceId`) REFERENCES `sale_invoices`(`id`) ON UPDATE no action ON DELETE restrict,
 	FOREIGN KEY (`created_by`) REFERENCES `users`(`id`) ON UPDATE no action ON DELETE set null,
 	CONSTRAINT "sale_walkInPaid_chk" CHECK("sales"."customer_id" IS NOT NULL OR "sales"."paid_amount" = "sales"."total_amount")
 );
 --> statement-breakpoint
-CREATE UNIQUE INDEX `sale_invoiceId_idx` ON `sales` (`invoice_no`);--> statement-breakpoint
+CREATE UNIQUE INDEX `sale_invoiceId_idx` ON `sales` (`invoiceId`);--> statement-breakpoint
 CREATE INDEX `sale_customerId_idx` ON `sales` (`customer_id`);--> statement-breakpoint
 CREATE INDEX `sale_createdAt_idx` ON `sales` (`created_at`);--> statement-breakpoint
 CREATE INDEX `sale_createdBy_idx` ON `sales` (`created_by`);--> statement-breakpoint

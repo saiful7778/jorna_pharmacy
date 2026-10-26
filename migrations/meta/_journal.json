@@ -29,6 +29,13 @@
       "when": 1792813249391,
       "tag": "0003_add_medicine_purchase",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "6",
+      "when": 1792990607342,
+      "tag": "0004_remove_sale_walkInPaid_chk",
+      "breakpoints": true
     }
   ]
 }

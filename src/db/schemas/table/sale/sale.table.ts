@@ -1,6 +1,5 @@
-import { relations, sql } from "drizzle-orm";
+import { relations } from "drizzle-orm";
 import {
-  check,
   foreignKey,
   index,
   sqliteTable,
@@ -30,7 +29,7 @@ export const SaleTable = sqliteTable(
   "sales",
   {
     id: db_id,
-    invoiceId: text("invoice_no").notNull(),
+    invoiceId: text("invoice_id").notNull(),
     customerId: text("customer_id"),
     subtotal: db_money("subtotal").notNull(),
     discount: db_money("discount").notNull().default(0),
@@ -56,10 +55,6 @@ export const SaleTable = sqliteTable(
       columns: [table.createdBy],
       foreignColumns: [UserTable.id],
     }).onDelete("set null"),
-    check(
-      "sale_walkInPaid_chk",
-      sql`${table.customerId} IS NOT NULL OR ${table.paidAmount} = ${table.totalAmount}`
-    ),
     uniqueIndex("sale_invoiceId_idx").on(table.invoiceId),
     index("sale_customerId_idx").on(table.customerId),
     index("sale_createdAt_idx").on(table.createdAt),
