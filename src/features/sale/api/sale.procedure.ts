@@ -1,9 +1,20 @@
 import { implement, ORPCError } from "@orpc/server";
-import { and, asc, desc, eq, gt, inArray, sql, type SQL } from "drizzle-orm";
+import {
+  and,
+  asc,
+  desc,
+  eq,
+  gt,
+  inArray,
+  like,
+  sql,
+  type SQL,
+} from "drizzle-orm";
 import type { BatchItem } from "drizzle-orm/batch";
 
 import { API_MESSAGES } from "@/constants/apiMessage";
 import {
+  CustomerPaymentTable,
   CustomerTable,
   MedicineTable,
   PurchaseItemTable,
@@ -11,11 +22,13 @@ import {
   SaleItemTable,
   SaleTable,
   type InsertCustomer,
+  type InsertCustomerPayment,
   type InsertSale,
   type InsertSaleItem,
   type SaleDataModel,
 } from "@/db/schemas";
 import { buildPaginateOptions, buildPaginationMeta } from "@/db/utils";
+import { escapeLike } from "@/db/utils/escapeLike";
 import { apiResponse } from "@/lib/apiResponse";
 import {
   authMiddleware,
@@ -181,7 +194,12 @@ export const saleCreateProcedure = saleImpl.create
       const [existCustomer] = await context.db
         .select({ id: CustomerTable.id })
         .from(CustomerTable)
-        .where(eq(CustomerTable.id, input.customerId))
+        .where(
+          and(
+            eq(CustomerTable.isActive, true),
+            eq(CustomerTable.id, input.customerId)
+          )
+        )
         .limit(1);
       if (!existCustomer) {
         throw new ORPCError("NOT_FOUND", {
@@ -191,20 +209,41 @@ export const saleCreateProcedure = saleImpl.create
       customerId = existCustomer.id;
     } else {
       if (input.customerName) {
-        const [newCustomer] = await context.db
-          .insert(CustomerTable)
-          .values({
-            name: input.customerName,
-            phone: input.customerPhone,
-            address: input.customerAddress,
-          } satisfies InsertCustomer)
-          .returning({ id: CustomerTable.id });
-        if (!newCustomer) {
-          throw new ORPCError("INTERNAL_SERVER_ERROR", {
-            message: API_MESSAGES.CUSTOMER.NOT_CREATE,
-          });
+        const customerWhere = [
+          eq(CustomerTable.isActive, true),
+          like(CustomerTable.name, `%${escapeLike(input.customerName)}%`),
+        ];
+
+        if (input.customerPhone) {
+          customerWhere.push(
+            like(CustomerTable.phone, `%${escapeLike(input.customerPhone)}%`)
+          );
         }
-        customerId = newCustomer.id;
+
+        const [existCustomer] = await context.db
+          .select({ id: CustomerTable.id })
+          .from(CustomerTable)
+          .where(and(...customerWhere))
+          .limit(1);
+
+        if (existCustomer) {
+          customerId = existCustomer.id;
+        } else {
+          const [newCustomer] = await context.db
+            .insert(CustomerTable)
+            .values({
+              name: input.customerName,
+              phone: input.customerPhone,
+              address: input.customerAddress,
+            } satisfies InsertCustomer)
+            .returning({ id: CustomerTable.id });
+          if (!newCustomer) {
+            throw new ORPCError("INTERNAL_SERVER_ERROR", {
+              message: API_MESSAGES.CUSTOMER.NOT_CREATE,
+            });
+          }
+          customerId = newCustomer.id;
+        }
       }
     }
 
@@ -362,7 +401,7 @@ export const saleCreateProcedure = saleImpl.create
 
     const invoice = await reserveInvoice(context.db, context.user.id);
 
-    const statements: Array<BatchItem<"sqlite">> = [
+    const statements: [BatchItem<"sqlite">, ...Array<BatchItem<"sqlite">>] = [
       context.db
         .insert(SaleTable)
         .values({
@@ -377,6 +416,17 @@ export const saleCreateProcedure = saleImpl.create
         } satisfies InsertSale)
         .returning(),
     ];
+
+    if (customerId) {
+      statements.push(
+        context.db.insert(CustomerPaymentTable).values({
+          customerId,
+          amount: input.paidAmount,
+          createdBy: context.user.id,
+          saleId,
+        } satisfies InsertCustomerPayment)
+      );
+    }
 
     if (saleItems.length > 0) {
       statements.push(
@@ -395,9 +445,7 @@ export const saleCreateProcedure = saleImpl.create
       );
     }
 
-    const [saleResult] = await context.db.batch(
-      statements as [BatchItem<"sqlite">, ...Array<BatchItem<"sqlite">>]
-    );
+    const [saleResult] = await context.db.batch(statements);
     const newSale = (saleResult as Array<SaleDataModel> | undefined)?.[0];
 
     if (!newSale) {
