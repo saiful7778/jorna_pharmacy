@@ -38,23 +38,27 @@ export const requireSessions = createServerFn({ method: "GET" }).handler(
     const userAgent = requestHeaders.get("user-agent");
     if (userAgent) headers.set("user-agent", userAgent);
 
-    const authSession = await getAuth().api.getSession({ headers });
+    try {
+      const authSession = await getAuth().api.getSession({ headers });
 
-    if (!authSession) {
+      if (!authSession) {
+        return null;
+      }
+
+      const rolesPermissions = await getUserRolesAndPermission(
+        authSession.user.id,
+        db
+      );
+
+      return {
+        user: authSession.user,
+        session: authSession.session,
+        roles: rolesPermissions.roles,
+        permissions: rolesPermissions.permissions,
+      };
+    } catch {
       return null;
     }
-
-    const rolesPermissions = await getUserRolesAndPermission(
-      authSession.user.id,
-      db
-    );
-
-    return {
-      user: authSession.user,
-      session: authSession.session,
-      roles: rolesPermissions.roles,
-      permissions: rolesPermissions.permissions,
-    };
   }
 );
 
