@@ -25,6 +25,7 @@ interface InputFieldProps<
   description?: string;
   isDescriptionInfoIconShow?: boolean;
   requiredField?: boolean;
+  showError?: boolean;
 }
 
 function InputField<
@@ -40,6 +41,7 @@ function InputField<
   isDescriptionInfoIconShow = false,
   requiredField = false,
   disabled = false,
+  showError = true,
   ...props
 }: InputFieldProps<TFieldValues, TTransformedValues>) {
   const fieldId = useId();
@@ -75,7 +77,9 @@ function InputField<
               {description}
             </FieldDescription>
           )}
-          {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+          {showError && fieldState.invalid && (
+            <FieldError errors={[fieldState.error]} />
+          )}
         </Field>
       )}
     />
