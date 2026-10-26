@@ -52,4 +52,13 @@ export const API_MESSAGES = {
     GET_STATS: "Sale statistics loaded successfully.",
     NOT_FOUND: "Sale not found.",
   },
+  MEDICINE: {
+    GET_ALL: "Medicines loaded successfully.",
+    GET_FOR_SEARCH: "Medicines loaded successfully.",
+    CREATE: "Medicine created successfully.",
+    UPDATE: "Medicine updated successfully.",
+    NOT_FOUND: "Medicine not found.",
+    NOT_CREATE: "Failed to create medicine. Please try again.",
+    NOT_UPDATE: "Failed to update medicine. Please try again.",
+  },
 };
