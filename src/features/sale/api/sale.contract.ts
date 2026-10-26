@@ -1,11 +1,18 @@
 import z from "zod";
 
+import { API_MESSAGES } from "@/constants/apiMessage";
 import { selectCustomerSchema, selectSaleSchema } from "@/db/schemas";
 import { apiOutputSchema } from "@/lib/zod-schemas/apiOutputSchema";
 import { paginateInputSchema } from "@/lib/zod-schemas/paginateInputSchema";
 import { paginateOutputSchema } from "@/lib/zod-schemas/paginateOutputSchema";
 import { baseContract } from "@/oRPC/orpc.contract-base";
 import type { InferContractRouterType } from "@/types/orpc.types";
+
+import { saleCreateSchema } from "../sale.schema";
+
+const saleBaseContract = baseContract.errors({
+  NOT_FOUND: { status: 404, message: API_MESSAGES.SALE.NOT_FOUND },
+});
 
 const tags = ["Sale"] as const;
 
@@ -16,7 +23,7 @@ const listSaleInputSchema = z.object({
   createdAt: z.date(),
 });
 
-const listSaleContract = baseContract
+const listSaleContract = saleBaseContract
   .route({
     method: "GET",
     path: "/sales/list",
@@ -67,7 +74,7 @@ export type ListSaleContractType = InferContractRouterType<
   typeof listSaleContract
 >;
 
-const saleStatsContract = baseContract
+const saleStatsContract = saleBaseContract
   .route({
     method: "GET",
     path: "/sales/stats",
@@ -102,7 +109,21 @@ export type SaleStatsContractType = InferContractRouterType<
   typeof saleStatsContract
 >;
 
+const saleCreateContract = saleBaseContract
+  .route({
+    method: "POST",
+    path: "/sales/create",
+    description: "Create new sale",
+    tags,
+  })
+  .input(saleCreateSchema)
+  .output(apiOutputSchema(selectSaleSchema));
+export type SaleCreateContractType = InferContractRouterType<
+  typeof saleCreateContract
+>;
+
 export const saleContract = {
   list: listSaleContract,
   stats: saleStatsContract,
+  create: saleCreateContract,
 };

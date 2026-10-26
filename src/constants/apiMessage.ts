@@ -51,6 +51,8 @@ export const API_MESSAGES = {
     GET_ALL: "Sales loaded successfully.",
     GET_STATS: "Sale statistics loaded successfully.",
     NOT_FOUND: "Sale not found.",
+    CREATE: "Sale created successfully",
+    NOT_CREATE: "Failed to create sale.",
   },
   MEDICINE: {
     GET_ALL: "Medicines loaded successfully.",

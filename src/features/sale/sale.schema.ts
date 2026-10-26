@@ -6,6 +6,7 @@ export const saleMedicineFormItem = z.object({
   medicineId: z.uuid(),
   medicineName: z.string(),
   price: z.number(),
+  stock: z.number(),
   quantity: z.preprocess(
     (v) => (v === "" || v === null || v === undefined ? undefined : v),
     z.coerce.number().check(z.int(), z.positive())
@@ -16,10 +17,7 @@ export const saleCreateFormSchema = z
   .object({
     isNewCustomer: z.boolean().default(false),
     customerId: z.uuid().optional(),
-    customerName: z
-      .string()
-      .min(1, "Customer name is required")
-      .max(100, "Customer name is too long"),
+    customerName: emptyStrSchema.optional(),
     customerPhone: emptyStrSchema.optional(),
     customerAddress: emptyStrSchema.optional(),
     items: z.array(saleMedicineFormItem),
@@ -37,14 +35,6 @@ export const saleCreateFormSchema = z
     ),
   })
   .superRefine((data, ctx) => {
-    if (!data.isNewCustomer && !data.customerId) {
-      ctx.addIssue({
-        code: "custom",
-        path: ["customerName"],
-        message: "Please select an existing customer",
-      });
-    }
-
     const discountAmount = data.discountAmount;
     const totalAmount = data.totalAmount;
     const paidAmount = data.paidAmount;
@@ -77,16 +67,21 @@ export const saleMedicineItem = z.object({
 export const saleCreateSchema = z
   .object({
     customerId: z.uuid().optional(),
-    customerName: z
-      .string()
-      .min(1, "Customer name is required")
-      .max(100, "Customer name is too long"),
+    customerName: z.string().max(100, "Customer name is too long").optional(),
     customerPhone: z.string().optional(),
     customerAddress: z.string().optional(),
     items: z.array(saleMedicineItem),
     totalAmount: z.number().check(z.int(), z.positive()),
-    discountAmount: z.number().check(z.int(), z.nonnegative()).optional(),
-    paidAmount: z.number().check(z.int(), z.nonnegative()).optional(),
+    discountAmount: z
+      .number()
+      .check(z.int(), z.nonnegative())
+      .optional()
+      .default(0),
+    paidAmount: z
+      .number()
+      .check(z.int(), z.nonnegative())
+      .optional()
+      .default(0),
   })
   .superRefine((data, ctx) => {
     const discountAmount = data.discountAmount;

@@ -1,5 +1,6 @@
 import {
   listSaleProcedure,
+  saleCreateProcedure,
   saleImpl,
   saleStatsProcedure,
 } from "./sale.procedure";
@@ -7,4 +8,5 @@ import {
 export const saleRouter = saleImpl.router({
   list: listSaleProcedure,
   stats: saleStatsProcedure,
+  create: saleCreateProcedure,
 });
