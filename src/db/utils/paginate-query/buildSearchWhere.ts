@@ -1,6 +1,8 @@
 import { like, or, type SQL } from "drizzle-orm";
 import type { SQLiteColumn } from "drizzle-orm/sqlite-core";
 
+import { escapeLike } from "../escapeLike";
+
 /**
  * Build a `where` condition for full-text search across columns.
  *
@@ -13,7 +15,7 @@ export function buildSearchWhere(
 ): SQL | undefined {
   if (!search || !fields.length) return undefined;
 
-  const conditions = fields.map((col) => like(col, `%${search}%`));
+  const conditions = fields.map((col) => like(col, `%${escapeLike(search)}%`));
 
   if (conditions.length === 0) return undefined;
 
