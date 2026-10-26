@@ -36,6 +36,7 @@ interface SearchableInputProps<TOption> {
   placeholder?: string;
   disabled?: boolean;
   className?: string;
+  inputClassName?: string;
   "aria-invalid"?: boolean;
   options: readonly TOption[] | undefined;
   onSearch?: (query: string) => void;
@@ -59,6 +60,7 @@ function SearchableInput<TOption>({
   placeholder,
   disabled = false,
   className,
+  inputClassName,
   options,
   onSearch,
   searchDebounceMs = 300,
@@ -177,7 +179,7 @@ function SearchableInput<TOption>({
 
   return (
     <>
-      <InputGroup>
+      <InputGroup className={className}>
         {firstAddon && (
           <InputGroupAddon align="inline-start">{firstAddon}</InputGroupAddon>
         )}
@@ -189,7 +191,7 @@ function SearchableInput<TOption>({
           role="combobox"
           type="text"
           autoComplete="off"
-          className={className}
+          className={inputClassName}
           aria-autocomplete="list"
           aria-expanded={isOpen}
           aria-controls={isOpen ? listboxId : undefined}
