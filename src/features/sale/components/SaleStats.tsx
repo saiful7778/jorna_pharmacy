@@ -36,7 +36,7 @@ export function SaleStats({
       data={statsQuery.data}
       isEmpty={() => false}
       loadingFallback={
-        <div className="grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-4">
+        <div className="grid grid-cols-[repeat(auto-fit,minmax(250px,1fr))] gap-2 md:gap-4">
           {Array.from({ length: 4 }).map((_, index) => (
             <Skeleton key={index} className="h-28 w-full" />
           ))}
@@ -47,7 +47,7 @@ export function SaleStats({
         const hasDue = stats.dueAmount > BALANCE_EPSILON;
 
         return (
-          <div className="grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-4">
+          <div className="grid grid-cols-[repeat(auto-fit,minmax(250px,1fr))] gap-2 md:gap-4">
             <SummaryStat
               label="Total Sales"
               value={String(stats.saleCount)}
