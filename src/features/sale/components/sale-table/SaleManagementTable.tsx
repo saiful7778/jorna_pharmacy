@@ -1,4 +1,6 @@
+import { useAtomSet } from "@effect-atom/atom-react";
 import { useQuery } from "@tanstack/react-query";
+import { Plus } from "lucide-react";
 
 import { DataTableEmpty } from "@/components/data-table/data-table-empty";
 import { DataTableGlobalSearch } from "@/components/data-table/data-table-global-search";
@@ -6,10 +8,13 @@ import { DataTableSkeleton } from "@/components/data-table/data-table-skeleton";
 import { DataTableToolbarSkeleton } from "@/components/data-table/data-table-toolbar-skeleton";
 import { QueryStateBoundary } from "@/components/tanstack-query/query-state-boundary";
 import { TimeRangeFilter } from "@/components/time-range-filter";
+import { Button } from "@/components/ui/button";
+import { usePermissionCheck } from "@/hooks/use-permission-check";
 import { useSearchFilter } from "@/hooks/use-search-filter";
 import { orpcTQClient } from "@/oRPC/orpc";
 import { buildDateRangeFilter } from "@/utils/buildDateRangeFilter";
 
+import { openSaleCreateDialog, SaleCreateDialog } from "../SaleCreateDialog";
 import { SaleStats } from "../SaleStats";
 import { SaleTable } from "./SaleTable";
 
@@ -18,7 +23,11 @@ export function SaleManagementTable({
 }: {
   searchFields: string[];
 }) {
-  "use no memo";
+  const setOpenSaleCreateDialog = useAtomSet(openSaleCreateDialog);
+  const isAllowSaleCreate = usePermissionCheck([
+    { level: "system", resource: "sale", action: "manage" },
+    { level: "system", resource: "sale", action: "create" },
+  ]);
   const { filters, setFilters, setSearchFilter } = useSearchFilter(
     "/dashboard/_dashboardLayout/sales/"
   );
@@ -59,7 +68,17 @@ export function SaleManagementTable({
         searchValue={filters.search}
         setSearchValue={setSearchFilter}
         refresh={refetch}
-      ></DataTableGlobalSearch>
+      >
+        {isAllowSaleCreate && (
+          <>
+            <Button onClick={() => setOpenSaleCreateDialog(true)}>
+              <Plus />
+              <span>New Sale</span>
+            </Button>
+            <SaleCreateDialog />
+          </>
+        )}
+      </DataTableGlobalSearch>
       <QueryStateBoundary
         isLoading={isLoading}
         isError={isError}
