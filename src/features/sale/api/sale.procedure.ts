@@ -51,13 +51,7 @@ export const listSaleProcedure = saleImpl.list
         customerPhone: CustomerTable.phone,
         createdAt: SaleTable.createdAt,
       },
-      {
-        ...paginateInput,
-        filter:
-          filter?.from || filter?.to
-            ? { createdAt: { from: filter.from, to: filter.to } }
-            : undefined,
-      }
+      paginateInput
     );
 
     const whereSql: Array<SQL> = [];

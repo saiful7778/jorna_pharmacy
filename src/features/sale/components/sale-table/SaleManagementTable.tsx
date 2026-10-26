@@ -39,7 +39,9 @@ export function SaleManagementTable({
         searchFields,
         order: filters.order,
         orderField: filters.orderField,
-        filter: buildDateRangeFilter(filters.startTime, filters.endTime),
+        filter: {
+          createdAt: buildDateRangeFilter(filters.startTime, filters.endTime),
+        },
       },
       select: (result) => result.data,
     })

@@ -54,7 +54,9 @@ export const Route = createFileRoute("/dashboard/_dashboardLayout/sales/")({
           searchFields,
           order: deps.order,
           orderField: deps.orderField,
-          filter: buildDateRangeFilter(deps.startTime, deps.endTime),
+          filter: {
+            createdAt: buildDateRangeFilter(deps.startTime, deps.endTime),
+          },
         },
       })
     );

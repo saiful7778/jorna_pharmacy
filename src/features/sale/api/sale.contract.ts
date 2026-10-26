@@ -36,8 +36,12 @@ const listSaleContract = saleBaseContract
       searchFields: ["invoiceNo", "customerPhone", "customerName"],
       orderFields: ["createdAt"],
       filter: z.object({
-        from: z.coerce.date().describe("Created at from date").optional(),
-        to: z.coerce.date().describe("Created at to date").optional(),
+        createdAt: z
+          .object({
+            from: z.coerce.date().describe("Created at from date").optional(),
+            to: z.coerce.date().describe("Created at to date").optional(),
+          })
+          .optional(),
       }),
     }).extend({
       customerId: z.uuid().optional(),
