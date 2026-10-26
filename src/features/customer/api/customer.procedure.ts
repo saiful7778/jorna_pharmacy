@@ -1,5 +1,13 @@
 import { implement, ORPCError } from "@orpc/server";
-import { and, asc, eq, getTableColumns, isNotNull, sql } from "drizzle-orm";
+import {
+  and,
+  asc,
+  desc,
+  eq,
+  getTableColumns,
+  isNotNull,
+  sql,
+} from "drizzle-orm";
 
 import { API_MESSAGES } from "@/constants/apiMessage";
 import { CustomerPaymentTable, CustomerTable, SaleTable } from "@/db/schemas";
@@ -27,7 +35,7 @@ export const listCustomerProcedure = customerImpl.list
     ])
   )
   .handler(async ({ context, input }) => {
-    const { where, page, orderBy, offset, limit } = buildPaginateOptions(
+    const { where, page, offset, limit } = buildPaginateOptions(
       {
         name: CustomerTable.name,
         phone: CustomerTable.phone,
@@ -90,7 +98,7 @@ export const listCustomerProcedure = customerImpl.list
         .where(where)
         .offset(offset)
         .limit(limit)
-        .orderBy(orderBy),
+        .orderBy(desc(CustomerTable.createdAt)),
     ]);
 
     const totalCount = Number(totalCountResult[0]?.count ?? 0);

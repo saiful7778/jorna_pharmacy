@@ -60,6 +60,7 @@ export const customerTableColumn: ColumnType<CustomerTableRowDataType> = [
       </div>
     ),
     meta: { label: "Customer" },
+    enableSorting: false,
     enableHiding: false,
   },
   {

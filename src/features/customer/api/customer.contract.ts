@@ -32,7 +32,7 @@ const listCustomerContract = baseContract
   .input(
     paginateInputSchema<typeof selectCustomerSchema>({
       searchFields: ["name", "phone", "address"],
-      orderFields: ["createdAt", "name"],
+      orderFields: [],
     })
   )
   .output(

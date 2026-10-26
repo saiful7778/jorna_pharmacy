@@ -8,7 +8,6 @@ import { DataTableSkeleton } from "@/components/data-table/data-table-skeleton";
 import { DataTableToolbarSkeleton } from "@/components/data-table/data-table-toolbar-skeleton";
 import { QueryStateBoundary } from "@/components/tanstack-query/query-state-boundary";
 import { Button } from "@/components/ui/button";
-import { useDebouncedCallback } from "@/hooks/use-debounced-callback";
 import { usePermissionCheck } from "@/hooks/use-permission-check";
 import { useSearchFilter } from "@/hooks/use-search-filter";
 import { orpcTQClient } from "@/oRPC/orpc";
@@ -24,7 +23,6 @@ export function CustomerManagementTable({
 }: {
   searchFields: string[];
 }) {
-  "use no memo";
   const setOpenCustomerCreateDialog = useAtomSet(openCustomerCreateDialog);
   const { filters, setFilters, setSearchFilter } = useSearchFilter(
     "/dashboard/_dashboardLayout/customers/"
@@ -44,11 +42,6 @@ export function CustomerManagementTable({
     })
   );
 
-  const globalSearch = useDebouncedCallback(
-    (searchValue: string | undefined) => setSearchFilter(searchValue),
-    500
-  );
-
   const isAllowCreate = usePermissionCheck([
     {
       level: "system",
@@ -61,7 +54,7 @@ export function CustomerManagementTable({
     <div className="space-y-3">
       <DataTableGlobalSearch
         searchValue={filters.search}
-        setSearchValue={globalSearch}
+        setSearchValue={setSearchFilter}
         refresh={refetch}
       >
         {isAllowCreate && (
