@@ -1,15 +1,5 @@
 import { implement, ORPCError } from "@orpc/server";
-import {
-  and,
-  asc,
-  desc,
-  eq,
-  gt,
-  inArray,
-  like,
-  sql,
-  type SQL,
-} from "drizzle-orm";
+import { and, asc, desc, eq, gt, inArray, sql, type SQL } from "drizzle-orm";
 import type { BatchItem } from "drizzle-orm/batch";
 
 import { API_MESSAGES } from "@/constants/apiMessage";
@@ -21,14 +11,13 @@ import {
   SaleInvoiceTable,
   SaleItemTable,
   SaleTable,
-  type InsertCustomer,
   type InsertCustomerPayment,
   type InsertSale,
   type InsertSaleItem,
   type SaleDataModel,
 } from "@/db/schemas";
 import { buildPaginateOptions, buildPaginationMeta } from "@/db/utils";
-import { escapeLike } from "@/db/utils/escapeLike";
+import { resolveCustomer } from "@/features/customer/customerResolver";
 import { apiResponse } from "@/lib/apiResponse";
 import {
   authMiddleware,
@@ -190,61 +179,15 @@ export const saleCreateProcedure = saleImpl.create
   .handler(async ({ context, input }) => {
     let customerId: string | undefined = undefined;
 
-    if (input.customerId) {
-      const [existCustomer] = await context.db
-        .select({ id: CustomerTable.id })
-        .from(CustomerTable)
-        .where(
-          and(
-            eq(CustomerTable.isActive, true),
-            eq(CustomerTable.id, input.customerId)
-          )
-        )
-        .limit(1);
-      if (!existCustomer) {
-        throw new ORPCError("NOT_FOUND", {
-          message: API_MESSAGES.CUSTOMER.NOT_FOUND,
-        });
-      }
-      customerId = existCustomer.id;
-    } else {
-      if (input.customerName) {
-        const customerWhere = [
-          eq(CustomerTable.isActive, true),
-          like(CustomerTable.name, `%${escapeLike(input.customerName)}%`),
-        ];
+    const resolvedCustomerData = await resolveCustomer(context.db, {
+      id: input.customerId,
+      name: input.customerName,
+      address: input.customerAddress,
+      phone: input.customerPhone,
+    });
 
-        if (input.customerPhone) {
-          customerWhere.push(
-            like(CustomerTable.phone, `%${escapeLike(input.customerPhone)}%`)
-          );
-        }
-
-        const [existCustomer] = await context.db
-          .select({ id: CustomerTable.id })
-          .from(CustomerTable)
-          .where(and(...customerWhere))
-          .limit(1);
-
-        if (existCustomer) {
-          customerId = existCustomer.id;
-        } else {
-          const [newCustomer] = await context.db
-            .insert(CustomerTable)
-            .values({
-              name: input.customerName,
-              phone: input.customerPhone,
-              address: input.customerAddress,
-            } satisfies InsertCustomer)
-            .returning({ id: CustomerTable.id });
-          if (!newCustomer) {
-            throw new ORPCError("INTERNAL_SERVER_ERROR", {
-              message: API_MESSAGES.CUSTOMER.NOT_CREATE,
-            });
-          }
-          customerId = newCustomer.id;
-        }
-      }
+    if (resolvedCustomerData.success) {
+      customerId = resolvedCustomerData.id;
     }
 
     const saleId = crypto.randomUUID();
