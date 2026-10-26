@@ -33,7 +33,7 @@
         {
           "binding": "DB",
           "database_name": "jornapharmacy-db-stage",
-          "database_id": "de4b3ccb-e702-4dcc-b1eb-48976f3ff259",
+          "database_id": "a8a2253f-2483-4af5-af1d-9e62ef13bf34",
           "migrations_dir": "migrations",
           "migrations_table": "d1_migrations",
           "remote": true,
@@ -54,7 +54,7 @@
         {
           "binding": "DB",
           "database_name": "jornapharmacy-db",
-          "database_id": "d16c4eed-1424-4880-8b08-823c4bb8fbca",
+          "database_id": "a81bfd70-80e0-436a-ad06-61fb39cf2517",
           "migrations_dir": "migrations",
           "migrations_table": "d1_migrations",
           "remote": true,
