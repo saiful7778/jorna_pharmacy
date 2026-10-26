@@ -109,7 +109,17 @@ const customerDetailsContract = customerBaseContract
     description: "Get customer details with purchase and payment summary",
     tags,
   })
-  .input(z.object({ customerId: z.uuid() }))
+  .input(
+    z.object({
+      customerId: z.uuid(),
+      createdAt: z
+        .object({
+          from: z.coerce.date().describe("Created at from date").optional(),
+          to: z.coerce.date().describe("Created at to date").optional(),
+        })
+        .optional(),
+    })
+  )
   .output(
     apiOutputSchema(
       selectCustomerSchema.extend({

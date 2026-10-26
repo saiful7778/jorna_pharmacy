@@ -22,7 +22,9 @@ import {
 import { CustomerPaymentsTab } from "@/features/customer/components/customer-details/CustomerPaymentsTab";
 import { CustomerPurchasesTab } from "@/features/customer/components/customer-details/CustomerPurchasesTab";
 import { head } from "@/lib/head";
+import { rangeFilterSchema } from "@/lib/querySearchSchema";
 import { orpcTQClient } from "@/oRPC/orpc";
+import { buildDateRangeFilter } from "@/utils/buildDateRangeFilter";
 
 export const Route = createFileRoute(
   "/dashboard/_dashboardLayout/customers/$customerId"
@@ -37,16 +39,24 @@ export const Route = createFileRoute(
       context.user.id
     );
   },
-  validateSearch: z.object({
+  validateSearch: rangeFilterSchema.extend({
     tab: z
       .enum(["details", "purchase", "payment"] as const)
       .optional()
       .default("details"),
   }),
-  loader: async ({ context: { queryClient }, params: { customerId } }) => {
+  loaderDeps: ({ search }) => search,
+  loader: async ({
+    context: { queryClient },
+    deps,
+    params: { customerId },
+  }) => {
     return queryClient.query(
       orpcTQClient.customer.details.queryOptions({
-        input: { customerId },
+        input: {
+          customerId,
+          createdAt: buildDateRangeFilter(deps.startTime, deps.endTime),
+        },
       })
     );
   },

@@ -1,11 +1,14 @@
 import { implement, ORPCError } from "@orpc/server";
+import type { SQL } from "drizzle-orm";
 import {
   and,
   asc,
   desc,
   eq,
   getTableColumns,
+  gte,
   isNotNull,
+  lte,
   sql,
 } from "drizzle-orm";
 
@@ -226,6 +229,28 @@ export const customerDetailsProcedure = customerImpl.details
       throw errors.NOT_FOUND();
     }
 
+    const saleTotalWhere: Array<SQL> = [
+      eq(SaleTable.customerId, input.customerId),
+    ];
+    const paymentTotalWhere: Array<SQL> = [
+      eq(CustomerPaymentTable.customerId, input.customerId),
+    ];
+
+    if (input.createdAt) {
+      if (input.createdAt.from) {
+        saleTotalWhere.push(gte(SaleTable.createdAt, input.createdAt.from));
+        paymentTotalWhere.push(
+          gte(CustomerPaymentTable.createdAt, input.createdAt.from)
+        );
+      }
+      if (input.createdAt.to) {
+        saleTotalWhere.push(lte(SaleTable.createdAt, input.createdAt.to));
+        paymentTotalWhere.push(
+          lte(CustomerPaymentTable.createdAt, input.createdAt.to)
+        );
+      }
+    }
+
     const [saleTotals, paymentTotals] = await Promise.all([
       context.db
         .select({
@@ -234,14 +259,14 @@ export const customerDetailsProcedure = customerImpl.details
           lastPurchaseAt: sql<number | null>`MAX(${SaleTable.createdAt})`,
         })
         .from(SaleTable)
-        .where(eq(SaleTable.customerId, input.customerId)),
+        .where(and(...saleTotalWhere)),
       context.db
         .select({
           total: sql<number>`COALESCE(SUM(${CustomerPaymentTable.amount}), 0)`,
           count: sql<number>`COUNT(*)`,
         })
         .from(CustomerPaymentTable)
-        .where(eq(CustomerPaymentTable.customerId, input.customerId)),
+        .where(and(...paymentTotalWhere)),
     ]);
 
     const totalSales = Number(saleTotals[0]?.totalSales ?? 0);
