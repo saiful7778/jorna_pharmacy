@@ -1,18 +1,21 @@
-import type { ComponentProps } from "react";
+import { useCallback, type ComponentProps } from "react";
 
-import type { RegisteredRouter, RouteIds } from "@tanstack/react-router";
 import { getRouteApi } from "@tanstack/react-router";
 import { cn } from "cn";
 
+import type { FileRoutesById, FileRouteTypes } from "@/routeTree.gen";
+
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 
-type RouteTree = RegisteredRouter["routeTree"];
-type RouteId = Exclude<RouteIds<RouteTree>, "__root__">;
+/** All route IDs from the generated route tree (API and __root__ routes excluded) */
+export type RouteId = Exclude<
+  FileRouteTypes["id"],
+  "__root__" | `/api/${string}`
+>;
 
-type SearchNavigate = (options: {
-  search: (prev: Record<string, unknown>) => Record<string, unknown>;
-  resetScroll?: boolean;
-}) => Promise<void>;
+/** Fully-resolved search schema (own + parent routes) for a given route id */
+export type SearchOf<TId extends RouteId> =
+  FileRoutesById[TId]["types"]["fullSearchSchema"];
 
 interface TabNavigationProps<TId extends RouteId> {
   paramName?: string;
@@ -48,21 +51,26 @@ export function TabNavigation<const TId extends RouteId>({
   routeId,
 }: TabNavigationProps<TId>) {
   const route = getRouteApi(routeId);
-  const search = route.useSearch() as unknown as Record<string, string>;
-  const navigate = route.useNavigate() as unknown as SearchNavigate;
+  const search = route.useSearch();
+  const navigate = route.useNavigate();
 
-  const value = String(search[paramName] ?? defaultTab);
+  const value = String(
+    (search as Record<string, unknown>)[paramName] ?? defaultTab
+  );
 
-  const handleTabChange = (next: string) => {
-    navigate({
-      search: (prev) => {
-        const prevSearch = prev;
+  const handleTabChange = useCallback(
+    (next: string) => {
+      const searchValue = (prev: SearchOf<TId>) => {
+        return Object.assign({}, prev, { [paramName]: next }) as SearchOf<TId>;
+      };
 
-        return { ...prevSearch, [paramName]: next };
-      },
-      resetScroll: true,
-    });
-  };
+      void (navigate as (opts: unknown) => Promise<void>)({
+        to: ".",
+        search: searchValue,
+      });
+    },
+    [navigate, paramName]
+  );
 
   return (
     <Tabs value={value} onValueChange={handleTabChange}>
