@@ -61,7 +61,7 @@ export const listSaleProcedure = saleImpl.list
     }
 
     if (unpaidOnly) {
-      whereSql.push(sql`${SaleTable.totalAmount} > ${SaleTable.paidAmount}`);
+      whereSql.push(gt(SaleTable.totalAmount, SaleTable.paidAmount));
     }
 
     if (where) {
