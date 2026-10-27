@@ -30,17 +30,6 @@ const customerPaymentBaseContract = baseContract.errors({
 
 const tags = ["Customer"] as const;
 
-const customerPaymentListRowSchema = selectCustomerPaymentSchema
-  .pick({
-    id: true,
-    customerId: true,
-    saleId: true,
-    amount: true,
-    note: true,
-    createdAt: true,
-  })
-  .extend({ invoiceNo: z.string().nullable() });
-
 const listCustomerPaymentsContract = customerPaymentBaseContract
   .route({
     method: "GET",
@@ -49,9 +38,9 @@ const listCustomerPaymentsContract = customerPaymentBaseContract
     tags,
   })
   .input(
-    paginateInputSchema<typeof customerPaymentListRowSchema>({
+    paginateInputSchema({
       searchFields: ["invoiceNo"],
-      orderFields: ["createdAt", "amount"],
+      orderFields: [],
       filter: z.object({
         createdAt: z
           .object({
@@ -62,7 +51,21 @@ const listCustomerPaymentsContract = customerPaymentBaseContract
       }),
     }).extend({ customerId: z.uuid().optional() })
   )
-  .output(apiOutputSchema(paginateOutputSchema(customerPaymentListRowSchema)));
+  .output(
+    apiOutputSchema(
+      paginateOutputSchema(
+        selectCustomerPaymentSchema
+          .pick({
+            id: true,
+            saleId: true,
+            amount: true,
+            note: true,
+            createdAt: true,
+          })
+          .extend({ invoiceNo: z.string().nullable() })
+      )
+    )
+  );
 export type ListCustomerPaymentsContractType = InferContractRouterType<
   typeof listCustomerPaymentsContract
 >;

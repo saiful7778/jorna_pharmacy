@@ -26,9 +26,7 @@ export const listCustomerPaymentsProcedure = customerImpl.payment.list
 
     const { where, page, orderBy, offset, limit } = buildPaginateOptions(
       {
-        invoiceNo: SaleInvoiceTable.number,
         createdAt: CustomerPaymentTable.createdAt,
-        amount: CustomerPaymentTable.amount,
       },
       paginateInput
     );
