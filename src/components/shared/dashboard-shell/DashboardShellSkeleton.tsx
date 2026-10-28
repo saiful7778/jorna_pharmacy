@@ -12,6 +12,7 @@ export function DashboardShellSkeleton({
 }: DashboardShellSkeletonProps) {
   return (
     <div
+      data-slot="dashboard-shell-skeleton"
       className={cn("w-full px-2 pt-2 pb-2 sm:px-4 sm:pt-3 sm:pb-4", className)}
       aria-hidden="true"
       {...props}

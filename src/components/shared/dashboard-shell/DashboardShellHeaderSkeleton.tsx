@@ -7,7 +7,11 @@ export function DashboardShellTitleSkeleton({
   ...props
 }: React.ComponentProps<typeof Skeleton>) {
   return (
-    <Skeleton className={cn("h-8 w-56 max-w-full", className)} {...props} />
+    <Skeleton
+      data-slot="dashboard-shell-title-skeleton"
+      className={cn("h-8 w-56 max-w-full", className)}
+      {...props}
+    />
   );
 }
 
@@ -16,6 +20,10 @@ export function DashboardShellDescriptionSkeleton({
   ...props
 }: React.ComponentProps<typeof Skeleton>) {
   return (
-    <Skeleton className={cn("h-4 w-72 max-w-full", className)} {...props} />
+    <Skeleton
+      data-slot="dashboard-shell-description-skeleton"
+      className={cn("h-4 w-72 max-w-full", className)}
+      {...props}
+    />
   );
 }
