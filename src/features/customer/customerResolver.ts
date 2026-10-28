@@ -1,4 +1,4 @@
-import { and, eq, like } from "drizzle-orm";
+import { and, eq, isNull, like } from "drizzle-orm";
 
 import { API_MESSAGES } from "@/constants/apiMessage";
 import type { DatabaseType } from "@/db/clients/drizzle-client";
@@ -25,7 +25,13 @@ export async function resolveCustomer(
     const [existCustomer] = await db
       .select({ id: CustomerTable.id })
       .from(CustomerTable)
-      .where(and(eq(CustomerTable.isActive, true), eq(CustomerTable.id, id)))
+      .where(
+        and(
+          eq(CustomerTable.isActive, true),
+          isNull(CustomerTable.deletedAt),
+          eq(CustomerTable.id, id)
+        )
+      )
       .limit(1);
     if (!existCustomer) {
       return { success: false, message: API_MESSAGES.CUSTOMER.NOT_FOUND };
@@ -39,6 +45,7 @@ export async function resolveCustomer(
 
   const customerWhere = [
     eq(CustomerTable.isActive, true),
+    isNull(CustomerTable.deletedAt),
     like(CustomerTable.name, `%${escapeLike(name)}%`),
   ];
 

@@ -25,13 +25,13 @@ export function useCreateCustomerPayment<TFieldNames>({
         await Promise.all([
           queryClient.invalidateQueries({
             queryKey: orpcTQClient.customer.payment.list.queryKey({
-              input: { customerId },
+              input: {},
             }),
             exact: false,
           }),
           queryClient.invalidateQueries({
             queryKey: orpcTQClient.customer.payment.stats.queryKey({
-              input: { customerId },
+              input: {},
             }),
             exact: false,
           }),

@@ -9,6 +9,7 @@ import { baseContract } from "@/oRPC/orpc.contract-base";
 import type { InferContractRouterType } from "@/types/orpc.types";
 
 import { customerCreateSchema, customerUpdateSchema } from "../customer.schema";
+import { customerDeleteContract } from "./customerDelete.contract";
 import { customerPaymentContract } from "./customerPayment.contract";
 
 const customerBaseContract = baseContract.errors({
@@ -112,12 +113,6 @@ const customerDetailsContract = customerBaseContract
   .input(
     z.object({
       customerId: z.uuid(),
-      createdAt: z
-        .object({
-          from: z.coerce.date().describe("Created at from date").optional(),
-          to: z.coerce.date().describe("Created at to date").optional(),
-        })
-        .optional(),
     })
   )
   .output(
@@ -139,6 +134,7 @@ export type CustomerDetailsContractType = InferContractRouterType<
 >;
 
 export const customerContract = {
+  ...customerDeleteContract,
   list: listCustomerContract,
   listForSearch: listCustomerForSearchContract,
   create: createCustomerContract,

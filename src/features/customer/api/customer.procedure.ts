@@ -6,9 +6,8 @@ import {
   desc,
   eq,
   getTableColumns,
-  gte,
   isNotNull,
-  lte,
+  isNull,
   sql,
 } from "drizzle-orm";
 
@@ -59,7 +58,7 @@ export const listCustomerProcedure = customerImpl.list
         ),
       })
       .from(SaleTable)
-      .where(isNotNull(SaleTable.customerId))
+      .where(and(isNotNull(SaleTable.customerId), isNull(SaleTable.deletedAt)))
       .groupBy(SaleTable.customerId)
       .as("sales_by_customer");
 
@@ -72,6 +71,7 @@ export const listCustomerProcedure = customerImpl.list
           ),
       })
       .from(CustomerPaymentTable)
+      .where(isNull(CustomerPaymentTable.deletedAt))
       .groupBy(CustomerPaymentTable.customerId)
       .as("payments_by_customer");
 
@@ -79,7 +79,7 @@ export const listCustomerProcedure = customerImpl.list
       context.db
         .select({ count: sql<number>`COUNT(*)` })
         .from(CustomerTable)
-        .where(where),
+        .where(and(isNull(CustomerTable.deletedAt), where)),
       context.db
         .select({
           ...getTableColumns(CustomerTable),
@@ -98,7 +98,7 @@ export const listCustomerProcedure = customerImpl.list
           paymentsByCustomer,
           eq(paymentsByCustomer.customerId, CustomerTable.id)
         )
-        .where(where)
+        .where(and(isNull(CustomerTable.deletedAt), where))
         .offset(offset)
         .limit(limit)
         .orderBy(desc(CustomerTable.createdAt)),
@@ -143,7 +143,13 @@ export const listCustomerForSearchProcedure = customerImpl.listForSearch
         address: CustomerTable.address,
       })
       .from(CustomerTable)
-      .where(and(eq(CustomerTable.isActive, true), where))
+      .where(
+        and(
+          eq(CustomerTable.isActive, true),
+          isNull(CustomerTable.deletedAt),
+          where
+        )
+      )
       .orderBy(asc(CustomerTable.name))
       .limit(limit);
 
@@ -185,7 +191,9 @@ export const updateCustomerProcedure = customerImpl.update
     const [existCustomer] = await context.db
       .select()
       .from(CustomerTable)
-      .where(eq(CustomerTable.id, customerId))
+      .where(
+        and(eq(CustomerTable.id, customerId), isNull(CustomerTable.deletedAt))
+      )
       .limit(1);
 
     if (!existCustomer) {
@@ -222,7 +230,12 @@ export const customerDetailsProcedure = customerImpl.details
     const [customer] = await context.db
       .select()
       .from(CustomerTable)
-      .where(eq(CustomerTable.id, input.customerId))
+      .where(
+        and(
+          eq(CustomerTable.id, input.customerId),
+          isNull(CustomerTable.deletedAt)
+        )
+      )
       .limit(1);
 
     if (!customer) {
@@ -231,25 +244,12 @@ export const customerDetailsProcedure = customerImpl.details
 
     const saleTotalWhere: Array<SQL> = [
       eq(SaleTable.customerId, input.customerId),
+      isNull(SaleTable.deletedAt),
     ];
     const paymentTotalWhere: Array<SQL> = [
       eq(CustomerPaymentTable.customerId, input.customerId),
+      isNull(CustomerPaymentTable.deletedAt),
     ];
-
-    if (input.createdAt) {
-      if (input.createdAt.from) {
-        saleTotalWhere.push(gte(SaleTable.createdAt, input.createdAt.from));
-        paymentTotalWhere.push(
-          gte(CustomerPaymentTable.createdAt, input.createdAt.from)
-        );
-      }
-      if (input.createdAt.to) {
-        saleTotalWhere.push(lte(SaleTable.createdAt, input.createdAt.to));
-        paymentTotalWhere.push(
-          lte(CustomerPaymentTable.createdAt, input.createdAt.to)
-        );
-      }
-    }
 
     const [saleTotals, paymentTotals] = await Promise.all([
       context.db
@@ -272,6 +272,8 @@ export const customerDetailsProcedure = customerImpl.details
     const totalSales = Number(saleTotals[0]?.totalSales ?? 0);
     const totalPaid = Number(paymentTotals[0]?.total ?? 0);
     const lastPurchaseAt = saleTotals[0]?.lastPurchaseAt;
+
+    console.log(saleTotals);
 
     const dueAmount = totalSales - totalPaid;
 

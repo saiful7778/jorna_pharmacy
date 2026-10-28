@@ -42,14 +42,9 @@ const listCustomerPaymentsContract = customerPaymentBaseContract
       searchFields: ["invoiceNo"],
       orderFields: [],
       filter: z.object({
-        createdAt: z
-          .object({
-            from: z.coerce.date().describe("Created at from date").optional(),
-            to: z.coerce.date().describe("Created at to date").optional(),
-          })
-          .optional(),
+        customerId: z.uuid().optional(),
       }),
-    }).extend({ customerId: z.uuid().optional() })
+    })
   )
   .output(
     apiOutputSchema(
@@ -62,7 +57,11 @@ const listCustomerPaymentsContract = customerPaymentBaseContract
             note: true,
             createdAt: true,
           })
-          .extend({ invoiceNo: z.string().nullable() })
+          .extend({
+            invoiceNo: z.string().nullable(),
+            saleTotalAmount: z.number().nullable(),
+            saleCreatedAt: z.date().nullable(),
+          })
       )
     )
   );
@@ -91,7 +90,11 @@ const customerPaymentStatsContract = customerPaymentBaseContract
   })
   .input(
     z.object({
-      customerId: z.uuid().optional(),
+      filter: z
+        .object({
+          customerId: z.uuid().optional(),
+        })
+        .optional(),
     })
   )
   .output(

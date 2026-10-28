@@ -1,4 +1,4 @@
-import { and, asc, desc, eq, lt, sql, type SQL } from "drizzle-orm";
+import { and, asc, desc, eq, isNull, lt, sql, type SQL } from "drizzle-orm";
 import type { BatchItem } from "drizzle-orm/batch";
 
 import { API_MESSAGES } from "@/constants/apiMessage";
@@ -22,20 +22,14 @@ export const listCustomerPaymentsProcedure = customerImpl.payment.list
     ])
   )
   .handler(async ({ context, input }) => {
-    const { customerId, ...paginateInput } = input;
-
     const { where, page, orderBy, offset, limit } = buildPaginateOptions(
       {
-        createdAt: CustomerPaymentTable.createdAt,
+        customerId: CustomerPaymentTable.customerId,
       },
-      paginateInput
+      input
     );
 
-    const whereSql: Array<SQL> = [];
-
-    if (customerId) {
-      whereSql.push(eq(CustomerPaymentTable.customerId, customerId));
-    }
+    const whereSql: Array<SQL> = [isNull(CustomerPaymentTable.deletedAt)];
 
     if (where) {
       whereSql.push(where);
@@ -55,6 +49,8 @@ export const listCustomerPaymentsProcedure = customerImpl.payment.list
           customerId: CustomerPaymentTable.customerId,
           saleId: CustomerPaymentTable.saleId,
           invoiceNo: SaleInvoiceTable.number,
+          saleTotalAmount: SaleTable.totalAmount,
+          saleCreatedAt: SaleTable.createdAt,
           amount: CustomerPaymentTable.amount,
           note: CustomerPaymentTable.note,
           createdAt: CustomerPaymentTable.createdAt,
@@ -92,7 +88,9 @@ export const createCustomerPaymentProcedure = customerImpl.payment.create
     const [customer] = await context.db
       .select({ id: CustomerTable.id })
       .from(CustomerTable)
-      .where(eq(CustomerTable.id, customerId))
+      .where(
+        and(eq(CustomerTable.id, customerId), isNull(CustomerTable.deletedAt))
+      )
       .limit(1);
 
     if (!customer) {
@@ -111,7 +109,11 @@ export const createCustomerPaymentProcedure = customerImpl.payment.create
           })
           .from(SaleTable)
           .where(
-            and(eq(SaleTable.customerId, customerId), eq(SaleTable.id, saleId))
+            and(
+              eq(SaleTable.customerId, customerId),
+              eq(SaleTable.id, saleId),
+              isNull(SaleTable.deletedAt)
+            )
           )
       : await context.db
           .select({
@@ -125,7 +127,8 @@ export const createCustomerPaymentProcedure = customerImpl.payment.create
           .where(
             and(
               eq(SaleTable.customerId, customerId),
-              lt(SaleTable.paidAmount, SaleTable.totalAmount)
+              lt(SaleTable.paidAmount, SaleTable.totalAmount),
+              isNull(SaleTable.deletedAt)
             )
           )
           .orderBy(asc(SaleTable.createdAt));
@@ -181,25 +184,30 @@ export const customerPaymentStatsProcedure = customerImpl.payment.stats
     ])
   )
   .handler(async ({ context, input }) => {
-    const customerWhere: Array<SQL> = [];
-    const saleWhere: Array<SQL> = [];
+    const customerPaginateOption = buildPaginateOptions(
+      {
+        customerId: CustomerPaymentTable.customerId,
+      },
+      input
+    );
+    const salerPaginateOption = buildPaginateOptions(
+      {
+        customerId: SaleTable.customerId,
+      },
+      input
+    );
 
-    if (input.customerId) {
-      customerWhere.push(eq(CustomerPaymentTable.customerId, input.customerId));
-      saleWhere.push(eq(SaleTable.customerId, input.customerId));
+    const customerWhere: Array<SQL> = [isNull(CustomerPaymentTable.deletedAt)];
+    const saleWhere: Array<SQL> = [isNull(SaleTable.deletedAt)];
+
+    if (customerPaginateOption.where) {
+      customerWhere.push(customerPaginateOption.where);
+    }
+    if (salerPaginateOption.where) {
+      saleWhere.push(salerPaginateOption.where);
     }
 
-    const [paymentTotals, saleTotals] = await Promise.all([
-      // Get total paid amount
-      context.db
-        .select({
-          total: sql<number>`COALESCE(SUM(${CustomerPaymentTable.amount}), 0)`,
-          count: sql<number>`COUNT(*)`,
-        })
-        .from(CustomerPaymentTable)
-        .where(and(...customerWhere)),
-
-      // Get total sales amount and paid amount from sales table
+    const [saleTotals, paymentTotals] = await Promise.all([
       context.db
         .select({
           totalSales: sql<number>`COALESCE(SUM(${SaleTable.totalAmount}), 0)`,
@@ -208,6 +216,13 @@ export const customerPaymentStatsProcedure = customerImpl.payment.stats
         })
         .from(SaleTable)
         .where(and(...saleWhere)),
+      context.db
+        .select({
+          total: sql<number>`COALESCE(SUM(${CustomerPaymentTable.amount}), 0)`,
+          count: sql<number>`COUNT(*)`,
+        })
+        .from(CustomerPaymentTable)
+        .where(and(...customerWhere)),
     ]);
 
     const totalSales = Number(saleTotals[0]?.totalSales ?? 0);
