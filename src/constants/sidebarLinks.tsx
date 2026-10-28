@@ -1,10 +1,12 @@
 import {
   Banknote,
+  BuildingComplex,
   Contact,
   House,
   Receipt,
   Settings,
   ShieldUser,
+  ShoppingCart,
   User,
   UsersRound,
 } from "lucide-react";
@@ -60,6 +62,32 @@ export const sidebarMenuLinks: Array<SidebarGroupMenuLinkType> = [
         pathRegex: /^\/dashboard\/customers\/payments$/,
         permissions: manageOrList("customer_payment"),
         icon: <Banknote />,
+      },
+    ],
+  },
+  {
+    groupName: "Suppliers",
+    items: [
+      {
+        title: "Company",
+        path: "/dashboard/companies",
+        pathRegex: /^\/dashboard\/companies$/,
+        permissions: manageOrList("company"),
+        icon: <BuildingComplex />,
+      },
+      {
+        title: "Company Payments",
+        path: "/dashboard/companies/payments",
+        pathRegex: /^\/dashboard\/companies\/payments$/,
+        permissions: manageOrList("company_payment"),
+        icon: <Banknote />,
+      },
+      {
+        title: "Company Purchases",
+        path: "/dashboard/companies/purchases",
+        pathRegex: /^\/dashboard\/companies\/purchases$/,
+        permissions: manageOrList("purchase"),
+        icon: <ShoppingCart />,
       },
     ],
   },
