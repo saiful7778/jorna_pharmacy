@@ -23,14 +23,14 @@ import {
 import type { ORPCContext } from "@/types/orpc.types";
 
 import {
-  deleteAllCompanyPurchaseProcedure,
-  deleteCompanyPurchaseProcedure,
-  listCompanyPurchaseBinProcedure,
-  removeAllCompanyPurchaseProcedure,
-  removeCompanyPurchaseProcedure,
-  restoreAllCompanyPurchaseProcedure,
-  restoreCompanyPurchaseProcedure,
-} from "./companyPurchaseDelete.procedure";
+  deleteAllPurchaseProcedure,
+  deletePurchaseProcedure,
+  listPurchaseBinProcedure,
+  removeAllPurchaseProcedure,
+  removePurchaseProcedure,
+  restoreAllPurchaseProcedure,
+  restorePurchaseProcedure,
+} from "./purchaseDelete.procedure";
 
 vi.mock("@/oRPC/middleware/auth.middleware", async () => {
   const { os } = await import("@orpc/server");
@@ -167,7 +167,7 @@ describe("company purchase delete procedure", () => {
     const { context } = createContext(db);
 
     await call(
-      deleteCompanyPurchaseProcedure,
+      deletePurchaseProcedure,
       { purchaseId: PURCHASE_ID },
       { context }
     );
@@ -201,11 +201,7 @@ describe("company purchase delete procedure", () => {
     const { context } = createContext(db);
 
     await expect(
-      call(
-        deleteCompanyPurchaseProcedure,
-        { purchaseId: PURCHASE_ID },
-        { context }
-      )
+      call(deletePurchaseProcedure, { purchaseId: PURCHASE_ID }, { context })
     ).rejects.toMatchObject({ code: "HAS_SALES" });
 
     const [purchase] = await db
@@ -220,7 +216,7 @@ describe("company purchase delete procedure", () => {
     const { context } = createContext(db);
 
     const result = await call(
-      deleteAllCompanyPurchaseProcedure,
+      deleteAllPurchaseProcedure,
       { purchaseIds: [PURCHASE_ID, PURCHASE_TWO_ID] },
       { context }
     );
@@ -237,24 +233,20 @@ describe("company purchase delete procedure", () => {
     const { context } = createContext(db);
 
     await expect(
-      call(
-        removeCompanyPurchaseProcedure,
-        { purchaseId: PURCHASE_ID },
-        { context }
-      )
+      call(removePurchaseProcedure, { purchaseId: PURCHASE_ID }, { context })
     ).rejects.toMatchObject({ code: "NOT_IN_BIN" });
   });
 
   it("permanently removes a bin purchase with its items and payments", async () => {
     const { context } = createContext(db);
     await call(
-      deleteCompanyPurchaseProcedure,
+      deletePurchaseProcedure,
       { purchaseId: PURCHASE_ID },
       { context }
     );
 
     await call(
-      removeCompanyPurchaseProcedure,
+      removePurchaseProcedure,
       { purchaseId: PURCHASE_ID },
       { context }
     );
@@ -278,14 +270,14 @@ describe("company purchase delete procedure", () => {
   it("removeAll rejects the whole request when one purchase is not in the bin", async () => {
     const { context } = createContext(db);
     await call(
-      deleteCompanyPurchaseProcedure,
+      deletePurchaseProcedure,
       { purchaseId: PURCHASE_ID },
       { context }
     );
 
     await expect(
       call(
-        removeAllCompanyPurchaseProcedure,
+        removeAllPurchaseProcedure,
         { purchaseIds: [PURCHASE_ID, PURCHASE_TWO_ID] },
         { context }
       )
@@ -297,13 +289,13 @@ describe("company purchase delete procedure", () => {
   it("listBin returns only the purchases that are in the bin", async () => {
     const { context } = createContext(db);
     await call(
-      deleteCompanyPurchaseProcedure,
+      deletePurchaseProcedure,
       { purchaseId: PURCHASE_ID },
       { context }
     );
 
     const result = await call(
-      listCompanyPurchaseBinProcedure,
+      listPurchaseBinProcedure,
       { page: 1, limit: 20, searchFields: [] },
       { context }
     );
@@ -316,13 +308,13 @@ describe("company purchase delete procedure", () => {
   it("restore brings a bin purchase and its payments back and leaves stock unchanged", async () => {
     const { context } = createContext(db);
     await call(
-      deleteCompanyPurchaseProcedure,
+      deletePurchaseProcedure,
       { purchaseId: PURCHASE_ID },
       { context }
     );
 
     await call(
-      restoreCompanyPurchaseProcedure,
+      restorePurchaseProcedure,
       { purchaseId: PURCHASE_ID },
       { context }
     );
@@ -345,24 +337,20 @@ describe("company purchase delete procedure", () => {
     const { context } = createContext(db);
 
     await expect(
-      call(
-        restoreCompanyPurchaseProcedure,
-        { purchaseId: PURCHASE_ID },
-        { context }
-      )
+      call(restorePurchaseProcedure, { purchaseId: PURCHASE_ID }, { context })
     ).rejects.toMatchObject({ code: "NOT_IN_BIN" });
   });
 
   it("restoreAll restores every selected purchase", async () => {
     const { context } = createContext(db);
     await call(
-      deleteAllCompanyPurchaseProcedure,
+      deleteAllPurchaseProcedure,
       { purchaseIds: [PURCHASE_ID, PURCHASE_TWO_ID] },
       { context }
     );
 
     const result = await call(
-      restoreAllCompanyPurchaseProcedure,
+      restoreAllPurchaseProcedure,
       { purchaseIds: [PURCHASE_ID, PURCHASE_TWO_ID] },
       { context }
     );

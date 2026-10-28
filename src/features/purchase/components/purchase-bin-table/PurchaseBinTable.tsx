@@ -14,14 +14,14 @@ import { useDataTable } from "@/hooks/use-data-table";
 import type { FiltersType } from "@/types/data-table";
 
 import {
-  useRemoveAllCompanyPurchase,
-  useRestoreAllCompanyPurchase,
-} from "../../api/companyPurchaseDelete.api.hook";
-import type { ListCompanyPurchaseBinContractType } from "../../api/companyPurchaseDelete.contract";
+  useRemoveAllPurchase,
+  useRestoreAllPurchase,
+} from "../../api/purchaseDelete.api.hook";
+import type { ListPurchaseBinContractType } from "../../api/purchaseDelete.contract";
 import { purchaseBinTableColumn } from "./purchaseBinTableColumn";
 
 interface PurchaseBinTableProps {
-  data: ListCompanyPurchaseBinContractType["output"]["data"];
+  data: ListPurchaseBinContractType["output"]["data"];
   filters: FiltersType;
   setFilters: (filters: Omit<FiltersType, "search">) => void;
 }
@@ -52,14 +52,14 @@ export function PurchaseBinTable({
     table.getFilteredSelectedRowModel().rows.map((row) => row.original.id);
 
   const { mutate: restoreAllPurchases, isPending: isRestoringAll } =
-    useRestoreAllCompanyPurchase({
+    useRestoreAllPurchase({
       onSuccess: () => {
         table.toggleAllRowsSelected(false);
       },
     });
 
   const { mutate: removeAllPurchases, isPending: isRemovingAll } =
-    useRemoveAllCompanyPurchase({
+    useRemoveAllPurchase({
       onSuccess: () => {
         table.toggleAllRowsSelected(false);
         setOpenRemoveAllDialog(false);

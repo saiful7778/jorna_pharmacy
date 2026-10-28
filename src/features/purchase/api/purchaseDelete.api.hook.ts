@@ -12,15 +12,15 @@ import { formatOrpcError } from "@/utils/formatOrpcError";
 function invalidatePurchaseQueries(queryClient: QueryClient) {
   return Promise.all([
     queryClient.invalidateQueries({
-      queryKey: orpcTQClient.company.purchase.list.queryKey({ input: {} }),
+      queryKey: orpcTQClient.purchase.list.queryKey({ input: {} }),
       exact: false,
     }),
     queryClient.invalidateQueries({
-      queryKey: orpcTQClient.company.purchase.listBin.queryKey({ input: {} }),
+      queryKey: orpcTQClient.purchase.listBin.queryKey({ input: {} }),
       exact: false,
     }),
     queryClient.invalidateQueries({
-      queryKey: orpcTQClient.company.purchase.stats.queryKey({ input: {} }),
+      queryKey: orpcTQClient.purchase.stats.queryKey({ input: {} }),
       exact: false,
     }),
     queryClient.invalidateQueries({
@@ -30,7 +30,7 @@ function invalidatePurchaseQueries(queryClient: QueryClient) {
   ]);
 }
 
-export function useDeleteCompanyPurchase({
+export function useDeletePurchase({
   onRequestStart,
   onRequestEnd,
   onSuccess,
@@ -40,7 +40,7 @@ export function useDeleteCompanyPurchase({
   const queryClient = useQueryClient();
 
   return useMutation(
-    orpcTQClient.company.purchase.delete.mutationOptions({
+    orpcTQClient.purchase.delete.mutationOptions({
       onMutate: () => {
         toast.loading("Deleting...", { id: toastId });
         onRequestStart?.();
@@ -64,7 +64,7 @@ export function useDeleteCompanyPurchase({
   );
 }
 
-export function useDeleteAllCompanyPurchase({
+export function useDeleteAllPurchase({
   onRequestStart,
   onRequestEnd,
   onSuccess,
@@ -74,7 +74,7 @@ export function useDeleteAllCompanyPurchase({
   const queryClient = useQueryClient();
 
   return useMutation(
-    orpcTQClient.company.purchase.deleteAll.mutationOptions({
+    orpcTQClient.purchase.deleteAll.mutationOptions({
       onMutate: () => {
         toast.loading("Deleting...", { id: toastId });
         onRequestStart?.();
@@ -98,7 +98,7 @@ export function useDeleteAllCompanyPurchase({
   );
 }
 
-export function useRestoreCompanyPurchase({
+export function useRestorePurchase({
   onRequestStart,
   onRequestEnd,
   onSuccess,
@@ -108,7 +108,7 @@ export function useRestoreCompanyPurchase({
   const queryClient = useQueryClient();
 
   return useMutation(
-    orpcTQClient.company.purchase.restore.mutationOptions({
+    orpcTQClient.purchase.restore.mutationOptions({
       onMutate: () => {
         toast.loading("Restoring...", { id: toastId });
         onRequestStart?.();
@@ -132,7 +132,7 @@ export function useRestoreCompanyPurchase({
   );
 }
 
-export function useRestoreAllCompanyPurchase({
+export function useRestoreAllPurchase({
   onRequestStart,
   onRequestEnd,
   onSuccess,
@@ -142,7 +142,7 @@ export function useRestoreAllCompanyPurchase({
   const queryClient = useQueryClient();
 
   return useMutation(
-    orpcTQClient.company.purchase.restoreAll.mutationOptions({
+    orpcTQClient.purchase.restoreAll.mutationOptions({
       onMutate: () => {
         toast.loading("Restoring...", { id: toastId });
         onRequestStart?.();
@@ -166,7 +166,7 @@ export function useRestoreAllCompanyPurchase({
   );
 }
 
-export function useRemoveCompanyPurchase({
+export function useRemovePurchase({
   onRequestStart,
   onRequestEnd,
   onSuccess,
@@ -176,7 +176,7 @@ export function useRemoveCompanyPurchase({
   const queryClient = useQueryClient();
 
   return useMutation(
-    orpcTQClient.company.purchase.remove.mutationOptions({
+    orpcTQClient.purchase.remove.mutationOptions({
       onMutate: () => {
         toast.loading("Removing...", { id: toastId });
         onRequestStart?.();
@@ -184,7 +184,7 @@ export function useRemoveCompanyPurchase({
       onSuccess: async ({ message }) => {
         toast.success(message, { id: toastId });
         await queryClient.invalidateQueries({
-          queryKey: orpcTQClient.company.purchase.listBin.queryKey({
+          queryKey: orpcTQClient.purchase.listBin.queryKey({
             input: {},
           }),
           exact: false,
@@ -205,7 +205,7 @@ export function useRemoveCompanyPurchase({
   );
 }
 
-export function useRemoveAllCompanyPurchase({
+export function useRemoveAllPurchase({
   onRequestStart,
   onRequestEnd,
   onSuccess,
@@ -215,7 +215,7 @@ export function useRemoveAllCompanyPurchase({
   const queryClient = useQueryClient();
 
   return useMutation(
-    orpcTQClient.company.purchase.removeAll.mutationOptions({
+    orpcTQClient.purchase.removeAll.mutationOptions({
       onMutate: () => {
         toast.loading("Removing...", { id: toastId });
         onRequestStart?.();
@@ -223,7 +223,7 @@ export function useRemoveAllCompanyPurchase({
       onSuccess: async ({ message }) => {
         toast.success(message, { id: toastId });
         await queryClient.invalidateQueries({
-          queryKey: orpcTQClient.company.purchase.listBin.queryKey({
+          queryKey: orpcTQClient.purchase.listBin.queryKey({
             input: {},
           }),
           exact: false,

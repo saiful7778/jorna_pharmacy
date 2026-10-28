@@ -15,7 +15,7 @@ import { buildPaginateOptions, buildPaginationMeta } from "@/db/utils";
 import { apiResponse } from "@/lib/apiResponse";
 import { userPermissionMiddleware } from "@/oRPC/middleware/auth.middleware";
 
-import { companyImpl } from "./company.procedure";
+import { purchaseImpl } from "./purchase.procedure";
 
 async function hasPurchaseSoldBatches(
   db: DatabaseType,
@@ -69,7 +69,7 @@ async function restorePurchases(
   ]);
 }
 
-export const listCompanyPurchaseBinProcedure = companyImpl.purchase.listBin
+export const listPurchaseBinProcedure = purchaseImpl.listBin
   .use(
     userPermissionMiddleware([
       { level: "system", resource: "purchase", action: "manage" },
@@ -120,7 +120,7 @@ export const listCompanyPurchaseBinProcedure = companyImpl.purchase.listBin
     });
   });
 
-export const deleteCompanyPurchaseProcedure = companyImpl.purchase.delete
+export const deletePurchaseProcedure = purchaseImpl.delete
   .use(
     userPermissionMiddleware([
       { level: "system", resource: "purchase", action: "manage" },
@@ -187,7 +187,7 @@ export const deleteCompanyPurchaseProcedure = companyImpl.purchase.delete
     return apiResponse(API_MESSAGES.PURCHASE.DELETE, deletedPurchase);
   });
 
-export const deleteAllCompanyPurchaseProcedure = companyImpl.purchase.deleteAll
+export const deleteAllPurchaseProcedure = purchaseImpl.deleteAll
   .use(
     userPermissionMiddleware([
       { level: "system", resource: "purchase", action: "manage" },
@@ -253,7 +253,7 @@ export const deleteAllCompanyPurchaseProcedure = companyImpl.purchase.deleteAll
     });
   });
 
-export const removeCompanyPurchaseProcedure = companyImpl.purchase.remove
+export const removePurchaseProcedure = purchaseImpl.remove
   .use(
     userPermissionMiddleware([
       { level: "system", resource: "purchase", action: "manage" },
@@ -298,7 +298,7 @@ export const removeCompanyPurchaseProcedure = companyImpl.purchase.remove
     return apiResponse(API_MESSAGES.PURCHASE.REMOVE, removedPurchase);
   });
 
-export const removeAllCompanyPurchaseProcedure = companyImpl.purchase.removeAll
+export const removeAllPurchaseProcedure = purchaseImpl.removeAll
   .use(
     userPermissionMiddleware([
       { level: "system", resource: "purchase", action: "manage" },
@@ -340,7 +340,7 @@ export const removeAllCompanyPurchaseProcedure = companyImpl.purchase.removeAll
     });
   });
 
-export const restoreCompanyPurchaseProcedure = companyImpl.purchase.restore
+export const restorePurchaseProcedure = purchaseImpl.restore
   .use(
     userPermissionMiddleware([
       { level: "system", resource: "purchase", action: "manage" },
@@ -378,34 +378,33 @@ export const restoreCompanyPurchaseProcedure = companyImpl.purchase.restore
     return apiResponse(API_MESSAGES.PURCHASE.RESTORE, restoredPurchase);
   });
 
-export const restoreAllCompanyPurchaseProcedure =
-  companyImpl.purchase.restoreAll
-    .use(
-      userPermissionMiddleware([
-        { level: "system", resource: "purchase", action: "manage" },
-        { level: "system", resource: "purchase", action: "delete" },
-      ])
-    )
-    .handler(async ({ context, input, errors }) => {
-      const purchaseIds = [...new Set(input.purchaseIds)];
+export const restoreAllPurchaseProcedure = purchaseImpl.restoreAll
+  .use(
+    userPermissionMiddleware([
+      { level: "system", resource: "purchase", action: "manage" },
+      { level: "system", resource: "purchase", action: "delete" },
+    ])
+  )
+  .handler(async ({ context, input, errors }) => {
+    const purchaseIds = [...new Set(input.purchaseIds)];
 
-      const binPurchases = await context.db
-        .select({ id: PurchaseTable.id })
-        .from(PurchaseTable)
-        .where(
-          and(
-            inArray(PurchaseTable.id, purchaseIds),
-            isNotNull(PurchaseTable.deletedAt)
-          )
-        );
+    const binPurchases = await context.db
+      .select({ id: PurchaseTable.id })
+      .from(PurchaseTable)
+      .where(
+        and(
+          inArray(PurchaseTable.id, purchaseIds),
+          isNotNull(PurchaseTable.deletedAt)
+        )
+      );
 
-      if (binPurchases.length !== purchaseIds.length) {
-        throw errors.NOT_IN_BIN();
-      }
+    if (binPurchases.length !== purchaseIds.length) {
+      throw errors.NOT_IN_BIN();
+    }
 
-      await restorePurchases(context.db, purchaseIds);
+    await restorePurchases(context.db, purchaseIds);
 
-      return apiResponse(API_MESSAGES.PURCHASE.RESTORE_ALL, {
-        count: purchaseIds.length,
-      });
+    return apiResponse(API_MESSAGES.PURCHASE.RESTORE_ALL, {
+      count: purchaseIds.length,
     });
+  });

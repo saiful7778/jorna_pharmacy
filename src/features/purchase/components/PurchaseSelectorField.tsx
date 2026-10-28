@@ -30,10 +30,9 @@ import { DEFAULT_PAGE_INDEX } from "@/constants";
 import { orpcTQClient } from "@/oRPC/orpc";
 import { formatCurrency } from "@/utils/formatCurrency";
 
-import type { ListCompanyPurchaseContractType } from "../api/companyPurchase.contract";
+import type { ListPurchaseContractType } from "../api/purchase.contract";
 
-type PurchaseItem =
-  ListCompanyPurchaseContractType["output"]["data"]["data"][number];
+type PurchaseItem = ListPurchaseContractType["output"]["data"]["data"][number];
 
 interface PurchaseSelectorFieldProps<
   TFieldValues extends FieldValues,
@@ -126,7 +125,7 @@ function PurchaseSelectorFieldRender<TFieldValues extends FieldValues>({
   const [search, setSearch] = useState<string | undefined>(undefined);
 
   const { data, isLoading, isError, error } = useQuery(
-    orpcTQClient.company.purchase.list.queryOptions({
+    orpcTQClient.purchase.list.queryOptions({
       input: {
         companyId,
         unpaidOnly: true,

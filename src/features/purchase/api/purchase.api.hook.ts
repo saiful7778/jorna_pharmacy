@@ -5,7 +5,7 @@ import { orpcTQClient } from "@/oRPC/orpc";
 import type { IApiHookInput } from "@/types";
 import { formatOrpcError } from "@/utils/formatOrpcError";
 
-export function useCompanyPurchaseCreate<TFieldNames>({
+export function usePurchaseCreate<TFieldNames>({
   onRequestStart,
   onRequestEnd,
   onSuccess,
@@ -16,7 +16,7 @@ export function useCompanyPurchaseCreate<TFieldNames>({
   const queryClient = useQueryClient();
 
   return useMutation(
-    orpcTQClient.company.purchase.create.mutationOptions({
+    orpcTQClient.purchase.create.mutationOptions({
       onMutate: () => {
         toast.loading("Loading...", { id: toastId });
         onRequestStart?.();
@@ -25,13 +25,13 @@ export function useCompanyPurchaseCreate<TFieldNames>({
         toast.success(message, { id: toastId });
         await Promise.all([
           queryClient.invalidateQueries({
-            queryKey: orpcTQClient.company.purchase.list.queryKey({
+            queryKey: orpcTQClient.purchase.list.queryKey({
               input: {},
             }),
             exact: false,
           }),
           queryClient.invalidateQueries({
-            queryKey: orpcTQClient.company.purchase.stats.queryKey({
+            queryKey: orpcTQClient.purchase.stats.queryKey({
               input: {},
             }),
             exact: false,

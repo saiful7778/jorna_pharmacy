@@ -36,19 +36,19 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { MEDICINE_TYPE } from "@/db/schemas/enums/enum-values";
+import type { CompanyOptionType } from "@/features/company/components/CompanySearchableInput";
+import { CompanySearchableInputField } from "@/features/company/components/CompanySearchableInputField";
 import type { MedicineOptionType } from "@/features/medicine/components/MedicineSearchableInput";
 import { MedicineSearchableInputField } from "@/features/medicine/components/MedicineSearchableInputField";
 import { formatCurrency } from "@/utils/formatCurrency";
 
-import { useCompanyPurchaseCreate } from "../api/companyPurchase.api.hook";
+import { usePurchaseCreate } from "../api/purchase.api.hook";
 import {
   purchaseCreateFormSchema,
   type PurchaseCreateFormInputType,
   type PurchaseCreateFormType,
   type PurchaseCreateType,
 } from "../purchase.schema";
-import type { CompanyOptionType } from "./CompanySearchableInput";
-import { CompanySearchableInputField } from "./CompanySearchableInputField";
 
 const defaultItemValue: PurchaseCreateFormInputType["items"][number] = {
   isNew: true,
@@ -104,9 +104,7 @@ export function PurchaseCreateDialog({
 
   const { reset, handleSubmit, control, setValue, getValues } = form;
 
-  const { mutate, isPending } = useCompanyPurchaseCreate<
-    keyof PurchaseCreateType
-  >({
+  const { mutate, isPending } = usePurchaseCreate<keyof PurchaseCreateType>({
     onSuccess: () => {
       form.reset();
       setOpen(false);

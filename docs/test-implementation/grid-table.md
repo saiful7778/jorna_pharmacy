@@ -1,7 +1,7 @@
 # Grid Table
 
 Owner of the reusable grid-based table primitives in `src/components/ui/grid-table.tsx`.
-Used by `src/features/company/components/PurchaseCreateDialog.tsx` for the medicine item
+Used by `src/features/purchase/components/PurchaseCreateDialog.tsx` for the medicine item
 rows.
 
 ## Coverage summary

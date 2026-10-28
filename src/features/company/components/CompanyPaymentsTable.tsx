@@ -8,10 +8,10 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { PurchaseStatusBadge } from "@/features/purchase/components/PurchaseStatusBadge";
 import { formatCurrency } from "@/utils/formatCurrency";
 
 import type { ListCompanyPaymentsContractType } from "../api/companyPayment.contract";
-import { PurchaseStatusBadge } from "./PurchaseStatusBadge";
 import { CompanyPaymentRowAction } from "./company-details/CompanyPaymentRowAction";
 
 type CompanyPaymentsData = ListCompanyPaymentsContractType["output"]["data"];

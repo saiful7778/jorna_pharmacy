@@ -4,8 +4,7 @@ import { ReceiptText } from "lucide-react";
 
 import DataTableRowMenu from "@/components/data-table/data-table-row-menu";
 import { DropdownMenuItem } from "@/components/ui/dropdown-menu";
-
-import { PurchaseViewDialog } from "../PurchaseViewDialog";
+import { PurchaseViewDialog } from "@/features/purchase/components/PurchaseViewDialog";
 
 export function CompanyPaymentRowAction({
   purchaseId,

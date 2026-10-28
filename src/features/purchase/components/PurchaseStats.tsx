@@ -16,7 +16,7 @@ interface PurchaseStatsProps {
 
 export function PurchaseStats({ startTime, endTime }: PurchaseStatsProps) {
   const { data, isLoading, isError, error } = useQuery(
-    orpcTQClient.company.purchase.stats.queryOptions({
+    orpcTQClient.purchase.stats.queryOptions({
       input: {
         filter: {
           createdAt: buildDateRangeFilter(startTime, endTime),

@@ -14,15 +14,15 @@ import { baseContract } from "@/oRPC/orpc.contract-base";
 import type { InferContractRouterType } from "@/types/orpc.types";
 
 import { purchaseCreateSchema } from "../purchase.schema";
-import { companyPurchaseDeleteContract } from "./companyPurchaseDelete.contract";
+import { purchaseDeleteContract } from "./purchaseDelete.contract";
 
-const companyPurchaseBaseContract = baseContract.errors({
+const purchaseBaseContract = baseContract.errors({
   NOT_FOUND: { status: 404, message: API_MESSAGES.PURCHASE.NOT_FOUND },
 });
 
 const tags = ["Company", "Purchases"] as const;
 
-const listCompanyPurchaseContract = companyPurchaseBaseContract
+const listPurchaseContract = purchaseBaseContract
   .route({
     method: "POST",
     path: "/companies/purchases/list",
@@ -70,11 +70,11 @@ const listCompanyPurchaseContract = companyPurchaseBaseContract
       )
     )
   );
-export type ListCompanyPurchaseContractType = InferContractRouterType<
-  typeof listCompanyPurchaseContract
+export type ListPurchaseContractType = InferContractRouterType<
+  typeof listPurchaseContract
 >;
 
-const companyPurchaseStatsContract = companyPurchaseBaseContract
+const purchaseStatsContract = purchaseBaseContract
   .route({
     method: "GET",
     path: "/companies/purchases/stats",
@@ -104,11 +104,11 @@ const companyPurchaseStatsContract = companyPurchaseBaseContract
       })
     )
   );
-export type CompanyPurchaseStatsContractType = InferContractRouterType<
-  typeof companyPurchaseStatsContract
+export type PurchaseStatsContractType = InferContractRouterType<
+  typeof purchaseStatsContract
 >;
 
-const companyPurchaseCreateContract = companyPurchaseBaseContract
+const purchaseCreateContract = purchaseBaseContract
   .route({
     method: "POST",
     path: "/companies/purchases/create",
@@ -117,11 +117,11 @@ const companyPurchaseCreateContract = companyPurchaseBaseContract
   })
   .input(purchaseCreateSchema)
   .output(apiOutputSchema(selectPurchaseSchema));
-export type CompanyPurchaseCreateContractType = InferContractRouterType<
-  typeof companyPurchaseCreateContract
+export type PurchaseCreateContractType = InferContractRouterType<
+  typeof purchaseCreateContract
 >;
 
-const companyPurchaseDetailsContract = companyPurchaseBaseContract
+const purchaseDetailsContract = purchaseBaseContract
   .route({
     method: "GET",
     path: "/companies/purchases/details",
@@ -148,14 +148,14 @@ const companyPurchaseDetailsContract = companyPurchaseBaseContract
       })
     )
   );
-export type CompanyPurchaseDetailsContractType = InferContractRouterType<
-  typeof companyPurchaseDetailsContract
+export type PurchaseDetailsContractType = InferContractRouterType<
+  typeof purchaseDetailsContract
 >;
 
-export const companyPurchaseContract = {
-  list: listCompanyPurchaseContract,
-  stats: companyPurchaseStatsContract,
-  create: companyPurchaseCreateContract,
-  details: companyPurchaseDetailsContract,
-  ...companyPurchaseDeleteContract,
+export const purchaseContract = {
+  list: listPurchaseContract,
+  stats: purchaseStatsContract,
+  create: purchaseCreateContract,
+  details: purchaseDetailsContract,
+  ...purchaseDeleteContract,
 };

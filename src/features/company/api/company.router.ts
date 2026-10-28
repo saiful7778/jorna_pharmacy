@@ -20,21 +20,6 @@ import {
   createCompanyPaymentProcedure,
   listCompanyPaymentsProcedure,
 } from "./companyPayment.procedure";
-import {
-  companyPurchaseCreateProcedure,
-  companyPurchaseDetailsProcedure,
-  companyPurchaseStatsProcedure,
-  listCompanyPurchaseProcedure,
-} from "./companyPurchase.procedure";
-import {
-  deleteAllCompanyPurchaseProcedure,
-  deleteCompanyPurchaseProcedure,
-  listCompanyPurchaseBinProcedure,
-  removeAllCompanyPurchaseProcedure,
-  removeCompanyPurchaseProcedure,
-  restoreAllCompanyPurchaseProcedure,
-  restoreCompanyPurchaseProcedure,
-} from "./companyPurchaseDelete.procedure";
 
 export const companyRouter = companyImpl.router({
   list: listCompanyProcedure,
@@ -53,18 +38,5 @@ export const companyRouter = companyImpl.router({
     list: listCompanyPaymentsProcedure,
     stats: companyPaymentStatsProcedure,
     create: createCompanyPaymentProcedure,
-  },
-  purchase: {
-    list: listCompanyPurchaseProcedure,
-    listBin: listCompanyPurchaseBinProcedure,
-    stats: companyPurchaseStatsProcedure,
-    create: companyPurchaseCreateProcedure,
-    details: companyPurchaseDetailsProcedure,
-    delete: deleteCompanyPurchaseProcedure,
-    deleteAll: deleteAllCompanyPurchaseProcedure,
-    restore: restoreCompanyPurchaseProcedure,
-    restoreAll: restoreAllCompanyPurchaseProcedure,
-    remove: removeCompanyPurchaseProcedure,
-    removeAll: removeAllCompanyPurchaseProcedure,
   },
 });

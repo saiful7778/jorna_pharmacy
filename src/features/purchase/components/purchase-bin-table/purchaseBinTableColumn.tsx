@@ -7,11 +7,11 @@ import { BIN_RETENTION_DAYS } from "@/constants";
 import type { ColumnType } from "@/types/data-table";
 import { formatCurrency } from "@/utils/formatCurrency";
 
-import type { ListCompanyPurchaseBinContractType } from "../../api/companyPurchaseDelete.contract";
+import type { ListPurchaseBinContractType } from "../../api/purchaseDelete.contract";
 import { PurchaseBinTableRowAction } from "./PurchaseBinTableRowAction";
 
 type PurchaseBinTableRowDataType =
-  ListCompanyPurchaseBinContractType["output"]["data"]["data"][number];
+  ListPurchaseBinContractType["output"]["data"]["data"][number];
 
 export const purchaseBinTableColumn: ColumnType<PurchaseBinTableRowDataType> = [
   {

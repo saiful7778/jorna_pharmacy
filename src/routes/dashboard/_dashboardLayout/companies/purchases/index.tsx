@@ -22,8 +22,8 @@ import {
   TabNavigationTrigger,
 } from "@/components/tab-navigation";
 import { requirePermissions } from "@/features/auth/auth.functions";
-import { PurchaseBinManagementTable } from "@/features/company/components/purchase-bin-table/PurchaseBinManagementTable";
-import { PurchaseManagementTable } from "@/features/company/components/purchase-table/PurchaseManagementTable";
+import { PurchaseBinManagementTable } from "@/features/purchase/components/purchase-bin-table/PurchaseBinManagementTable";
+import { PurchaseManagementTable } from "@/features/purchase/components/purchase-table/PurchaseManagementTable";
 import { usePermissionCheck } from "@/hooks/use-permission-check";
 import { head } from "@/lib/head";
 import { querySearchSchema, rangeFilterSchema } from "@/lib/querySearchSchema";
@@ -59,7 +59,7 @@ export const Route = createFileRoute(
     }),
   loader: async ({ context: { queryClient }, deps }) => {
     await queryClient.query(
-      orpcTQClient.company.purchase.list.queryOptions({
+      orpcTQClient.purchase.list.queryOptions({
         input: {
           page: deps.page,
           limit: deps.limit,

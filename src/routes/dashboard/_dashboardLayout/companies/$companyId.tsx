@@ -29,7 +29,7 @@ import {
   CompanyDetailsTab,
 } from "@/features/company/components/company-details/CompanyDetailsTab";
 import { CompanyPaymentsTab } from "@/features/company/components/company-details/CompanyPaymentsTab";
-import { CompanyPurchasesTab } from "@/features/company/components/company-details/CompanyPurchasesTab";
+import { CompanyPurchasesTab } from "@/features/purchase/components/company-details/CompanyPurchasesTab";
 import { usePermissionCheck } from "@/hooks/use-permission-check";
 import { head } from "@/lib/head";
 import { orpcTQClient } from "@/oRPC/orpc";

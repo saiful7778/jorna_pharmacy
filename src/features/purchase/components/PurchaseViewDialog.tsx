@@ -27,10 +27,10 @@ import {
 import { orpcTQClient } from "@/oRPC/orpc";
 import { formatCurrency } from "@/utils/formatCurrency";
 
-import type { CompanyPurchaseDetailsContractType } from "../api/companyPurchase.contract";
+import type { PurchaseDetailsContractType } from "../api/purchase.contract";
 import { PurchaseStatusBadge } from "./PurchaseStatusBadge";
 
-type PurchaseDetailsType = CompanyPurchaseDetailsContractType["output"]["data"];
+type PurchaseDetailsType = PurchaseDetailsContractType["output"]["data"];
 
 export function PurchaseViewDialog({
   purchaseId,
@@ -42,7 +42,7 @@ export function PurchaseViewDialog({
   setOpen: (value: boolean) => void;
 }) {
   const { data, isLoading, isError, error } = useQuery(
-    orpcTQClient.company.purchase.details.queryOptions({
+    orpcTQClient.purchase.details.queryOptions({
       input: { purchaseId },
       enabled: open,
       select: (result) => result.data,

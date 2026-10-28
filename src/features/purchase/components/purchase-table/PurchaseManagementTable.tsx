@@ -33,7 +33,7 @@ export function PurchaseManagementTable({
   ]);
 
   const { data, isLoading, isError, error, refetch } = useQuery(
-    orpcTQClient.company.purchase.list.queryOptions({
+    orpcTQClient.purchase.list.queryOptions({
       input: {
         page: filters.page,
         limit: filters.limit,

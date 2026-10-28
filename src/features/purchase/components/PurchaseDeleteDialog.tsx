@@ -1,6 +1,6 @@
 import { DeleteDialog } from "@/components/DeleteDialog";
 
-import { useDeleteCompanyPurchase } from "../api/companyPurchaseDelete.api.hook";
+import { useDeletePurchase } from "../api/purchaseDelete.api.hook";
 
 export function PurchaseDeleteDialog({
   open,
@@ -13,7 +13,7 @@ export function PurchaseDeleteDialog({
   purchaseId: string;
   onSuccess?: () => void;
 }) {
-  const { mutate, isPending } = useDeleteCompanyPurchase({
+  const { mutate, isPending } = useDeletePurchase({
     onSuccess: () => {
       setOpen(false);
       onSuccess?.();

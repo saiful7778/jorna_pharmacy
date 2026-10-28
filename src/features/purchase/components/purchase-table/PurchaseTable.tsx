@@ -11,12 +11,12 @@ import { useDataTable } from "@/hooks/use-data-table";
 import { usePermissionCheck } from "@/hooks/use-permission-check";
 import type { FiltersType } from "@/types/data-table";
 
-import type { ListCompanyPurchaseContractType } from "../../api/companyPurchase.contract";
-import { useDeleteAllCompanyPurchase } from "../../api/companyPurchaseDelete.api.hook";
+import type { ListPurchaseContractType } from "../../api/purchase.contract";
+import { useDeleteAllPurchase } from "../../api/purchaseDelete.api.hook";
 import { purchaseTableColumn } from "./purchaseTableColumn";
 
 interface PurchaseTableProps {
-  data: ListCompanyPurchaseContractType["output"]["data"];
+  data: ListPurchaseContractType["output"]["data"];
   filters: FiltersType;
   setFilters: (filters: Omit<FiltersType, "search">) => void;
 }
@@ -46,7 +46,7 @@ export function PurchaseTable({
   });
 
   const { mutate: deleteAllPurchases, isPending: isDeletingAll } =
-    useDeleteAllCompanyPurchase({
+    useDeleteAllPurchase({
       onSuccess: () => {
         table.toggleAllRowsSelected(false);
       },

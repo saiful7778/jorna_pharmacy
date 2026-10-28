@@ -6,12 +6,12 @@ import { Checkbox } from "@/components/ui/checkbox";
 import type { ColumnType } from "@/types/data-table";
 import { formatCurrency } from "@/utils/formatCurrency";
 
-import type { ListCompanyPurchaseContractType } from "../../api/companyPurchase.contract";
+import type { ListPurchaseContractType } from "../../api/purchase.contract";
 import { PurchaseStatusBadge } from "../PurchaseStatusBadge";
 import { PurchaseTableRowAction } from "./PurchaseTableRowAction";
 
 type PurchaseTableRowDataType =
-  ListCompanyPurchaseContractType["output"]["data"]["data"][number];
+  ListPurchaseContractType["output"]["data"]["data"][number];
 
 export const purchaseTableColumn: ColumnType<PurchaseTableRowDataType> = [
   {

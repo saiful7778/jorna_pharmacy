@@ -19,6 +19,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { FieldGroup } from "@/components/ui/field";
+import { PurchaseSelectorField } from "@/features/purchase/components/PurchaseSelectorField";
 
 import { useCompanyPaymentCreate } from "../api/companyPayment.api.hook";
 import {
@@ -26,7 +27,6 @@ import {
   type CompanyPaymentCreateInputType,
   type CompanyPaymentCreateType,
 } from "../company.schema";
-import { PurchaseSelectorField } from "./PurchaseSelectorField";
 
 export function CompanyPaymentCreateDialog({
   companyId,

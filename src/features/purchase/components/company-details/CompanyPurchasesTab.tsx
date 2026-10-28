@@ -31,7 +31,7 @@ import { useSearchNavigate } from "@/hooks/use-search-navigate";
 import { orpcTQClient } from "@/oRPC/orpc";
 import { formatCurrency } from "@/utils/formatCurrency";
 
-import type { ListCompanyPurchaseContractType } from "../../api/companyPurchase.contract";
+import type { ListPurchaseContractType } from "../../api/purchase.contract";
 import { PurchaseCreateDialog } from "../PurchaseCreateDialog";
 import { PurchaseStatusBadge } from "../PurchaseStatusBadge";
 import { CompanyPurchaseRowAction } from "./CompanyPurchaseRowAction";
@@ -55,7 +55,7 @@ export function CompanyPurchasesTab({ companyId }: { companyId: string }) {
   };
 
   const { data, isLoading, isError, error } = useQuery(
-    orpcTQClient.company.purchase.list.queryOptions({
+    orpcTQClient.purchase.list.queryOptions({
       input: {
         companyId,
         page,
@@ -146,7 +146,7 @@ export function CompanyPurchasesTab({ companyId }: { companyId: string }) {
 function PurchaseRow({
   purchase,
 }: {
-  purchase: ListCompanyPurchaseContractType["output"]["data"]["data"][number];
+  purchase: ListPurchaseContractType["output"]["data"]["data"][number];
 }) {
   return (
     <TableRow>

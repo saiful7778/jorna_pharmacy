@@ -5,17 +5,17 @@ import { BanknoteCheck, Eye, ReceiptText, Trash2 } from "lucide-react";
 
 import DataTableRowMenu from "@/components/data-table/data-table-row-menu";
 import { DropdownMenuItem } from "@/components/ui/dropdown-menu";
+import { CompanyPaymentCreateDialog } from "@/features/company/components/CompanyPaymentCreateDialog";
 import { usePermissionCheck } from "@/hooks/use-permission-check";
 
-import type { ListCompanyPurchaseContractType } from "../../api/companyPurchase.contract";
-import { CompanyPaymentCreateDialog } from "../CompanyPaymentCreateDialog";
+import type { ListPurchaseContractType } from "../../api/purchase.contract";
 import { PurchaseDeleteDialog } from "../PurchaseDeleteDialog";
 import { PurchaseViewDialog } from "../PurchaseViewDialog";
 
 export function PurchaseTableRowAction({
   purchaseData,
 }: {
-  purchaseData: ListCompanyPurchaseContractType["output"]["data"]["data"][number];
+  purchaseData: ListPurchaseContractType["output"]["data"]["data"][number];
 }) {
   const isAllowCreatePayment = usePermissionCheck([
     { level: "system", resource: "company_payment", action: "create" },

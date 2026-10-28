@@ -9,22 +9,21 @@ import { paginateOutputSchema } from "@/lib/zod-schemas/paginateOutputSchema";
 import { baseContract } from "@/oRPC/orpc.contract-base";
 import type { InferContractRouterType } from "@/types/orpc.types";
 
-const companyPurchaseDeleteBaseContract = baseContract.errors({
+const purchaseDeleteBaseContract = baseContract.errors({
   NOT_FOUND: { status: 404, message: API_MESSAGES.PURCHASE.NOT_FOUND },
 });
 
-const companyPurchaseMoveToBinContract =
-  companyPurchaseDeleteBaseContract.errors({
-    HAS_SALES: { status: 409, message: API_MESSAGES.PURCHASE.HAS_SALES },
-  });
+const purchaseMoveToBinContract = purchaseDeleteBaseContract.errors({
+  HAS_SALES: { status: 409, message: API_MESSAGES.PURCHASE.HAS_SALES },
+});
 
-const companyPurchaseBinContract = companyPurchaseDeleteBaseContract.errors({
+const purchaseBinContract = purchaseDeleteBaseContract.errors({
   NOT_IN_BIN: { status: 409, message: API_MESSAGES.PURCHASE.NOT_IN_BIN },
 });
 
 const tags = ["Company", "Purchases"] as const;
 
-const listCompanyPurchaseBinContract = companyPurchaseDeleteBaseContract
+const listPurchaseBinContract = purchaseDeleteBaseContract
   .route({
     method: "POST",
     path: "/companies/purchases/bin",
@@ -56,11 +55,11 @@ const listCompanyPurchaseBinContract = companyPurchaseDeleteBaseContract
       )
     )
   );
-export type ListCompanyPurchaseBinContractType = InferContractRouterType<
-  typeof listCompanyPurchaseBinContract
+export type ListPurchaseBinContractType = InferContractRouterType<
+  typeof listPurchaseBinContract
 >;
 
-const deleteCompanyPurchaseContract = companyPurchaseMoveToBinContract
+const deletePurchaseContract = purchaseMoveToBinContract
   .route({
     method: "DELETE",
     path: "/companies/purchases/delete",
@@ -71,7 +70,7 @@ const deleteCompanyPurchaseContract = companyPurchaseMoveToBinContract
   .input(z.object({ purchaseId: z.uuid() }))
   .output(apiOutputSchema(selectPurchaseSchema));
 
-const deleteAllCompanyPurchaseContract = companyPurchaseMoveToBinContract
+const deleteAllPurchaseContract = purchaseMoveToBinContract
   .route({
     method: "DELETE",
     path: "/companies/purchases/delete-all",
@@ -82,7 +81,7 @@ const deleteAllCompanyPurchaseContract = companyPurchaseMoveToBinContract
   .input(z.object({ purchaseIds: bulkIdsSchema }))
   .output(apiOutputSchema(z.object({ count: z.number() })));
 
-const restoreCompanyPurchaseContract = companyPurchaseBinContract
+const restorePurchaseContract = purchaseBinContract
   .route({
     method: "POST",
     path: "/companies/purchases/restore",
@@ -93,7 +92,7 @@ const restoreCompanyPurchaseContract = companyPurchaseBinContract
   .input(z.object({ purchaseId: z.uuid() }))
   .output(apiOutputSchema(selectPurchaseSchema));
 
-const restoreAllCompanyPurchaseContract = companyPurchaseBinContract
+const restoreAllPurchaseContract = purchaseBinContract
   .route({
     method: "POST",
     path: "/companies/purchases/restore-all",
@@ -104,7 +103,7 @@ const restoreAllCompanyPurchaseContract = companyPurchaseBinContract
   .input(z.object({ purchaseIds: bulkIdsSchema }))
   .output(apiOutputSchema(z.object({ count: z.number() })));
 
-const removeCompanyPurchaseContract = companyPurchaseBinContract
+const removePurchaseContract = purchaseBinContract
   .route({
     method: "DELETE",
     path: "/companies/purchases/remove",
@@ -114,7 +113,7 @@ const removeCompanyPurchaseContract = companyPurchaseBinContract
   .input(z.object({ purchaseId: z.uuid() }))
   .output(apiOutputSchema(selectPurchaseSchema));
 
-const removeAllCompanyPurchaseContract = companyPurchaseBinContract
+const removeAllPurchaseContract = purchaseBinContract
   .route({
     method: "DELETE",
     path: "/companies/purchases/remove-all",
@@ -124,12 +123,12 @@ const removeAllCompanyPurchaseContract = companyPurchaseBinContract
   .input(z.object({ purchaseIds: bulkIdsSchema }))
   .output(apiOutputSchema(z.object({ count: z.number() })));
 
-export const companyPurchaseDeleteContract = {
-  listBin: listCompanyPurchaseBinContract,
-  delete: deleteCompanyPurchaseContract,
-  deleteAll: deleteAllCompanyPurchaseContract,
-  restore: restoreCompanyPurchaseContract,
-  restoreAll: restoreAllCompanyPurchaseContract,
-  remove: removeCompanyPurchaseContract,
-  removeAll: removeAllCompanyPurchaseContract,
+export const purchaseDeleteContract = {
+  listBin: listPurchaseBinContract,
+  delete: deletePurchaseContract,
+  deleteAll: deleteAllPurchaseContract,
+  restore: restorePurchaseContract,
+  restoreAll: restoreAllPurchaseContract,
+  remove: removePurchaseContract,
+  removeAll: removeAllPurchaseContract,
 };

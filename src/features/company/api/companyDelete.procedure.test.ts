@@ -20,6 +20,7 @@ import {
   SaleTable,
   UserTable,
 } from "@/db/schemas";
+import { deletePurchaseProcedure } from "@/features/purchase/api/purchaseDelete.procedure";
 import type { ORPCContext } from "@/types/orpc.types";
 
 import {
@@ -27,7 +28,6 @@ import {
   removeCompanyProcedure,
   restoreCompanyProcedure,
 } from "./companyDelete.procedure";
-import { deleteCompanyPurchaseProcedure } from "./companyPurchaseDelete.procedure";
 
 vi.mock("@/oRPC/middleware/auth.middleware", async () => {
   const { os } = await import("@orpc/server");
@@ -209,7 +209,7 @@ describe("company delete procedure", () => {
   it("does not restore a purchase that was deleted on its own before the company", async () => {
     const { context } = createContext(db);
     await call(
-      deleteCompanyPurchaseProcedure,
+      deletePurchaseProcedure,
       { purchaseId: PURCHASE_ID },
       { context }
     );

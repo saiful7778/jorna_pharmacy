@@ -1,4 +1,4 @@
-import { ORPCError } from "@orpc/client";
+import { implement, ORPCError } from "@orpc/server";
 import {
   and,
   asc,
@@ -29,12 +29,22 @@ import {
 import { buildPaginateOptions, buildPaginationMeta } from "@/db/utils";
 import { chunkByParams } from "@/db/utils/chunk-by-params";
 import { apiResponse } from "@/lib/apiResponse";
-import { userPermissionMiddleware } from "@/oRPC/middleware/auth.middleware";
+import {
+  authMiddleware,
+  userPermissionMiddleware,
+} from "@/oRPC/middleware/auth.middleware";
+import { errorMiddleware } from "@/oRPC/middleware/error.middleware";
+import type { ORPCContext } from "@/types/orpc.types";
 
 import { resolveCompany } from "../companyResolver";
-import { companyImpl } from "./company.procedure";
+import { purchaseContract } from "./purchase.contract";
 
-export const listCompanyPurchaseProcedure = companyImpl.purchase.list
+export const purchaseImpl = implement(purchaseContract)
+  .$context<ORPCContext>()
+  .use(authMiddleware)
+  .use(errorMiddleware);
+
+export const listPurchaseProcedure = purchaseImpl.list
   .use(
     userPermissionMiddleware([
       {
@@ -111,7 +121,7 @@ export const listCompanyPurchaseProcedure = companyImpl.purchase.list
     });
   });
 
-export const companyPurchaseStatsProcedure = companyImpl.purchase.stats
+export const purchaseStatsProcedure = purchaseImpl.stats
   .use(
     userPermissionMiddleware([
       { level: "system", resource: "purchase", action: "manage" },
@@ -151,7 +161,7 @@ export const companyPurchaseStatsProcedure = companyImpl.purchase.stats
     });
   });
 
-export const companyPurchaseCreateProcedure = companyImpl.purchase.create
+export const purchaseCreateProcedure = purchaseImpl.create
   .use(
     userPermissionMiddleware([
       {
@@ -306,7 +316,7 @@ export const companyPurchaseCreateProcedure = companyImpl.purchase.create
     return apiResponse(API_MESSAGES.PURCHASE.CREATE, newPurchase);
   });
 
-export const companyPurchaseDetailsProcedure = companyImpl.purchase.details
+export const purchaseDetailsProcedure = purchaseImpl.details
   .use(
     userPermissionMiddleware([
       { level: "system", resource: "purchase", action: "manage" },

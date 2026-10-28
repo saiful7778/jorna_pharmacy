@@ -20,7 +20,7 @@ export function PurchaseBinManagementTable({
   );
 
   const { data, isLoading, isError, error, refetch } = useQuery(
-    orpcTQClient.company.purchase.listBin.queryOptions({
+    orpcTQClient.purchase.listBin.queryOptions({
       input: {
         page: filters.page,
         limit: filters.limit,

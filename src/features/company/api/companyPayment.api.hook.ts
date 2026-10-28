@@ -24,7 +24,7 @@ export function useCompanyPaymentCreate<TFieldNames>({
         toast.success(message, { id: toastId });
         await Promise.all([
           queryClient.invalidateQueries({
-            queryKey: orpcTQClient.company.purchase.list.queryKey({
+            queryKey: orpcTQClient.purchase.list.queryKey({
               input: {},
             }),
             exact: false,

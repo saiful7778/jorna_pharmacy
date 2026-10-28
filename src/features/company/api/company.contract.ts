@@ -11,7 +11,6 @@ import type { InferContractRouterType } from "@/types/orpc.types";
 import { companyCreateSchema, companyUpdateSchema } from "../company.schema";
 import { companyDeleteContract } from "./companyDelete.contract";
 import { companyPaymentContract } from "./companyPayment.contract";
-import { companyPurchaseContract } from "./companyPurchase.contract";
 
 const companyBaseContract = baseContract.errors({
   NOT_FOUND: {
@@ -142,5 +141,4 @@ export const companyContract = {
   ...companyDeleteContract,
   details: companyDetailsContract,
   payment: companyPaymentContract,
-  purchase: companyPurchaseContract,
 };

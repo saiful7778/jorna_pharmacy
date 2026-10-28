@@ -8,15 +8,15 @@ import { DropdownMenuItem } from "@/components/ui/dropdown-menu";
 import { usePermissionCheck } from "@/hooks/use-permission-check";
 
 import {
-  useRemoveCompanyPurchase,
-  useRestoreCompanyPurchase,
-} from "../../api/companyPurchaseDelete.api.hook";
-import type { ListCompanyPurchaseBinContractType } from "../../api/companyPurchaseDelete.contract";
+  useRemovePurchase,
+  useRestorePurchase,
+} from "../../api/purchaseDelete.api.hook";
+import type { ListPurchaseBinContractType } from "../../api/purchaseDelete.contract";
 
 export function PurchaseBinTableRowAction({
   purchaseData,
 }: {
-  purchaseData: ListCompanyPurchaseBinContractType["output"]["data"]["data"][number];
+  purchaseData: ListPurchaseBinContractType["output"]["data"]["data"][number];
 }) {
   const [openRemoveDialog, setOpenRemoveDialog] = useState(false);
   const isAllowDelete = usePermissionCheck([
@@ -24,11 +24,10 @@ export function PurchaseBinTableRowAction({
   ]);
 
   const { mutate: restorePurchase, isPending: isRestoring } =
-    useRestoreCompanyPurchase();
-  const { mutate: removePurchase, isPending: isRemoving } =
-    useRemoveCompanyPurchase({
-      onSuccess: () => setOpenRemoveDialog(false),
-    });
+    useRestorePurchase();
+  const { mutate: removePurchase, isPending: isRemoving } = useRemovePurchase({
+    onSuccess: () => setOpenRemoveDialog(false),
+  });
 
   return (
     <>
