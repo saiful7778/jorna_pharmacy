@@ -12,8 +12,6 @@ import {
   Wallet,
 } from "lucide-react";
 
-import { FormatDateCell } from "@/components/FormatDateCell";
-import { MetaPagination } from "@/components/MetaPagination";
 import { SummaryStat } from "@/components/SummaryStat";
 import { DataTableEmpty } from "@/components/data-table/data-table-empty";
 import { DataTableSkeleton } from "@/components/data-table/data-table-skeleton";
@@ -41,23 +39,14 @@ import { RefreshButton } from "@/components/ui/refresh-button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Spinner } from "@/components/ui/spinner";
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import {
   BALANCE_EPSILON,
   DEFAULT_PAGE_INDEX,
   DEFAULT_PAGE_SIZE,
 } from "@/constants";
 import { requirePermissions } from "@/features/auth/auth.functions";
 import { CompanyPaymentCreateDialog } from "@/features/company/components/CompanyPaymentCreateDialog";
+import { CompanyPaymentsTable } from "@/features/company/components/CompanyPaymentsTable";
 import { CompanySearchableInput } from "@/features/company/components/CompanySearchableInput";
-import { PurchaseStatusBadge } from "@/features/company/components/PurchaseStatusBadge";
-import { CompanyPaymentRowAction } from "@/features/company/components/company-details/CompanyPaymentRowAction";
 import { usePermissionCheck } from "@/hooks/use-permission-check";
 import { head } from "@/lib/head";
 import { orpcTQClient } from "@/oRPC/orpc";
@@ -275,77 +264,10 @@ function CompanyPaymentDetails({ companyId }: { companyId: string }) {
         emptyFallback={<DataTableEmpty />}
       >
         {(paymentsData) => (
-          <div className="space-y-4">
-            <div className="overflow-hidden rounded-md border">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Date</TableHead>
-                    <TableHead>Purchase</TableHead>
-                    <TableHead className="text-right">Amount</TableHead>
-                    <TableHead>Note</TableHead>
-                    <TableHead className="w-0">
-                      <span className="sr-only">Actions</span>
-                    </TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {paymentsData.data.map((payment) => (
-                    <TableRow key={payment.id}>
-                      <TableCell>
-                        <FormatDateCell
-                          format="dd MMM, yyyy"
-                          value={payment.createdAt}
-                          className="block whitespace-nowrap"
-                        />
-                      </TableCell>
-                      <TableCell>
-                        {payment.purchase ? (
-                          <div className="flex flex-col items-start gap-1">
-                            <div className="flex items-center gap-1">
-                              <div className="block text-xs">
-                                {payment.purchaseId
-                                  ? payment.purchase.companyInvoiceNo
-                                    ? `Invoice ${payment.purchase.companyInvoiceNo}`
-                                    : "No invoice no"
-                                  : "General payment"}
-                              </div>
-                            </div>
-                            <PurchaseStatusBadge
-                              due={payment.purchase.dueAmount}
-                              paidAmount={payment.purchase.paidAmount}
-                            />
-                          </div>
-                        ) : (
-                          <span className="text-muted-foreground">—</span>
-                        )}
-                      </TableCell>
-                      <TableCell className="text-right font-medium tabular-nums">
-                        {formatCurrency(payment.amount)}
-                      </TableCell>
-                      <TableCell className="max-w-xs">
-                        {payment.note ? (
-                          <span className="line-clamp-1" title={payment.note}>
-                            {payment.note}
-                          </span>
-                        ) : (
-                          <span className="text-muted-foreground">—</span>
-                        )}
-                      </TableCell>
-                      <TableCell>
-                        {payment.purchaseId && (
-                          <CompanyPaymentRowAction
-                            purchaseId={payment.purchaseId}
-                          />
-                        )}
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-            <MetaPagination meta={paymentsData.meta} onPageChange={setPage} />
-          </div>
+          <CompanyPaymentsTable
+            paymentsData={paymentsData}
+            onPageChange={setPage}
+          />
         )}
       </QueryStateBoundary>
     </div>

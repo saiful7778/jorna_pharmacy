@@ -171,7 +171,7 @@ payments. Scope: `src/features/customer/**` and the customer routes under
 
 ### CUST-017 · Customer payments tab shows date with the invoice it was made against
 
-- **Covers:** `CustomerPaymentsTab` and `CustomerPaymentRowAction` — `src/features/customer/components/customer-details/`
+- **Covers:** `CustomerPaymentsTab` and `CustomerPaymentRowAction` — `src/features/customer/components/customer-details/`; `CustomerPaymentsTable` (shared by the tab and the customers payments page) — `src/features/customer/components/CustomerPaymentsTable.tsx`
 - **Type:** component · **Priority:** P2 · **Status:** Missing
 - **Given** a customer with a payment linked to a sale invoice and a general payment with no invoice
 - **When** the payments tab renders the payment list
@@ -201,6 +201,7 @@ payments. Scope: `src/features/customer/**` and the customer routes under
 | `src/features/customer/components/customer-details/CustomerPurchaseRowAction.tsx`   | _none yet_                                                              | CUST-018                                                   |
 | `src/features/customer/components/customer-details/CustomerPaymentsTab.tsx`         | _none yet_                                                              | CUST-003, CUST-017                                         |
 | `src/features/customer/components/customer-details/CustomerPaymentRowAction.tsx`    | _none yet_                                                              | CUST-017                                                   |
+| `src/features/customer/components/CustomerPaymentsTable.tsx`                        | _none yet_                                                              | CUST-017                                                   |
 | `src/features/customer/api/customerDelete.procedure.ts`                             | `src/features/customer/api/customerDelete.procedure.test.ts`            | CUST-007, CUST-008, CUST-009, CUST-010, CUST-011, CUST-014 |
 | `src/features/customer/api/customer.procedure.ts`                                   | _none yet_                                                              | CUST-015                                                   |
 | `src/features/customer/api/customerPayment.procedure.ts`                            | _none yet_                                                              | CUST-015                                                   |

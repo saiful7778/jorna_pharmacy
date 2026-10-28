@@ -304,7 +304,7 @@ payments and purchases. Scope: `src/features/company/**` and the company routes 
 
 ### COMP-031 · Company payment row menu views the linked purchase only when one exists
 
-- **Covers:** `CompanyPaymentRowAction` — `src/features/company/components/company-details/CompanyPaymentRowAction.tsx`; `CompanyPaymentsTab` — `src/features/company/components/company-details/CompanyPaymentsTab.tsx`; payments page table — `src/routes/dashboard/_dashboardLayout/companies/payments.tsx`
+- **Covers:** `CompanyPaymentRowAction` — `src/features/company/components/company-details/CompanyPaymentRowAction.tsx`; `CompanyPaymentsTab` — `src/features/company/components/company-details/CompanyPaymentsTab.tsx`; `CompanyPaymentsTable` (shared by the tab and the payments page) — `src/features/company/components/CompanyPaymentsTable.tsx`; payments page — `src/routes/dashboard/_dashboardLayout/companies/payments.tsx`
 - **Type:** component · **Priority:** P2 · **Status:** Missing
 - **Given** a payment row linked to a purchase, and a general payment row with no `purchaseId`
 - **When** the user opens the row menu on the linked payment and selects View purchase
@@ -339,6 +339,7 @@ payments and purchases. Scope: `src/features/company/**` and the company routes 
 | `src/features/company/components/PurchaseViewDialog.tsx`                           | _none yet_                                                         | COMP-030                                                             |
 | `src/features/company/components/company-details/CompanyPaymentsTab.tsx`           | _none yet_                                                         | COMP-004, COMP-029, COMP-031                                         |
 | `src/features/company/components/company-details/CompanyPaymentRowAction.tsx`      | _none yet_                                                         | COMP-031                                                             |
+| `src/features/company/components/CompanyPaymentsTable.tsx`                         | _none yet_                                                         | COMP-031                                                             |
 | `src/routes/dashboard/_dashboardLayout/companies/payments.tsx`                     | _none yet_                                                         | COMP-031                                                             |
 | `src/components/DeleteDialog.tsx`                                                  | _none yet_                                                         | COMP-007                                                             |
 | `src/features/company/components/CompanyDeleteDialog.tsx`                          | _none yet_                                                         | COMP-007                                                             |
