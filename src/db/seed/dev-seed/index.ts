@@ -8,6 +8,7 @@ import { seedCustomerPayments, seedCustomers } from "./customer.seed";
 import { seedMedicines } from "./medicine.seed";
 import { seedPurchaseReturns, seedPurchases } from "./purchase.seed";
 import { seedSales } from "./sale.seed";
+import { seedSaleClosings } from "./saleClosing.seed";
 import { seedUsers } from "./user.seed";
 
 async function main() {
@@ -48,6 +49,7 @@ async function main() {
       users,
     });
     await seedCustomerPayments(db, { customers, sales, users });
+    const saleClosings = await seedSaleClosings(db, { sales, users });
 
     const { purchaseReturns } = await seedPurchaseReturns(db, {
       purchases,
@@ -69,6 +71,7 @@ async function main() {
     console.log(`Purchase returns: ${purchaseReturns.length}`);
     console.log(`Sales: ${sales.length}`);
     console.log(`Sale items: ${saleItems.length}`);
+    console.log(`Sale closings: ${saleClosings.length}`);
 
     console.log("\n🎉 Seed completed successfully!");
   } finally {

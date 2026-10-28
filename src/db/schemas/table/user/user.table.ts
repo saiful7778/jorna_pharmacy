@@ -21,6 +21,7 @@ import { CustomerPaymentTable } from "../customer";
 import { PurchaseReturnTable, PurchaseTable } from "../purchase";
 import { UserRoleTable } from "../role-permission";
 import { SaleInvoiceTable, SaleTable } from "../sale";
+import { SaleClosingTable } from "../saleClosing.table";
 import { SessionTable } from "../session.table";
 import { UserDeviceTable } from "./userDevice.table";
 import { UserEventTable } from "./userEvent.table";
@@ -78,6 +79,9 @@ export const UserRelations = relations(UserTable, ({ many }) => ({
   }),
   purchaseReturns: many(PurchaseReturnTable, {
     relationName: "PurchaseReturnToCreatedBy",
+  }),
+  saleClosings: many(SaleClosingTable, {
+    relationName: "SaleClosingToClosedBy",
   }),
 }));
 

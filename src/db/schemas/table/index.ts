@@ -6,5 +6,6 @@ export * from "./role-permission";
 export * from "./sale";
 export * from "./user";
 export * from "./account.table";
+export * from "./saleClosing.table";
 export * from "./session.table";
 export * from "./verification.table";

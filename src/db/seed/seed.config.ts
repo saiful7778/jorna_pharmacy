@@ -7,5 +7,6 @@ export const seedConfigs = {
     sales: 150,
     purchaseReturns: 6,
     expenses: 80,
+    saleClosings: 12,
   },
 };
