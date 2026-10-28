@@ -11,6 +11,7 @@ import {
   db_created_at,
   db_id,
   db_money,
+  db_soft_delete,
   db_updated_at,
 } from "@/db/utils/db-utils";
 
@@ -28,6 +29,7 @@ export const PurchaseReturnTable = sqliteTable(
     totalAmount: db_money("total_amount").notNull(),
     reason: text("reason"),
     createdBy: text("created_by"),
+    ...db_soft_delete,
     createdAt: db_created_at,
     updatedAt: db_updated_at,
   },

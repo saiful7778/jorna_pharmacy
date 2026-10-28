@@ -17,6 +17,7 @@ import {
   db_created_at,
   db_id,
   db_money,
+  db_soft_delete,
   db_updated_at,
 } from "@/db/utils/db-utils";
 
@@ -33,6 +34,7 @@ export const CustomerPaymentTable = sqliteTable(
     amount: db_money("amount").notNull(),
     note: text("note"),
     createdBy: text("created_by"),
+    ...db_soft_delete,
     createdAt: db_created_at,
     updatedAt: db_updated_at,
   },

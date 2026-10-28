@@ -11,6 +11,7 @@ import {
   db_bool,
   db_created_at,
   db_id,
+  db_soft_delete,
   db_updated_at,
 } from "@/db/utils/db-utils";
 
@@ -27,6 +28,7 @@ export const CompanyTable = sqliteTable(
     address: text("address"),
     note: text("note"),
     isActive: db_bool("is_active").notNull().default(true),
+    ...db_soft_delete,
     createdAt: db_created_at,
     updatedAt: db_updated_at,
   },

@@ -30,6 +30,9 @@ export async function seedCustomers(
       address: faker.location.streetAddress(),
       note: faker.datatype.boolean(0.2) ? faker.lorem.sentence() : null,
       isActive: faker.datatype.boolean(0.9),
+      deletedAt: faker.datatype.boolean(0.1)
+        ? daysAgo(faker.number.int({ min: 0, max: 14 }))
+        : null,
     })
   );
 
@@ -70,8 +73,9 @@ export async function seedCustomerPayments(
         createdBy: faker.helpers.arrayElement(users).id,
         createdAt: faker.date.between({
           from: sale.createdAt,
-          to: new Date(),
+          to: sale.deletedAt ?? new Date(),
         }),
+        deletedAt: sale.deletedAt,
       });
     }
   }
@@ -85,7 +89,11 @@ export async function seedCustomerPayments(
       amount: faker.number.int({ min: 500, max: 3000 }),
       note: "Due collection",
       createdBy: faker.helpers.arrayElement(users).id,
-      createdAt: daysAgo(faker.number.int({ min: 0, max: 90 })),
+      createdAt: faker.date.between({
+        from: daysAgo(90),
+        to: customer.deletedAt ?? new Date(),
+      }),
+      deletedAt: customer.deletedAt,
     });
   }
 

@@ -10,6 +10,7 @@ import type {
 } from "../../schemas";
 import { CompanyPaymentTable, CompanyTable } from "../../schemas";
 import {
+  daysAgo,
   insertChunked,
   insertChunkedReturning,
   splitAmount,
@@ -29,6 +30,9 @@ export async function seedCompanies(
       address: faker.location.streetAddress(),
       note: faker.datatype.boolean(0.3) ? faker.lorem.sentence() : null,
       isActive: faker.datatype.boolean(0.9),
+      deletedAt: faker.datatype.boolean(0.1)
+        ? daysAgo(faker.number.int({ min: 0, max: 14 }))
+        : null,
     })
   );
 
@@ -69,8 +73,9 @@ export async function seedCompanyPayments(
         createdBy: faker.helpers.arrayElement(users).id,
         createdAt: faker.date.between({
           from: purchase.createdAt,
-          to: new Date(),
+          to: purchase.deletedAt ?? new Date(),
         }),
+        deletedAt: purchase.deletedAt,
       });
     }
   }
@@ -84,7 +89,11 @@ export async function seedCompanyPayments(
       amount: faker.number.int({ min: 1000, max: 5000 }),
       note: "On-account payment",
       createdBy: faker.helpers.arrayElement(users).id,
-      createdAt: faker.date.recent({ days: 90 }),
+      createdAt: faker.date.between({
+        from: daysAgo(90),
+        to: company.deletedAt ?? new Date(),
+      }),
+      deletedAt: company.deletedAt,
     });
   }
 

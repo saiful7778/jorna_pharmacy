@@ -31,6 +31,8 @@ const RETURN_REASONS = [
   "Expired stock",
 ];
 
+const PURCHASE_DELETE_PROBABILITY = 0.05;
+
 export async function seedPurchases(
   db: DatabaseType,
   {
@@ -59,6 +61,12 @@ export async function seedPurchases(
       to: daysAgo(90),
     });
     const company = faker.helpers.arrayElement(companies);
+    // A purchase of a deleted company is deleted with the company at the same time
+    const deletedAt =
+      company.deletedAt ??
+      (faker.datatype.boolean(PURCHASE_DELETE_PROBABILITY)
+        ? faker.date.between({ from: createdAt, to: new Date() })
+        : null);
     const companyInvoiceCounter =
       (companyInvoiceCounters.get(company.id) ?? 0) + 1;
     companyInvoiceCounters.set(company.id, companyInvoiceCounter);
@@ -114,6 +122,7 @@ export async function seedPurchases(
       note: null,
       createdBy: faker.helpers.arrayElement(users).id,
       createdAt,
+      deletedAt,
     });
     purchaseItemsData.push(...items);
   }
@@ -152,9 +161,10 @@ export async function seedPurchaseReturns(
   const returnsData: Array<InsertPurchaseReturn> = [];
   const returnItemsData: Array<InsertPurchaseReturnItem> = [];
   const changedBatches = new Set<PurchaseItemDataModel>();
+  const activePurchases = purchases.filter((purchase) => !purchase.deletedAt);
 
   for (let i = 0; i < seedConfigs.targets.purchaseReturns; i++) {
-    const purchase = faker.helpers.arrayElement(purchases);
+    const purchase = faker.helpers.arrayElement(activePurchases);
     const candidates = purchaseItems.filter(
       (item) => item.purchaseId === purchase.id && item.qtyRemaining > 0
     );

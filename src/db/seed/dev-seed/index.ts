@@ -43,6 +43,7 @@ async function main() {
 
     const { sales, saleItems } = await seedSales(db, {
       customers,
+      purchases,
       purchaseItems,
       users,
     });
