@@ -1,8 +1,8 @@
 import { implement } from "@orpc/server";
-import { and, asc, eq, gt, sql } from "drizzle-orm";
+import { and, asc, eq, gt, isNull, sql } from "drizzle-orm";
 
 import { API_MESSAGES } from "@/constants/apiMessage";
-import { MedicineTable, PurchaseItemTable } from "@/db/schemas";
+import { MedicineTable, PurchaseItemTable, PurchaseTable } from "@/db/schemas";
 import { buildPaginateOptions } from "@/db/utils";
 import { apiResponse } from "@/lib/apiResponse";
 import {
@@ -50,7 +50,16 @@ export const listMedicineForSearchProcedure = medicineImpl.listForSearch
           ),
       })
       .from(PurchaseItemTable)
-      .where(gt(PurchaseItemTable.qtyRemaining, 0))
+      .innerJoin(
+        PurchaseTable,
+        eq(PurchaseTable.id, PurchaseItemTable.purchaseId)
+      )
+      .where(
+        and(
+          gt(PurchaseItemTable.qtyRemaining, 0),
+          isNull(PurchaseTable.deletedAt)
+        )
+      )
       .as("ranked_batches");
 
     const medicines = await context.db
