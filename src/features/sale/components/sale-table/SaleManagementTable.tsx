@@ -30,6 +30,10 @@ export function SaleManagementTable({
     "/dashboard/_dashboardLayout/sales/"
   );
 
+  const handleOpenDialog = (value: boolean) => {
+    setFilters((prev) => ({ ...prev, saleCreateDialog: value }));
+  };
+
   const { data, isLoading, isError, error, refetch } = useQuery(
     orpcTQClient.sale.list.queryOptions({
       input: {
@@ -71,15 +75,14 @@ export function SaleManagementTable({
       >
         {isAllowSaleCreate && (
           <>
-            <Button
-              onClick={() =>
-                setFilters((prev) => ({ ...prev, saleCreateDialog: true }))
-              }
-            >
+            <Button onClick={() => handleOpenDialog(true)}>
               <Plus />
               <span>New Sale</span>
             </Button>
-            <SaleCreateDialog />
+            <SaleCreateDialog
+              open={filters.saleCreateDialog}
+              setOpen={handleOpenDialog}
+            />
           </>
         )}
       </DataTableGlobalSearch>

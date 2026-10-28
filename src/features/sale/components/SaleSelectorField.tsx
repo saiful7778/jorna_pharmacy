@@ -126,12 +126,14 @@ function SaleSelectorFieldRender<TFieldValues extends FieldValues>({
   const { data, isLoading, isError, error } = useQuery(
     orpcTQClient.sale.list.queryOptions({
       input: {
-        customerId,
         unpaidOnly: true,
         search,
         searchFields: ["invoiceNo"],
         page: DEFAULT_PAGE_INDEX,
         limit: 5,
+        filter: {
+          customerId,
+        },
       },
       enabled: fetchApi,
       select: (result) => result.data.data,

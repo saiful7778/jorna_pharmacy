@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useMemo } from "react";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useSearch } from "@tanstack/react-router";
 import { Plus, Trash } from "lucide-react";
 import {
   useFieldArray,
@@ -25,13 +24,20 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { FieldGroup, FieldLegend, FieldSet } from "@/components/ui/field";
+import {
+  GridTable,
+  GridTableBody,
+  GridTableCell,
+  GridTableHead,
+  GridTableHeader,
+  GridTableRow,
+} from "@/components/ui/grid-table";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import type { CustomerOptionType } from "@/features/customer/components/CustomerSearchableInput";
 import { CustomerSearchableInputField } from "@/features/customer/components/CustomerSearchableInputField";
 import type { MedicineOptionType } from "@/features/medicine/components/MedicineSearchableInput";
 import { MedicineSearchableInputField } from "@/features/medicine/components/MedicineSearchableInputField";
-import { useSearchNavigate } from "@/hooks/use-search-navigate";
 import { formatCurrency } from "@/utils/formatCurrency";
 
 import { useSaleCreate } from "../api/sale.api.hook";
@@ -60,20 +66,24 @@ const formInitialValue: SaleCreateFormInputType = {
   paidAmount: "0",
 };
 
-export function SaleCreateDialog() {
-  const { saleCreateDialog } = useSearch({
-    from: "/dashboard/_dashboardLayout/sales/",
-  });
-  const searchNavigate = useSearchNavigate("/dashboard/sales/");
+export function SaleCreateDialog({
+  customerId,
+  open,
+  setOpen,
+}: {
+  customerId?: string;
+  open: boolean;
+  setOpen: (value: boolean) => void;
+}) {
   const form = useForm<SaleCreateFormInputType, unknown, SaleCreateFormType>({
     resolver: zodResolver(saleCreateFormSchema),
-    defaultValues: formInitialValue,
+    defaultValues: { ...formInitialValue, customerId },
   });
 
   const { reset, handleSubmit, control, setValue, getValues } = form;
 
   const handleDialog = (value: boolean) => {
-    searchNavigate((prev) => ({ ...prev, saleCreateDialog: value }));
+    setOpen(value);
   };
 
   const { mutate, isPending } = useSaleCreate<keyof SaleCreateType>({
@@ -178,11 +188,7 @@ export function SaleCreateDialog() {
   );
 
   return (
-    <Dialog
-      defaultOpen={saleCreateDialog}
-      open={saleCreateDialog}
-      onOpenChange={handleDialog}
-    >
+    <Dialog open={open} onOpenChange={handleDialog}>
       <DialogResponsiveContent className="max-w-full rounded-none sm:max-w-5xl sm:rounded-lg">
         <DialogStickyHeader>
           <DialogTitle>New Sale</DialogTitle>
@@ -193,32 +199,34 @@ export function SaleCreateDialog() {
         <DialogResponsiveBody>
           <form id={formId} onSubmit={onSubmit}>
             <FieldGroup>
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-                <CustomerSearchableInputField
-                  control={control}
-                  name="customerName"
-                  label="Customer"
-                  placeholder="Search customer"
-                  description="Type customer name to search"
-                  onReset={onCustomerFieldReset}
-                  onOptionSelect={onCustomerSelect}
-                  disabled={isPending}
-                />
-                <InputField
-                  control={control}
-                  name="customerPhone"
-                  label="Phone"
-                  placeholder="Customer Phone Number"
-                  disabled={isPending}
-                />
-                <InputField
-                  control={control}
-                  name="customerAddress"
-                  label="Address"
-                  placeholder="Customer Address"
-                  disabled={isPending}
-                />
-              </div>
+              {!customerId && (
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+                  <CustomerSearchableInputField
+                    control={control}
+                    name="customerName"
+                    label="Customer"
+                    placeholder="Search customer"
+                    description="Type customer name to search"
+                    onReset={onCustomerFieldReset}
+                    onOptionSelect={onCustomerSelect}
+                    disabled={isPending}
+                  />
+                  <InputField
+                    control={control}
+                    name="customerPhone"
+                    label="Phone"
+                    placeholder="Customer Phone Number"
+                    disabled={isPending}
+                  />
+                  <InputField
+                    control={control}
+                    name="customerAddress"
+                    label="Address"
+                    placeholder="Customer Address"
+                    disabled={isPending}
+                  />
+                </div>
+              )}
               <SaleMedicineItems form={form} isPending={isPending} />
 
               <div className="ml-auto w-full max-w-sm border">
@@ -340,25 +348,25 @@ function SaleMedicineItems({
     <FieldSet>
       <FieldLegend>Medicines</FieldLegend>
       <div className="space-y-2">
-        <div className="border">
-          {/* header */}
-          <div className="grid grid-cols-12 items-center">
-            <div className="col-span-5 border-r p-2">
-              <Label>Medicine name</Label>
-            </div>
-            <div className="col-span-2 border-r p-2">
-              <Label>Stock</Label>
-            </div>
-            <div className="col-span-2 border-r p-2">
-              <Label>Price</Label>
-            </div>
-            <div className="col-span-2 border-r p-2">
-              <Label>Qty</Label>
-            </div>
-            <div className="col-span-1 p-2"></div>
-          </div>
-          {/* body */}
-          <div className="grid grid-cols-12 items-center">
+        <GridTable>
+          <GridTableHeader>
+            <GridTableRow>
+              <GridTableHead span={5}>
+                <Label>Medicine name</Label>
+              </GridTableHead>
+              <GridTableHead span={2}>
+                <Label>Stock</Label>
+              </GridTableHead>
+              <GridTableHead span={2}>
+                <Label>Price</Label>
+              </GridTableHead>
+              <GridTableHead span={2}>
+                <Label>Qty</Label>
+              </GridTableHead>
+              <GridTableHead span={1} />
+            </GridTableRow>
+          </GridTableHeader>
+          <GridTableBody>
             {fields.map((_, idx) => (
               <SaleMedicineItem
                 key={idx}
@@ -368,8 +376,8 @@ function SaleMedicineItems({
                 isPending={isPending}
               />
             ))}
-          </div>
-        </div>
+          </GridTableBody>
+        </GridTable>
 
         <Button
           type="button"
@@ -422,8 +430,8 @@ function SaleMedicineItem({
   );
 
   return (
-    <>
-      <div className="col-span-5 border-t border-r">
+    <GridTableRow className="border-t">
+      <GridTableCell span={5}>
         <MedicineSearchableInputField
           control={control}
           showAddon={false}
@@ -437,8 +445,8 @@ function SaleMedicineItem({
           showError={false}
           disabled={isPending}
         />
-      </div>
-      <div className="col-span-2 border-t border-r">
+      </GridTableCell>
+      <GridTableCell span={2}>
         <InputField
           control={control}
           name={`items.${fieldIdx}.stock`}
@@ -449,8 +457,8 @@ function SaleMedicineItem({
           showError={false}
           disabled={isPending}
         />
-      </div>
-      <div className="col-span-2 border-t border-r">
+      </GridTableCell>
+      <GridTableCell span={2}>
         <InputField
           control={control}
           name={`items.${fieldIdx}.price`}
@@ -462,8 +470,8 @@ function SaleMedicineItem({
           showError={false}
           disabled={isPending}
         />
-      </div>
-      <div className="col-span-2 border-t border-r">
+      </GridTableCell>
+      <GridTableCell span={2}>
         <InputField
           control={control}
           name={`items.${fieldIdx}.quantity`}
@@ -473,14 +481,14 @@ function SaleMedicineItem({
           showError={false}
           disabled={isPending}
         />
-      </div>
-      <div className="col-span-1 border-t">
+      </GridTableCell>
+      <GridTableCell span={1}>
         <div className="flex justify-center">
           <Button size="icon" variant="destructive" onClick={onRemove}>
             <Trash /> <span className="sr-only">remove item</span>
           </Button>
         </div>
-      </div>
-    </>
+      </GridTableCell>
+    </GridTableRow>
   );
 }

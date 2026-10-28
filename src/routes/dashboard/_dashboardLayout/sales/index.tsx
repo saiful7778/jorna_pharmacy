@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { ReceiptText, Trash2 } from "lucide-react";
 import z from "zod";
 
 import { DataTableSkeleton } from "@/components/data-table/data-table-skeleton";
@@ -14,8 +15,16 @@ import {
   DashboardShellTitleSkeleton,
 } from "@/components/shared/dashboard-shell/DashboardShellHeaderSkeleton";
 import { DashboardShellSkeleton } from "@/components/shared/dashboard-shell/DashboardShellSkeleton";
+import {
+  TabNavigation,
+  TabNavigationContent,
+  TabNavigationList,
+  TabNavigationTrigger,
+} from "@/components/tab-navigation";
 import { requirePermissions } from "@/features/auth/auth.functions";
+import { SaleBinManagementTable } from "@/features/sale/components/sale-bin-table/SaleBinManagementTable";
 import { SaleManagementTable } from "@/features/sale/components/sale-table/SaleManagementTable";
+import { usePermissionCheck } from "@/hooks/use-permission-check";
 import { head } from "@/lib/head";
 import { querySearchSchema, rangeFilterSchema } from "@/lib/querySearchSchema";
 import { orpcTQClient } from "@/oRPC/orpc";
@@ -34,9 +43,10 @@ export const Route = createFileRoute("/dashboard/_dashboardLayout/sales/")({
       context.user.id
     );
   },
-  validateSearch: querySearchSchema
-    .extend(rangeFilterSchema.shape)
-    .extend({ saleCreateDialog: z.boolean().optional().default(false) }),
+  validateSearch: querySearchSchema.extend(rangeFilterSchema.shape).extend({
+    saleCreateDialog: z.boolean().optional().default(false),
+    view: z.enum(["active", "bin"]).default("active"),
+  }),
   loaderDeps: ({ search }) => search,
   head: ({ match }) =>
     head({
@@ -76,6 +86,10 @@ export const Route = createFileRoute("/dashboard/_dashboardLayout/sales/")({
 });
 
 function RouteComponent() {
+  const isAllowDelete = usePermissionCheck([
+    { level: "system", resource: "sale", action: "delete" },
+  ]);
+
   return (
     <DashboardShell
       header={
@@ -87,7 +101,28 @@ function RouteComponent() {
         </DashboardShellHeader>
       }
     >
-      <SaleManagementTable searchFields={searchFields} />
+      <TabNavigation paramName="view" routeId={Route.id} defaultTab="active">
+        <TabNavigationList>
+          <TabNavigationTrigger value="active">
+            <ReceiptText />
+            Active
+          </TabNavigationTrigger>
+          {isAllowDelete && (
+            <TabNavigationTrigger value="bin">
+              <Trash2 />
+              Bin
+            </TabNavigationTrigger>
+          )}
+        </TabNavigationList>
+        <TabNavigationContent value="active">
+          <SaleManagementTable searchFields={searchFields} />
+        </TabNavigationContent>
+        {isAllowDelete && (
+          <TabNavigationContent value="bin">
+            <SaleBinManagementTable searchFields={searchFields} />
+          </TabNavigationContent>
+        )}
+      </TabNavigation>
     </DashboardShell>
   );
 }

@@ -4,11 +4,10 @@ import { HandCoins, Receipt, TrendingUp, Wallet } from "lucide-react";
 import { SummaryStat } from "@/components/SummaryStat";
 import { QueryStateBoundary } from "@/components/tanstack-query/query-state-boundary";
 import { Skeleton } from "@/components/ui/skeleton";
+import { BALANCE_EPSILON } from "@/constants";
 import { orpcTQClient } from "@/oRPC/orpc";
 import { buildDateRangeFilter } from "@/utils/buildDateRangeFilter";
 import { formatCurrency } from "@/utils/formatCurrency";
-
-const BALANCE_EPSILON = 0.005;
 
 export function SaleStats({
   startTime,
