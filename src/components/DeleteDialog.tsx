@@ -2,7 +2,7 @@ import { useState } from "react";
 
 import { CircleAlertIcon } from "lucide-react";
 
-import { BIN_RETENTION_DAYS } from "@/constants/bin";
+import { BIN_RETENTION_DAYS } from "@/constants";
 
 import {
   AlertDialog,
