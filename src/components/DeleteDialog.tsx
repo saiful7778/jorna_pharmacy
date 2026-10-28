@@ -2,6 +2,8 @@ import { useState } from "react";
 
 import { CircleAlertIcon } from "lucide-react";
 
+import { BIN_RETENTION_DAYS } from "@/constants/bin";
+
 import {
   AlertDialog,
   AlertDialogCancel,
@@ -14,11 +16,17 @@ import {
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 
+type DeleteMode = "soft" | "permanent";
+
 interface DeleteDialogProps {
   openDialog: boolean;
   setOpenDialog: React.Dispatch<React.SetStateAction<boolean>>;
   onDelete: () => void;
   isDeleteing?: boolean;
+  /** `soft` moves the item to the bin; `permanent` deletes it for good. */
+  mode?: DeleteMode;
+  /** Days a soft-deleted item stays in the bin before it is purged. */
+  retentionDays?: number;
 }
 
 export function DeleteDialog({
@@ -26,6 +34,8 @@ export function DeleteDialog({
   setOpenDialog,
   onDelete,
   isDeleteing,
+  mode = "permanent",
+  retentionDays = BIN_RETENTION_DAYS,
 }: DeleteDialogProps) {
   const [inputValue, setInputValue] = useState("");
 
@@ -33,6 +43,8 @@ export function DeleteDialog({
     onDelete();
     setInputValue("");
   };
+
+  const isSoft = mode === "soft";
 
   return (
     <AlertDialog open={openDialog} onOpenChange={setOpenDialog}>
@@ -45,13 +57,26 @@ export function DeleteDialog({
             <CircleAlertIcon className="opacity-80" size={16} />
           </div>
           <AlertDialogHeader>
-            <AlertDialogTitle className="sm:text-center">
-              Final confirmation
+            <AlertDialogTitle className="w-full text-center">
+              {isSoft ? "Move to bin" : "Final confirmation"}
             </AlertDialogTitle>
-            <AlertDialogDescription className="sm:text-center">
-              This action cannot be undone. Are you sure to delete. To confirm,
-              please enter{" "}
-              <span className="font-semibold text-foreground">CONFIRM</span>.
+            <AlertDialogDescription className="text-center">
+              {isSoft ? (
+                <>
+                  This item will be moved to the bin and permanently deleted
+                  after {retentionDays} days. You can restore it from the bin
+                  before then. To confirm, please enter{" "}
+                  <span className="font-semibold text-foreground">CONFIRM</span>
+                  .
+                </>
+              ) : (
+                <>
+                  This action cannot be undone. Are you sure to delete. To
+                  confirm, please enter{" "}
+                  <span className="font-semibold text-foreground">CONFIRM</span>
+                  .
+                </>
+              )}
             </AlertDialogDescription>
           </AlertDialogHeader>
         </div>
@@ -80,7 +105,7 @@ export function DeleteDialog({
               aria-disabled={isDeleteing || inputValue !== "CONFIRM"}
               onClick={handleDelete}
             >
-              Delete
+              {isSoft ? "Move to bin" : "Delete"}
             </Button>
           </AlertDialogFooter>
         </div>
