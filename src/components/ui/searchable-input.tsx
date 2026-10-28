@@ -1,7 +1,6 @@
 import {
   useCallback,
   useId,
-  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -14,8 +13,12 @@ import { createPortal } from "react-dom";
 
 import { cn } from "cn";
 
+import { useAsRef } from "@/hooks/use-as-ref";
+import { useCallbackRef } from "@/hooks/use-callback-ref";
 import { useComposedRefs } from "@/hooks/use-composed-refs";
+import { useControllableState } from "@/hooks/use-controllable-state";
 import { useDebouncedCallback } from "@/hooks/use-debounced-callback";
+import { useIsomorphicLayoutEffect } from "@/hooks/use-isomorphic-layout-effect";
 
 import { InputGroup, InputGroupAddon, InputGroupInput } from "./input-group";
 
@@ -41,6 +44,9 @@ interface SearchableInputProps<TOption> {
   options: readonly TOption[] | undefined;
   onSearch?: (query: string) => void;
   searchDebounceMs?: number;
+  defaultOpen?: boolean;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
   getOptionKey: (option: TOption) => string;
   getOptionLabel: (option: TOption) => string;
   renderOption?: (option: TOption) => ReactNode;
@@ -64,6 +70,9 @@ function SearchableInput<TOption>({
   options,
   onSearch,
   searchDebounceMs = 300,
+  defaultOpen = false,
+  open: openProp,
+  onOpenChange,
   getOptionKey,
   getOptionLabel,
   renderOption,
@@ -76,7 +85,11 @@ function SearchableInput<TOption>({
   const listboxId = useId();
   const inputRef = useRef<HTMLInputElement | null>(null);
   const setInputRef = useComposedRefs(inputRef, externalInputRef);
-  const [isOpenRequested, setIsOpenRequested] = useState(false);
+  const [isOpenRequested, setIsOpenRequested] = useControllableState({
+    prop: openProp,
+    defaultProp: false,
+    onChange: onOpenChange,
+  });
   const [activeIndex, setActiveIndex] = useState(-1);
   const [position, setPosition] = useState<SearchableInputPosition | null>(
     null
@@ -85,13 +98,17 @@ function SearchableInput<TOption>({
   const inputId = id ?? generatedId;
   const items = useMemo(() => options ?? [], [options]);
   const isOpen = isOpenRequested && items.length > 0;
+  const itemsRef = useAsRef(items);
+  const isOpenRef = useAsRef(isOpen);
+  const stableGetOptionLabel = useCallbackRef(getOptionLabel);
+  const stableOnOptionSelect = useCallbackRef(onOptionSelect);
 
   const debouncedSearch = useDebouncedCallback(
     (query: string) => onSearch?.(query),
     searchDebounceMs
   );
 
-  useLayoutEffect(() => {
+  useIsomorphicLayoutEffect(() => {
     if (!isOpen) return;
 
     const updatePosition = () => {
@@ -113,15 +130,22 @@ function SearchableInput<TOption>({
   const closeList = useCallback(() => {
     setIsOpenRequested(false);
     setActiveIndex(-1);
-  }, []);
+  }, [setIsOpenRequested]);
 
   const selectOption = useCallback(
     (option: TOption) => {
-      onChange?.(getOptionLabel(option));
-      onOptionSelect?.(option);
+      debouncedSearch.cancel();
+      onChange?.(stableGetOptionLabel(option));
+      stableOnOptionSelect(option);
       closeList();
     },
-    [closeList, getOptionLabel, onChange, onOptionSelect]
+    [
+      closeList,
+      debouncedSearch,
+      onChange,
+      stableGetOptionLabel,
+      stableOnOptionSelect,
+    ]
   );
 
   const handleOnChange = useCallback(
@@ -134,19 +158,22 @@ function SearchableInput<TOption>({
       setActiveIndex(-1);
       debouncedSearch(nextValue);
     },
-    [debouncedSearch, onChange, onValueChange]
+    [debouncedSearch, onChange, onValueChange, setIsOpenRequested]
   );
 
   const handleOnKeyDown = useCallback(
     (event: KeyboardEvent<HTMLInputElement>) => {
+      const currentItems = itemsRef.current;
+      const currentIsOpen = isOpenRef.current;
+
       if (event.key === "ArrowDown" || event.key === "ArrowUp") {
-        if (items.length === 0) return;
+        if (currentItems.length === 0) return;
         event.preventDefault();
-        if (!isOpen) {
+        if (!currentIsOpen) {
           setIsOpenRequested(true);
           return;
         }
-        const lastIndex = items.length - 1;
+        const lastIndex = currentItems.length - 1;
         if (event.key === "ArrowDown") {
           setActiveIndex(activeIndex >= lastIndex ? 0 : activeIndex + 1);
         } else {
@@ -155,22 +182,33 @@ function SearchableInput<TOption>({
         return;
       }
 
-      if (event.key === "Enter" && isOpen && activeIndex >= 0) {
-        const option = items[activeIndex];
+      if (event.key === "Enter" && currentIsOpen && activeIndex >= 0) {
+        const option = currentItems[activeIndex];
         if (!option) return;
         event.preventDefault();
         selectOption(option);
         return;
       }
 
-      if (event.key === "Escape" && isOpen) {
+      if (event.key === "Escape" && currentIsOpen) {
         event.preventDefault();
         event.stopPropagation();
         closeList();
       }
     },
-    [activeIndex, closeList, isOpen, items, selectOption]
+    [
+      activeIndex,
+      closeList,
+      isOpenRef,
+      itemsRef,
+      selectOption,
+      setIsOpenRequested,
+    ]
   );
+
+  const handleOnFocus = useCallback(() => {
+    if (defaultOpen) setIsOpenRequested(true);
+  }, [defaultOpen, setIsOpenRequested]);
 
   const handleOnBlur = useCallback(() => {
     onBlur?.();
@@ -205,6 +243,7 @@ function SearchableInput<TOption>({
           value={value}
           onChange={handleOnChange}
           onKeyDown={handleOnKeyDown}
+          onFocus={handleOnFocus}
           onBlur={handleOnBlur}
         />
         {secondAddon && (
@@ -219,7 +258,7 @@ function SearchableInput<TOption>({
               return (
                 <SearchableInputItem
                   key={getOptionKey(option)}
-                  id={`${id}-${index}`}
+                  id={`${listboxId}-${index}`}
                   active={isActive}
                   onSelect={() => selectOption(option)}
                   onActive={() => setActiveIndex(index)}
