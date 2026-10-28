@@ -83,10 +83,11 @@ ID prefixes are listed per document. IDs are stable: never renumber an existing 
 
 ## Document index
 
-| Area     | Document                     | Source scope                                                             |
-| -------- | ---------------------------- | ------------------------------------------------------------------------ |
-| Customer | [customer.md](./customer.md) | `src/features/customer/**`                                               |
-| Sale     | [sale.md](./sale.md)         | `src/features/sale/**`, `src/routes/dashboard/_dashboardLayout/sales/**` |
+| Area       | Document                         | Source scope                                                             |
+| ---------- | -------------------------------- | ------------------------------------------------------------------------ |
+| Customer   | [customer.md](./customer.md)     | `src/features/customer/**`                                               |
+| Grid table | [grid-table.md](./grid-table.md) | `src/components/ui/grid-table.tsx`                                       |
+| Sale       | [sale.md](./sale.md)             | `src/features/sale/**`, `src/routes/dashboard/_dashboardLayout/sales/**` |
 
 ## Out of scope
 
