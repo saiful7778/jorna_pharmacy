@@ -1,3 +1,4 @@
+import { companyRouter } from "@/features/company/api/company.router";
 import { customerRouter } from "@/features/customer/api/customer.router";
 import { medicineRouter } from "@/features/medicine/api/medicine.router";
 import { roleRouter } from "@/features/role/api/role.router";
@@ -10,4 +11,5 @@ export const router = {
   customer: customerRouter,
   sale: saleRouter,
   medicine: medicineRouter,
+  company: companyRouter,
 };
