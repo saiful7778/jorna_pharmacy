@@ -18,10 +18,14 @@ import { Route as authAuthLayoutResetPasswordRouteImport } from './routes/(auth)
 import { Route as authAuthLayoutSignInRouteImport } from './routes/(auth)/_authLayout/sign-in'
 import { Route as authAuthLayoutSignUpRouteImport } from './routes/(auth)/_authLayout/sign-up'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth.$'
+import { Route as ApiOpenapiSplatRouteImport } from './routes/api/openapi.$'
 import { Route as ApiRpcSplatRouteImport } from './routes/api/rpc.$'
 import { Route as DashboardDashboardLayoutIndexRouteImport } from './routes/dashboard/_dashboardLayout/index'
 import { Route as DashboardDashboardLayoutProfileRouteImport } from './routes/dashboard/_dashboardLayout/profile'
 import { Route as DashboardDashboardLayoutRolesRouteImport } from './routes/dashboard/_dashboardLayout/roles'
+import { Route as DashboardDashboardLayoutCompaniesIndexRouteImport } from './routes/dashboard/_dashboardLayout/companies/index'
+import { Route as DashboardDashboardLayoutCompaniesCompanyIdRouteImport } from './routes/dashboard/_dashboardLayout/companies/$companyId'
+import { Route as DashboardDashboardLayoutCompaniesPaymentsRouteImport } from './routes/dashboard/_dashboardLayout/companies/payments'
 import { Route as DashboardDashboardLayoutCustomersIndexRouteImport } from './routes/dashboard/_dashboardLayout/customers/index'
 import { Route as DashboardDashboardLayoutCustomersCustomerIdRouteImport } from './routes/dashboard/_dashboardLayout/customers/$customerId'
 import { Route as DashboardDashboardLayoutCustomersPaymentsRouteImport } from './routes/dashboard/_dashboardLayout/customers/payments'
@@ -29,6 +33,7 @@ import { Route as DashboardDashboardLayoutSalesIndexRouteImport } from './routes
 import { Route as DashboardDashboardLayoutSettingsSettingsLayoutRouteImport } from './routes/dashboard/_dashboardLayout/settings/_settingsLayout'
 import { Route as DashboardDashboardLayoutUsersIndexRouteImport } from './routes/dashboard/_dashboardLayout/users/index'
 import { Route as DashboardDashboardLayoutUsersUserIdRouteImport } from './routes/dashboard/_dashboardLayout/users/$userId'
+import { Route as DashboardDashboardLayoutCompaniesPurchasesIndexRouteImport } from './routes/dashboard/_dashboardLayout/companies/purchases/index'
 import { Route as DashboardDashboardLayoutSettingsSettingsLayoutIndexRouteImport } from './routes/dashboard/_dashboardLayout/settings/_settingsLayout/index'
 import { Route as DashboardDashboardLayoutSettingsSettingsLayoutConnectedAppsRouteImport } from './routes/dashboard/_dashboardLayout/settings/_settingsLayout/connected-apps'
 import { Route as DashboardDashboardLayoutSettingsSettingsLayoutProfileRouteImport } from './routes/dashboard/_dashboardLayout/settings/_settingsLayout/profile'
@@ -82,6 +87,11 @@ const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   path: '/api/auth/$',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiOpenapiSplatRoute = ApiOpenapiSplatRouteImport.update({
+  id: '/api/openapi/$',
+  path: '/api/openapi/$',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiRpcSplatRoute = ApiRpcSplatRouteImport.update({
   id: '/api/rpc/$',
   path: '/api/rpc/$',
@@ -103,6 +113,24 @@ const DashboardDashboardLayoutRolesRoute =
   DashboardDashboardLayoutRolesRouteImport.update({
     id: '/roles',
     path: '/roles',
+    getParentRoute: () => DashboardDashboardLayoutRoute,
+  } as any)
+const DashboardDashboardLayoutCompaniesIndexRoute =
+  DashboardDashboardLayoutCompaniesIndexRouteImport.update({
+    id: '/companies/',
+    path: '/companies/',
+    getParentRoute: () => DashboardDashboardLayoutRoute,
+  } as any)
+const DashboardDashboardLayoutCompaniesCompanyIdRoute =
+  DashboardDashboardLayoutCompaniesCompanyIdRouteImport.update({
+    id: '/companies/$companyId',
+    path: '/companies/$companyId',
+    getParentRoute: () => DashboardDashboardLayoutRoute,
+  } as any)
+const DashboardDashboardLayoutCompaniesPaymentsRoute =
+  DashboardDashboardLayoutCompaniesPaymentsRouteImport.update({
+    id: '/companies/payments',
+    path: '/companies/payments',
     getParentRoute: () => DashboardDashboardLayoutRoute,
   } as any)
 const DashboardDashboardLayoutCustomersIndexRoute =
@@ -145,6 +173,12 @@ const DashboardDashboardLayoutUsersUserIdRoute =
   DashboardDashboardLayoutUsersUserIdRouteImport.update({
     id: '/users/$userId',
     path: '/users/$userId',
+    getParentRoute: () => DashboardDashboardLayoutRoute,
+  } as any)
+const DashboardDashboardLayoutCompaniesPurchasesIndexRoute =
+  DashboardDashboardLayoutCompaniesPurchasesIndexRouteImport.update({
+    id: '/companies/purchases/',
+    path: '/companies/purchases/',
     getParentRoute: () => DashboardDashboardLayoutRoute,
   } as any)
 const DashboardDashboardLayoutSettingsSettingsLayoutIndexRoute =
@@ -191,14 +225,18 @@ export interface FileRoutesByFullPath {
   '/sign-in': typeof authAuthLayoutSignInRoute
   '/sign-up': typeof authAuthLayoutSignUpRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/openapi/$': typeof ApiOpenapiSplatRoute
   '/api/rpc/$': typeof ApiRpcSplatRoute
   '/dashboard/profile': typeof DashboardDashboardLayoutProfileRoute
   '/dashboard/roles': typeof DashboardDashboardLayoutRolesRoute
   '/dashboard/': typeof DashboardDashboardLayoutIndexRoute
+  '/dashboard/companies/$companyId': typeof DashboardDashboardLayoutCompaniesCompanyIdRoute
+  '/dashboard/companies/payments': typeof DashboardDashboardLayoutCompaniesPaymentsRoute
   '/dashboard/customers/$customerId': typeof DashboardDashboardLayoutCustomersCustomerIdRoute
   '/dashboard/customers/payments': typeof DashboardDashboardLayoutCustomersPaymentsRoute
   '/dashboard/settings': typeof DashboardDashboardLayoutSettingsSettingsLayoutRouteWithChildren
   '/dashboard/users/$userId': typeof DashboardDashboardLayoutUsersUserIdRoute
+  '/dashboard/companies/': typeof DashboardDashboardLayoutCompaniesIndexRoute
   '/dashboard/customers/': typeof DashboardDashboardLayoutCustomersIndexRoute
   '/dashboard/sales/': typeof DashboardDashboardLayoutSalesIndexRoute
   '/dashboard/users/': typeof DashboardDashboardLayoutUsersIndexRoute
@@ -206,6 +244,7 @@ export interface FileRoutesByFullPath {
   '/dashboard/settings/profile': typeof DashboardDashboardLayoutSettingsSettingsLayoutProfileRoute
   '/dashboard/settings/sessions': typeof DashboardDashboardLayoutSettingsSettingsLayoutSessionsRoute
   '/dashboard/settings/update-password': typeof DashboardDashboardLayoutSettingsSettingsLayoutUpdatePasswordRoute
+  '/dashboard/companies/purchases/': typeof DashboardDashboardLayoutCompaniesPurchasesIndexRoute
   '/dashboard/settings/': typeof DashboardDashboardLayoutSettingsSettingsLayoutIndexRoute
 }
 export interface FileRoutesByTo {
@@ -216,13 +255,17 @@ export interface FileRoutesByTo {
   '/sign-in': typeof authAuthLayoutSignInRoute
   '/sign-up': typeof authAuthLayoutSignUpRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/openapi/$': typeof ApiOpenapiSplatRoute
   '/api/rpc/$': typeof ApiRpcSplatRoute
   '/dashboard/profile': typeof DashboardDashboardLayoutProfileRoute
   '/dashboard/roles': typeof DashboardDashboardLayoutRolesRoute
   '/dashboard': typeof DashboardDashboardLayoutIndexRoute
+  '/dashboard/companies/$companyId': typeof DashboardDashboardLayoutCompaniesCompanyIdRoute
+  '/dashboard/companies/payments': typeof DashboardDashboardLayoutCompaniesPaymentsRoute
   '/dashboard/customers/$customerId': typeof DashboardDashboardLayoutCustomersCustomerIdRoute
   '/dashboard/customers/payments': typeof DashboardDashboardLayoutCustomersPaymentsRoute
   '/dashboard/users/$userId': typeof DashboardDashboardLayoutUsersUserIdRoute
+  '/dashboard/companies': typeof DashboardDashboardLayoutCompaniesIndexRoute
   '/dashboard/customers': typeof DashboardDashboardLayoutCustomersIndexRoute
   '/dashboard/sales': typeof DashboardDashboardLayoutSalesIndexRoute
   '/dashboard/users': typeof DashboardDashboardLayoutUsersIndexRoute
@@ -230,6 +273,7 @@ export interface FileRoutesByTo {
   '/dashboard/settings/profile': typeof DashboardDashboardLayoutSettingsSettingsLayoutProfileRoute
   '/dashboard/settings/sessions': typeof DashboardDashboardLayoutSettingsSettingsLayoutSessionsRoute
   '/dashboard/settings/update-password': typeof DashboardDashboardLayoutSettingsSettingsLayoutUpdatePasswordRoute
+  '/dashboard/companies/purchases': typeof DashboardDashboardLayoutCompaniesPurchasesIndexRoute
   '/dashboard/settings': typeof DashboardDashboardLayoutSettingsSettingsLayoutIndexRoute
 }
 export interface FileRoutesById {
@@ -243,14 +287,18 @@ export interface FileRoutesById {
   '/(auth)/_authLayout/sign-in': typeof authAuthLayoutSignInRoute
   '/(auth)/_authLayout/sign-up': typeof authAuthLayoutSignUpRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/openapi/$': typeof ApiOpenapiSplatRoute
   '/api/rpc/$': typeof ApiRpcSplatRoute
   '/dashboard/_dashboardLayout/profile': typeof DashboardDashboardLayoutProfileRoute
   '/dashboard/_dashboardLayout/roles': typeof DashboardDashboardLayoutRolesRoute
   '/dashboard/_dashboardLayout/': typeof DashboardDashboardLayoutIndexRoute
+  '/dashboard/_dashboardLayout/companies/$companyId': typeof DashboardDashboardLayoutCompaniesCompanyIdRoute
+  '/dashboard/_dashboardLayout/companies/payments': typeof DashboardDashboardLayoutCompaniesPaymentsRoute
   '/dashboard/_dashboardLayout/customers/$customerId': typeof DashboardDashboardLayoutCustomersCustomerIdRoute
   '/dashboard/_dashboardLayout/customers/payments': typeof DashboardDashboardLayoutCustomersPaymentsRoute
   '/dashboard/_dashboardLayout/settings/_settingsLayout': typeof DashboardDashboardLayoutSettingsSettingsLayoutRouteWithChildren
   '/dashboard/_dashboardLayout/users/$userId': typeof DashboardDashboardLayoutUsersUserIdRoute
+  '/dashboard/_dashboardLayout/companies/': typeof DashboardDashboardLayoutCompaniesIndexRoute
   '/dashboard/_dashboardLayout/customers/': typeof DashboardDashboardLayoutCustomersIndexRoute
   '/dashboard/_dashboardLayout/sales/': typeof DashboardDashboardLayoutSalesIndexRoute
   '/dashboard/_dashboardLayout/users/': typeof DashboardDashboardLayoutUsersIndexRoute
@@ -258,6 +306,7 @@ export interface FileRoutesById {
   '/dashboard/_dashboardLayout/settings/_settingsLayout/profile': typeof DashboardDashboardLayoutSettingsSettingsLayoutProfileRoute
   '/dashboard/_dashboardLayout/settings/_settingsLayout/sessions': typeof DashboardDashboardLayoutSettingsSettingsLayoutSessionsRoute
   '/dashboard/_dashboardLayout/settings/_settingsLayout/update-password': typeof DashboardDashboardLayoutSettingsSettingsLayoutUpdatePasswordRoute
+  '/dashboard/_dashboardLayout/companies/purchases/': typeof DashboardDashboardLayoutCompaniesPurchasesIndexRoute
   '/dashboard/_dashboardLayout/settings/_settingsLayout/': typeof DashboardDashboardLayoutSettingsSettingsLayoutIndexRoute
 }
 export interface FileRouteTypes {
@@ -271,14 +320,18 @@ export interface FileRouteTypes {
     | '/sign-in'
     | '/sign-up'
     | '/api/auth/$'
+    | '/api/openapi/$'
     | '/api/rpc/$'
     | '/dashboard/profile'
     | '/dashboard/roles'
     | '/dashboard/'
+    | '/dashboard/companies/$companyId'
+    | '/dashboard/companies/payments'
     | '/dashboard/customers/$customerId'
     | '/dashboard/customers/payments'
     | '/dashboard/settings'
     | '/dashboard/users/$userId'
+    | '/dashboard/companies/'
     | '/dashboard/customers/'
     | '/dashboard/sales/'
     | '/dashboard/users/'
@@ -286,6 +339,7 @@ export interface FileRouteTypes {
     | '/dashboard/settings/profile'
     | '/dashboard/settings/sessions'
     | '/dashboard/settings/update-password'
+    | '/dashboard/companies/purchases/'
     | '/dashboard/settings/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -296,13 +350,17 @@ export interface FileRouteTypes {
     | '/sign-in'
     | '/sign-up'
     | '/api/auth/$'
+    | '/api/openapi/$'
     | '/api/rpc/$'
     | '/dashboard/profile'
     | '/dashboard/roles'
     | '/dashboard'
+    | '/dashboard/companies/$companyId'
+    | '/dashboard/companies/payments'
     | '/dashboard/customers/$customerId'
     | '/dashboard/customers/payments'
     | '/dashboard/users/$userId'
+    | '/dashboard/companies'
     | '/dashboard/customers'
     | '/dashboard/sales'
     | '/dashboard/users'
@@ -310,6 +368,7 @@ export interface FileRouteTypes {
     | '/dashboard/settings/profile'
     | '/dashboard/settings/sessions'
     | '/dashboard/settings/update-password'
+    | '/dashboard/companies/purchases'
     | '/dashboard/settings'
   id:
     | '__root__'
@@ -322,14 +381,18 @@ export interface FileRouteTypes {
     | '/(auth)/_authLayout/sign-in'
     | '/(auth)/_authLayout/sign-up'
     | '/api/auth/$'
+    | '/api/openapi/$'
     | '/api/rpc/$'
     | '/dashboard/_dashboardLayout/profile'
     | '/dashboard/_dashboardLayout/roles'
     | '/dashboard/_dashboardLayout/'
+    | '/dashboard/_dashboardLayout/companies/$companyId'
+    | '/dashboard/_dashboardLayout/companies/payments'
     | '/dashboard/_dashboardLayout/customers/$customerId'
     | '/dashboard/_dashboardLayout/customers/payments'
     | '/dashboard/_dashboardLayout/settings/_settingsLayout'
     | '/dashboard/_dashboardLayout/users/$userId'
+    | '/dashboard/_dashboardLayout/companies/'
     | '/dashboard/_dashboardLayout/customers/'
     | '/dashboard/_dashboardLayout/sales/'
     | '/dashboard/_dashboardLayout/users/'
@@ -337,6 +400,7 @@ export interface FileRouteTypes {
     | '/dashboard/_dashboardLayout/settings/_settingsLayout/profile'
     | '/dashboard/_dashboardLayout/settings/_settingsLayout/sessions'
     | '/dashboard/_dashboardLayout/settings/_settingsLayout/update-password'
+    | '/dashboard/_dashboardLayout/companies/purchases/'
     | '/dashboard/_dashboardLayout/settings/_settingsLayout/'
   fileRoutesById: FileRoutesById
 }
@@ -345,6 +409,7 @@ export interface RootRouteChildren {
   authAuthLayoutRoute: typeof authAuthLayoutRouteWithChildren
   DashboardDashboardLayoutRoute: typeof DashboardDashboardLayoutRouteWithChildren
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
+  ApiOpenapiSplatRoute: typeof ApiOpenapiSplatRoute
   ApiRpcSplatRoute: typeof ApiRpcSplatRoute
 }
 
@@ -413,6 +478,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAuthSplatRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/openapi/$': {
+      id: '/api/openapi/$'
+      path: '/api/openapi/$'
+      fullPath: '/api/openapi/$'
+      preLoaderRoute: typeof ApiOpenapiSplatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/rpc/$': {
       id: '/api/rpc/$'
       path: '/api/rpc/$'
@@ -439,6 +511,27 @@ declare module '@tanstack/react-router' {
       path: '/roles'
       fullPath: '/dashboard/roles'
       preLoaderRoute: typeof DashboardDashboardLayoutRolesRouteImport
+      parentRoute: typeof DashboardDashboardLayoutRoute
+    }
+    '/dashboard/_dashboardLayout/companies/': {
+      id: '/dashboard/_dashboardLayout/companies/'
+      path: '/companies'
+      fullPath: '/dashboard/companies/'
+      preLoaderRoute: typeof DashboardDashboardLayoutCompaniesIndexRouteImport
+      parentRoute: typeof DashboardDashboardLayoutRoute
+    }
+    '/dashboard/_dashboardLayout/companies/$companyId': {
+      id: '/dashboard/_dashboardLayout/companies/$companyId'
+      path: '/companies/$companyId'
+      fullPath: '/dashboard/companies/$companyId'
+      preLoaderRoute: typeof DashboardDashboardLayoutCompaniesCompanyIdRouteImport
+      parentRoute: typeof DashboardDashboardLayoutRoute
+    }
+    '/dashboard/_dashboardLayout/companies/payments': {
+      id: '/dashboard/_dashboardLayout/companies/payments'
+      path: '/companies/payments'
+      fullPath: '/dashboard/companies/payments'
+      preLoaderRoute: typeof DashboardDashboardLayoutCompaniesPaymentsRouteImport
       parentRoute: typeof DashboardDashboardLayoutRoute
     }
     '/dashboard/_dashboardLayout/customers/': {
@@ -488,6 +581,13 @@ declare module '@tanstack/react-router' {
       path: '/users/$userId'
       fullPath: '/dashboard/users/$userId'
       preLoaderRoute: typeof DashboardDashboardLayoutUsersUserIdRouteImport
+      parentRoute: typeof DashboardDashboardLayoutRoute
+    }
+    '/dashboard/_dashboardLayout/companies/purchases/': {
+      id: '/dashboard/_dashboardLayout/companies/purchases/'
+      path: '/companies/purchases'
+      fullPath: '/dashboard/companies/purchases/'
+      preLoaderRoute: typeof DashboardDashboardLayoutCompaniesPurchasesIndexRouteImport
       parentRoute: typeof DashboardDashboardLayoutRoute
     }
     '/dashboard/_dashboardLayout/settings/_settingsLayout/': {
@@ -579,13 +679,17 @@ interface DashboardDashboardLayoutRouteChildren {
   DashboardDashboardLayoutProfileRoute: typeof DashboardDashboardLayoutProfileRoute
   DashboardDashboardLayoutRolesRoute: typeof DashboardDashboardLayoutRolesRoute
   DashboardDashboardLayoutIndexRoute: typeof DashboardDashboardLayoutIndexRoute
+  DashboardDashboardLayoutCompaniesCompanyIdRoute: typeof DashboardDashboardLayoutCompaniesCompanyIdRoute
+  DashboardDashboardLayoutCompaniesPaymentsRoute: typeof DashboardDashboardLayoutCompaniesPaymentsRoute
   DashboardDashboardLayoutCustomersCustomerIdRoute: typeof DashboardDashboardLayoutCustomersCustomerIdRoute
   DashboardDashboardLayoutCustomersPaymentsRoute: typeof DashboardDashboardLayoutCustomersPaymentsRoute
   DashboardDashboardLayoutSettingsSettingsLayoutRoute: typeof DashboardDashboardLayoutSettingsSettingsLayoutRouteWithChildren
   DashboardDashboardLayoutUsersUserIdRoute: typeof DashboardDashboardLayoutUsersUserIdRoute
+  DashboardDashboardLayoutCompaniesIndexRoute: typeof DashboardDashboardLayoutCompaniesIndexRoute
   DashboardDashboardLayoutCustomersIndexRoute: typeof DashboardDashboardLayoutCustomersIndexRoute
   DashboardDashboardLayoutSalesIndexRoute: typeof DashboardDashboardLayoutSalesIndexRoute
   DashboardDashboardLayoutUsersIndexRoute: typeof DashboardDashboardLayoutUsersIndexRoute
+  DashboardDashboardLayoutCompaniesPurchasesIndexRoute: typeof DashboardDashboardLayoutCompaniesPurchasesIndexRoute
 }
 
 const DashboardDashboardLayoutRouteChildren: DashboardDashboardLayoutRouteChildren =
@@ -593,6 +697,10 @@ const DashboardDashboardLayoutRouteChildren: DashboardDashboardLayoutRouteChildr
     DashboardDashboardLayoutProfileRoute: DashboardDashboardLayoutProfileRoute,
     DashboardDashboardLayoutRolesRoute: DashboardDashboardLayoutRolesRoute,
     DashboardDashboardLayoutIndexRoute: DashboardDashboardLayoutIndexRoute,
+    DashboardDashboardLayoutCompaniesCompanyIdRoute:
+      DashboardDashboardLayoutCompaniesCompanyIdRoute,
+    DashboardDashboardLayoutCompaniesPaymentsRoute:
+      DashboardDashboardLayoutCompaniesPaymentsRoute,
     DashboardDashboardLayoutCustomersCustomerIdRoute:
       DashboardDashboardLayoutCustomersCustomerIdRoute,
     DashboardDashboardLayoutCustomersPaymentsRoute:
@@ -601,12 +709,16 @@ const DashboardDashboardLayoutRouteChildren: DashboardDashboardLayoutRouteChildr
       DashboardDashboardLayoutSettingsSettingsLayoutRouteWithChildren,
     DashboardDashboardLayoutUsersUserIdRoute:
       DashboardDashboardLayoutUsersUserIdRoute,
+    DashboardDashboardLayoutCompaniesIndexRoute:
+      DashboardDashboardLayoutCompaniesIndexRoute,
     DashboardDashboardLayoutCustomersIndexRoute:
       DashboardDashboardLayoutCustomersIndexRoute,
     DashboardDashboardLayoutSalesIndexRoute:
       DashboardDashboardLayoutSalesIndexRoute,
     DashboardDashboardLayoutUsersIndexRoute:
       DashboardDashboardLayoutUsersIndexRoute,
+    DashboardDashboardLayoutCompaniesPurchasesIndexRoute:
+      DashboardDashboardLayoutCompaniesPurchasesIndexRoute,
   }
 
 const DashboardDashboardLayoutRouteWithChildren =
@@ -619,6 +731,7 @@ const rootRouteChildren: RootRouteChildren = {
   authAuthLayoutRoute: authAuthLayoutRouteWithChildren,
   DashboardDashboardLayoutRoute: DashboardDashboardLayoutRouteWithChildren,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
+  ApiOpenapiSplatRoute: ApiOpenapiSplatRoute,
   ApiRpcSplatRoute: ApiRpcSplatRoute,
 }
 export const routeTree = rootRouteImport
