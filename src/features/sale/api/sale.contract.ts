@@ -1,7 +1,12 @@
 import z from "zod";
 
 import { API_MESSAGES } from "@/constants/apiMessage";
-import { selectCustomerSchema, selectSaleSchema } from "@/db/schemas";
+import {
+  selectCustomerSchema,
+  selectMedicineSchema,
+  selectSaleItemSchema,
+  selectSaleSchema,
+} from "@/db/schemas";
 import { apiOutputSchema } from "@/lib/zod-schemas/apiOutputSchema";
 import { paginateInputSchema } from "@/lib/zod-schemas/paginateInputSchema";
 import { paginateOutputSchema } from "@/lib/zod-schemas/paginateOutputSchema";
@@ -9,6 +14,7 @@ import { baseContract } from "@/oRPC/orpc.contract-base";
 import type { InferContractRouterType } from "@/types/orpc.types";
 
 import { saleCreateSchema } from "../sale.schema";
+import { saleDeleteContract } from "./saleDelete.contract";
 
 const saleBaseContract = baseContract.errors({
   NOT_FOUND: { status: 404, message: API_MESSAGES.SALE.NOT_FOUND },
@@ -42,9 +48,9 @@ const listSaleContract = saleBaseContract
             to: z.coerce.date().describe("Created at to date").optional(),
           })
           .optional(),
+        customerId: z.uuid().optional(),
       }),
     }).extend({
-      customerId: z.uuid().optional(),
       unpaidOnly: z.boolean().optional(),
     })
   )
@@ -63,6 +69,9 @@ const listSaleContract = saleBaseContract
           .extend({
             invoiceNo: z.string(),
             itemCount: z.number(),
+            dueAmount: z
+              .number()
+              .describe("Total amount minus paid, never negative"),
             customer: selectCustomerSchema
               .pick({
                 id: true,
@@ -126,8 +135,69 @@ export type SaleCreateContractType = InferContractRouterType<
   typeof saleCreateContract
 >;
 
+const saleDetailsContract = saleBaseContract
+  .route({
+    method: "GET",
+    path: "/sales/details",
+    description: "Get sale details with customer, items, and totals",
+    tags,
+  })
+  .input(z.object({ saleId: z.uuid() }))
+  .output(
+    apiOutputSchema(
+      selectSaleSchema
+        .pick({
+          id: true,
+          subtotal: true,
+          discount: true,
+          totalAmount: true,
+          paidAmount: true,
+          createdAt: true,
+          updatedAt: true,
+        })
+        .extend({
+          invoiceNo: z.string(),
+          dueAmount: z
+            .number()
+            .describe("Total amount minus paid, never negative"),
+          customer: selectCustomerSchema
+            .pick({
+              id: true,
+              name: true,
+              phone: true,
+              address: true,
+            })
+            .nullable(),
+          items: z.array(
+            selectSaleItemSchema
+              .pick({
+                id: true,
+                qty: true,
+                unitPrice: true,
+                lineTotal: true,
+              })
+              .extend({
+                medicine: selectMedicineSchema.pick({
+                  id: true,
+                  name: true,
+                  genericName: true,
+                  strength: true,
+                  type: true,
+                  baseUnit: true,
+                }),
+              })
+          ),
+        })
+    )
+  );
+export type SaleDetailsContractType = InferContractRouterType<
+  typeof saleDetailsContract
+>;
+
 export const saleContract = {
   list: listSaleContract,
   stats: saleStatsContract,
   create: saleCreateContract,
+  details: saleDetailsContract,
+  ...saleDeleteContract,
 };

@@ -1,4 +1,4 @@
-import { readdirSync, readFileSync } from "node:fs";
+import { readFileSync } from "node:fs";
 import path from "node:path";
 
 import { call } from "@orpc/server";
@@ -39,15 +39,9 @@ const PURCHASE_ID = "66666666-6666-4666-8666-666666666666";
 const MEDICINE_ID = "22222222-2222-4222-8222-222222222222";
 const CUSTOMER_ID = "33333333-3333-4333-8333-333333333333";
 
-async function applyMigrations(db: MockDatabaseType) {
-  const migrationsDir = path.resolve(process.cwd(), "migrations");
-  const files = readdirSync(migrationsDir)
-    .filter((file) => file.endsWith(".sql"))
-    .sort();
-
-  for (const file of files) {
-    await db.$client.exec(readFileSync(path.join(migrationsDir, file), "utf8"));
-  }
+async function applySchema(db: MockDatabaseType) {
+  const schemaPath = path.resolve(process.cwd(), "full-schema.sql");
+  await db.$client.exec(readFileSync(schemaPath, "utf8"));
 }
 
 async function seedBase(db: MockDatabaseType) {
@@ -201,7 +195,7 @@ describe("sale create procedure", () => {
 
   beforeEach(async () => {
     db = createMockDrizzleClient();
-    await applyMigrations(db);
+    await applySchema(db);
     await seedBase(db);
   });
 
@@ -271,6 +265,37 @@ describe("sale create procedure", () => {
       { id: "batch-earlier", qtyRemaining: 0 },
       { id: "batch-later", qtyRemaining: 8 },
     ]);
+  });
+
+  it("marks a walk-in sale without a customer as fully paid", async () => {
+    await seedBatches(db, [
+      {
+        id: "batch-walkin",
+        qtyRemaining: 5,
+        sellPerUnit: 10,
+        costPerUnit: 6,
+        expiryDate: new Date("2027-01-01T00:00:00.000Z"),
+        createdAt: new Date("2026-01-01T00:00:00.000Z"),
+      },
+    ]);
+
+    const { context } = createContext(db);
+    const result = await call(
+      saleCreateProcedure,
+      {
+        items: [{ medicineId: MEDICINE_ID, quantity: 2 }],
+        totalAmount: 20,
+        discountAmount: 0,
+        paidAmount: 0,
+      },
+      { context }
+    );
+
+    expect(result.data).toMatchObject({
+      customerId: null,
+      totalAmount: 20,
+      paidAmount: 20,
+    });
   });
 
   it("aggregates duplicate medicine lines before allocating batches", async () => {

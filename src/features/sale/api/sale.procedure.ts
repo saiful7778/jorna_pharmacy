@@ -1,5 +1,15 @@
 import { implement, ORPCError } from "@orpc/server";
-import { and, asc, desc, eq, gt, inArray, sql, type SQL } from "drizzle-orm";
+import {
+  and,
+  asc,
+  desc,
+  eq,
+  gt,
+  inArray,
+  isNull,
+  sql,
+  type SQL,
+} from "drizzle-orm";
 import type { BatchItem } from "drizzle-orm/batch";
 
 import { API_MESSAGES } from "@/constants/apiMessage";
@@ -8,6 +18,7 @@ import {
   CustomerTable,
   MedicineTable,
   PurchaseItemTable,
+  PurchaseTable,
   SaleInvoiceTable,
   SaleItemTable,
   SaleTable,
@@ -42,11 +53,12 @@ export const listSaleProcedure = saleImpl.list
     ])
   )
   .handler(async ({ context, input }) => {
-    const { customerId, unpaidOnly, filter, ...paginateInput } = input;
+    const { unpaidOnly, ...paginateInput } = input;
 
     const { where, page, offset, limit } = buildPaginateOptions(
       {
         invoiceNo: SaleInvoiceTable.number,
+        customerId: CustomerTable.id,
         customerName: CustomerTable.name,
         customerPhone: CustomerTable.phone,
         createdAt: SaleTable.createdAt,
@@ -54,11 +66,7 @@ export const listSaleProcedure = saleImpl.list
       paginateInput
     );
 
-    const whereSql: Array<SQL> = [];
-
-    if (customerId) {
-      whereSql.push(eq(SaleTable.customerId, customerId));
-    }
+    const whereSql: Array<SQL> = [isNull(SaleTable.deletedAt)];
 
     if (unpaidOnly) {
       whereSql.push(gt(SaleTable.totalAmount, SaleTable.paidAmount));
@@ -101,6 +109,7 @@ export const listSaleProcedure = saleImpl.list
           discount: SaleTable.discount,
           totalAmount: SaleTable.totalAmount,
           paidAmount: SaleTable.paidAmount,
+          dueAmount: sql<number>`MAX(${SaleTable.totalAmount} - ${SaleTable.paidAmount}, 0)`,
           createdAt: SaleTable.createdAt,
         })
         .from(SaleTable)
@@ -149,7 +158,7 @@ export const saleStatsProcedure = saleImpl.stats
         totalPaid: sql<number>`COALESCE(SUM(${SaleTable.paidAmount}), 0)`,
       })
       .from(SaleTable)
-      .where(where);
+      .where(and(isNull(SaleTable.deletedAt), where));
 
     const totalRevenue = Number(totals?.totalRevenue ?? 0);
     const totalPaid = Number(totals?.totalPaid ?? 0);
@@ -160,6 +169,70 @@ export const saleStatsProcedure = saleImpl.stats
       totalRevenue,
       totalPaid,
       dueAmount,
+    });
+  });
+
+export const saleDetailsProcedure = saleImpl.details
+  .use(
+    userPermissionMiddleware([
+      { level: "system", resource: "sale", action: "manage" },
+      { level: "system", resource: "sale", action: "list" },
+    ])
+  )
+  .handler(async ({ context, input, errors }) => {
+    const [[sale], items] = await Promise.all([
+      context.db
+        .select({
+          id: SaleTable.id,
+          invoiceNo: SaleInvoiceTable.number,
+          subtotal: SaleTable.subtotal,
+          discount: SaleTable.discount,
+          totalAmount: SaleTable.totalAmount,
+          paidAmount: SaleTable.paidAmount,
+          dueAmount: sql<number>`MAX(${SaleTable.totalAmount} - ${SaleTable.paidAmount}, 0)`,
+          createdAt: SaleTable.createdAt,
+          updatedAt: SaleTable.updatedAt,
+          customer: CustomerTable,
+        })
+        .from(SaleTable)
+        .innerJoin(
+          SaleInvoiceTable,
+          eq(SaleInvoiceTable.id, SaleTable.invoiceId)
+        )
+        .leftJoin(CustomerTable, eq(SaleTable.customerId, CustomerTable.id))
+        .where(and(eq(SaleTable.id, input.saleId), isNull(SaleTable.deletedAt)))
+        .limit(1),
+      context.db
+        .select({
+          id: SaleItemTable.id,
+          qty: SaleItemTable.qty,
+          unitPrice: SaleItemTable.unitPrice,
+          lineTotal: SaleItemTable.lineTotal,
+          medicine: {
+            id: MedicineTable.id,
+            name: MedicineTable.name,
+            genericName: MedicineTable.genericName,
+            strength: MedicineTable.strength,
+            type: MedicineTable.type,
+            baseUnit: MedicineTable.baseUnit,
+          },
+        })
+        .from(SaleItemTable)
+        .innerJoin(
+          MedicineTable,
+          eq(MedicineTable.id, SaleItemTable.medicineId)
+        )
+        .where(eq(SaleItemTable.saleId, input.saleId))
+        .orderBy(asc(SaleItemTable.createdAt), asc(SaleItemTable.id)),
+    ]);
+
+    if (!sale) {
+      throw errors.NOT_FOUND();
+    }
+
+    return apiResponse(API_MESSAGES.SALE.GET_DETAILS, {
+      ...sale,
+      items,
     });
   });
 
@@ -220,10 +293,15 @@ export const saleCreateProcedure = saleImpl.create
             createdAt: PurchaseItemTable.createdAt,
           })
           .from(PurchaseItemTable)
+          .innerJoin(
+            PurchaseTable,
+            eq(PurchaseTable.id, PurchaseItemTable.purchaseId)
+          )
           .where(
             and(
               gt(PurchaseItemTable.qtyRemaining, 0),
-              inArray(PurchaseItemTable.medicineId, medicineIds)
+              inArray(PurchaseItemTable.medicineId, medicineIds),
+              isNull(PurchaseTable.deletedAt)
             )
           )
           .orderBy(
@@ -336,6 +414,8 @@ export const saleCreateProcedure = saleImpl.create
       totalAmount = input.totalAmount;
     }
 
+    const paidAmount = customerId ? input.paidAmount : totalAmount;
+
     const invoice = await reserveInvoice(context.db, context.user.id);
 
     const statements: [BatchItem<"sqlite">, ...Array<BatchItem<"sqlite">>] = [
@@ -349,7 +429,7 @@ export const saleCreateProcedure = saleImpl.create
           subtotal,
           totalAmount,
           discount: input.discountAmount,
-          paidAmount: input.paidAmount,
+          paidAmount,
         } satisfies InsertSale)
         .returning(),
     ];
