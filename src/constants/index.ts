@@ -60,3 +60,8 @@ export const breadcrumbRoutes: Array<BreadcrumbRouteType> = [
 
 export const DEFAULT_PAGE_INDEX = 1;
 export const DEFAULT_PAGE_SIZE = 20;
+
+export const BIN_RETENTION_DAYS = 15;
+
+export const BALANCE_EPSILON = 0.005;
+export const DUE_EPSILON = 0.005;
