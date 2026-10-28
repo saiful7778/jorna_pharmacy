@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect, useMemo, useRef } from "react";
 
 import { useCallbackRef } from "./use-callback-ref";
 
@@ -11,16 +11,21 @@ export function useDebouncedCallback<T extends (...args: never[]) => unknown>(
 
   useEffect(() => () => window.clearTimeout(debounceTimerRef.current), []);
 
+  const cancel = useCallback(() => {
+    window.clearTimeout(debounceTimerRef.current);
+  }, []);
+
   const setValue = useCallback(
     (...args: Parameters<T>) => {
-      window.clearTimeout(debounceTimerRef.current);
+      cancel();
       debounceTimerRef.current = window.setTimeout(
         () => handleCallback(...args),
         delay
       );
     },
-    [handleCallback, delay]
+    [cancel, handleCallback, delay]
   );
 
-  return setValue;
+  // eslint-disable-next-line react-hooks/refs -- cancel only touches the timer ref when called, not during render
+  return useMemo(() => Object.assign(setValue, { cancel }), [setValue, cancel]);
 }
