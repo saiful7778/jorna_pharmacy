@@ -41,16 +41,20 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  BALANCE_EPSILON,
+  DEFAULT_PAGE_INDEX,
+  DEFAULT_PAGE_SIZE,
+} from "@/constants";
 import { requirePermissions } from "@/features/auth/auth.functions";
 import {
   CustomerPaymentCreateDialog,
   openCustomerPaymentCreateDialog,
 } from "@/features/customer/components/CustomerPaymentCreateDialog";
 import { CustomerSearchableInput } from "@/features/customer/components/CustomerSearchableInput";
+import { CustomerPaymentRowAction } from "@/features/customer/components/customer-details/CustomerPaymentRowAction";
 import { usePermissionCheck } from "@/hooks/use-permission-check";
-import { useSearchNavigate } from "@/hooks/use-search-navigate";
 import { head } from "@/lib/head";
-import { querySearchSchema } from "@/lib/querySearchSchema";
 import { orpcTQClient } from "@/oRPC/orpc";
 import { formatCurrency } from "@/utils/formatCurrency";
 
@@ -67,8 +71,6 @@ export const Route = createFileRoute(
       context.user.id
     );
   },
-  validateSearch: querySearchSchema.pick({ page: true, limit: true }),
-  loaderDeps: ({ search }) => search,
   head: ({ match }) =>
     head({
       pathname: match.pathname,
@@ -100,6 +102,7 @@ function RouteComponent() {
     >
       <div className="space-y-4 rounded-xl border bg-popover p-4">
         <CustomerSearchableInput
+          defaultOpen
           value={customerSearch}
           onChange={(value) => {
             setCustomerSearch(value);
@@ -127,8 +130,7 @@ function RouteComponent() {
 }
 
 function CustomerPaymentDetails({ customerId }: { customerId: string }) {
-  const searchNavigate = useSearchNavigate(Route.fullPath);
-  const search = Route.useSearch();
+  const [page, setPage] = useState(DEFAULT_PAGE_INDEX);
   const setCustomerPaymentCreateDialog = useAtomSet(
     openCustomerPaymentCreateDialog
   );
@@ -143,9 +145,11 @@ function CustomerPaymentDetails({ customerId }: { customerId: string }) {
   const paymentQuery = useQuery(
     orpcTQClient.customer.payment.list.queryOptions({
       input: {
-        page: search.page,
-        limit: search.limit,
-        customerId,
+        page,
+        limit: DEFAULT_PAGE_SIZE,
+        filter: {
+          customerId,
+        },
       },
       select: (result) => result.data,
     })
@@ -154,7 +158,9 @@ function CustomerPaymentDetails({ customerId }: { customerId: string }) {
   const paymentStatsQuery = useQuery(
     orpcTQClient.customer.payment.stats.queryOptions({
       input: {
-        customerId,
+        filter: {
+          customerId,
+        },
       },
       select: (result) => result.data,
     })
@@ -167,7 +173,7 @@ function CustomerPaymentDetails({ customerId }: { customerId: string }) {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between gap-2">
+      <div className="flex items-center gap-2">
         <Button
           variant="outline"
           nativeButton={false}
@@ -182,7 +188,7 @@ function CustomerPaymentDetails({ customerId }: { customerId: string }) {
           <Eye />
           <span>Customer Details</span>
         </Button>
-        <div className="flex items-center gap-2">
+        <div className="ml-auto flex items-center gap-2">
           {isAllowCreate && (
             <>
               <Button onClick={() => setCustomerPaymentCreateDialog(true)}>
@@ -210,7 +216,6 @@ function CustomerPaymentDetails({ customerId }: { customerId: string }) {
         }
       >
         {(stats) => {
-          const BALANCE_EPSILON = 0.005;
           const hasDue = stats.dueAmount > BALANCE_EPSILON;
           const hasAdvance = stats.dueAmount < -BALANCE_EPSILON;
 
@@ -266,25 +271,42 @@ function CustomerPaymentDetails({ customerId }: { customerId: string }) {
                 <TableHeader>
                   <TableRow>
                     <TableHead>Date</TableHead>
-                    <TableHead>Invoice No</TableHead>
+                    <TableHead>Sale</TableHead>
                     <TableHead className="text-right">Amount</TableHead>
                     <TableHead>Note</TableHead>
+                    <TableHead></TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {paymentsData.data.map((payment) => (
                     <TableRow key={payment.id}>
-                      <TableCell className="text-muted-foreground">
+                      <TableCell>
                         <FormatDateCell
                           format="dd MMM, yyyy"
                           value={payment.createdAt}
+                          className="block whitespace-nowrap"
                         />
                       </TableCell>
                       <TableCell>
-                        {payment.invoiceNo ? (
-                          <span className="font-medium">
-                            {payment.invoiceNo}
-                          </span>
+                        {payment.saleId ? (
+                          <div className="flex flex-col">
+                            <span className="font-medium">
+                              {payment.invoiceNo
+                                ? `Invoice ${payment.invoiceNo}`
+                                : "Sale"}
+                            </span>
+                            <span className="text-xs text-muted-foreground">
+                              {payment.saleCreatedAt && (
+                                <FormatDateCell
+                                  format="dd MMM, yyyy"
+                                  value={payment.saleCreatedAt}
+                                />
+                              )}
+                              {payment.saleTotalAmount !== null && (
+                                <span>{` · Total ${formatCurrency(payment.saleTotalAmount)}`}</span>
+                              )}
+                            </span>
+                          </div>
                         ) : (
                           <span className="text-muted-foreground">
                             General payment
@@ -303,17 +325,17 @@ function CustomerPaymentDetails({ customerId }: { customerId: string }) {
                           <span className="text-muted-foreground">—</span>
                         )}
                       </TableCell>
+                      <TableCell className="text-right">
+                        {payment.saleId && (
+                          <CustomerPaymentRowAction saleId={payment.saleId} />
+                        )}
+                      </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
               </Table>
             </div>
-            <MetaPagination
-              meta={paymentsData.meta}
-              onPageChange={(page) => {
-                searchNavigate((prev) => ({ ...prev, page }));
-              }}
-            />
+            <MetaPagination meta={paymentsData.meta} onPageChange={setPage} />
           </div>
         )}
       </QueryStateBoundary>

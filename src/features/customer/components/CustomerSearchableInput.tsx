@@ -33,6 +33,7 @@ export interface CustomerSearchableInputProps extends Omit<
 
 export function CustomerSearchableInput({
   placeholder = "Search customer",
+  value,
   onChange,
   onValueChange,
   onReset,
@@ -48,7 +49,6 @@ export function CustomerSearchableInput({
         page: DEFAULT_PAGE_INDEX,
         limit: 5,
       },
-      enabled: Boolean(search?.trim()),
       select: (result) => result.data,
     })
   );
@@ -72,9 +72,14 @@ export function CustomerSearchableInput({
           size="icon-xs"
           onClick={handleReset}
         >
-          {search ? <X className="size-4" /> : <Users className="size-4" />}
+          {value.trim() ? (
+            <X className="size-4" />
+          ) : (
+            <Users className="size-4" />
+          )}
         </InputGroupButton>
       }
+      value={value}
       onChange={onChange}
       onValueChange={onValueChange}
       placeholder={placeholder}

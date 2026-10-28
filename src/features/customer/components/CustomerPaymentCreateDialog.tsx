@@ -35,10 +35,18 @@ export const openCustomerPaymentCreateDialog = Atom.make(false).pipe(
 
 export function CustomerPaymentCreateDialog({
   customerId,
+  saleId,
+  open: controlledOpen,
+  setOpen: setControlledOpen,
 }: {
   customerId: string;
+  saleId?: string;
+  open?: boolean;
+  setOpen?: (value: boolean) => void;
 }) {
-  const [open, setOpen] = useAtom(openCustomerPaymentCreateDialog);
+  const [atomOpen, setAtomOpen] = useAtom(openCustomerPaymentCreateDialog);
+  const open = controlledOpen ?? atomOpen;
+  const setOpen = setControlledOpen ?? setAtomOpen;
 
   const form = useForm<
     CustomerPaymentCreateInputType,
@@ -48,7 +56,7 @@ export function CustomerPaymentCreateDialog({
     resolver: zodResolver(customerPaymentCreateSchema),
     defaultValues: {
       customerId,
-      saleId: undefined,
+      saleId,
       amount: "",
       note: "",
     },
@@ -61,11 +69,11 @@ export function CustomerPaymentCreateDialog({
 
     reset({
       customerId,
-      saleId: undefined,
+      saleId,
       amount: "",
       note: "",
     });
-  }, [customerId, open, reset]);
+  }, [open, reset, customerId, saleId]);
 
   const { mutate, isPending } = useCreateCustomerPayment<
     keyof CustomerPaymentCreateType
@@ -90,7 +98,7 @@ export function CustomerPaymentCreateDialog({
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogResponsiveContent>
         <DialogStickyHeader>
-          <DialogTitle>Record payment</DialogTitle>
+          <DialogTitle>New payment</DialogTitle>
           <DialogDescription>
             Record a payment received from this customer
           </DialogDescription>
@@ -99,15 +107,17 @@ export function CustomerPaymentCreateDialog({
         <DialogResponsiveBody>
           <form id={formId} onSubmit={handleSubmit}>
             <FieldGroup>
-              <SaleSelectorField
-                control={form.control}
-                name="saleId"
-                customerId={customerId}
-                label="Against purchase"
-                description="Leave empty to record a general payment"
-                fetchApi={open}
-                disabled={isPending}
-              />
+              {!saleId && (
+                <SaleSelectorField
+                  control={form.control}
+                  name="saleId"
+                  customerId={customerId}
+                  label="Against purchase"
+                  description="Leave empty to record a general payment"
+                  fetchApi={open}
+                  disabled={isPending}
+                />
+              )}
               <InputAddonField
                 control={form.control}
                 name="amount"

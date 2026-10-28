@@ -16,7 +16,6 @@ import {
 import { FormatDateCell } from "@/components/FormatDateCell";
 import { SummaryStat } from "@/components/SummaryStat";
 import { QueryStateBoundary } from "@/components/tanstack-query/query-state-boundary";
-import { TimeRangeFilter } from "@/components/time-range-filter";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -27,20 +26,14 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { BALANCE_EPSILON } from "@/constants";
 import { usePermissionCheck } from "@/hooks/use-permission-check";
-import { useSearchFilter } from "@/hooks/use-search-filter";
 import { orpcTQClient } from "@/oRPC/orpc";
-import { buildDateRangeFilter } from "@/utils/buildDateRangeFilter";
 import { formatCurrency } from "@/utils/formatCurrency";
 
 import { CustomerUpdateDialog } from "../CustomerUpdateDialog";
 
-const BALANCE_EPSILON = 0.005;
-
 export function CustomerDetailsTab({ customerId }: { customerId: string }) {
-  const { filters, setFilters } = useSearchFilter(
-    "/dashboard/_dashboardLayout/customers/$customerId"
-  );
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const isAllowUpdate = usePermissionCheck([
     { level: "system", resource: "customer", action: "update" },
@@ -50,7 +43,6 @@ export function CustomerDetailsTab({ customerId }: { customerId: string }) {
     orpcTQClient.customer.details.queryOptions({
       input: {
         customerId,
-        createdAt: buildDateRangeFilter(filters.startTime, filters.endTime),
       },
       select: (result) => result.data,
     })
@@ -58,20 +50,6 @@ export function CustomerDetailsTab({ customerId }: { customerId: string }) {
 
   return (
     <div className="space-y-2">
-      <TimeRangeFilter
-        rangeSearch={{
-          range: filters.range,
-          startTime: filters.startTime,
-          endTime: filters.endTime,
-        }}
-        setRangeSearch={(updatedRange) =>
-          setFilters({
-            range: updatedRange.range,
-            startTime: updatedRange.startTime,
-            endTime: updatedRange.endTime,
-          })
-        }
-      />
       <QueryStateBoundary
         isLoading={isLoading}
         isError={isError}

@@ -25,7 +25,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { DEFAULT_PAGE_SIZE } from "@/constants";
+import { DEFAULT_PAGE_INDEX, DEFAULT_PAGE_SIZE } from "@/constants";
 import { usePermissionCheck } from "@/hooks/use-permission-check";
 import { orpcTQClient } from "@/oRPC/orpc";
 import { formatCurrency } from "@/utils/formatCurrency";
@@ -35,9 +35,10 @@ import {
   CustomerPaymentCreateDialog,
   openCustomerPaymentCreateDialog,
 } from "../CustomerPaymentCreateDialog";
+import { CustomerPaymentRowAction } from "./CustomerPaymentRowAction";
 
 export function CustomerPaymentsTab({ customerId }: { customerId: string }) {
-  const [page, setPage] = useState(1);
+  const [page, setPage] = useState(DEFAULT_PAGE_INDEX);
   const setOpenCustomerPaymentDialog = useAtomSet(
     openCustomerPaymentCreateDialog
   );
@@ -52,76 +53,85 @@ export function CustomerPaymentsTab({ customerId }: { customerId: string }) {
 
   const { data, isLoading, isError, error } = useQuery(
     orpcTQClient.customer.payment.list.queryOptions({
-      input: { customerId, page, limit: DEFAULT_PAGE_SIZE },
+      input: {
+        page,
+        limit: DEFAULT_PAGE_SIZE,
+        filter: {
+          customerId,
+        },
+      },
       select: (result) => result.data,
     })
   );
 
   return (
     <>
-      <Card>
-        <CardHeader>
-          <CardTitle>Payments</CardTitle>
-          <CardDescription>
-            All payments received from this customer
-          </CardDescription>
-          {isAllowCreatePayment && (
-            <CardAction>
-              <Button
-                size="sm"
-                onClick={() => setOpenCustomerPaymentDialog(true)}
-              >
-                <Plus />
-                Record payment
-              </Button>
-            </CardAction>
-          )}
-        </CardHeader>
-        <CardContent>
-          <QueryStateBoundary
-            isLoading={isLoading}
-            isError={isError}
-            error={error}
-            data={data}
-            isEmpty={() => false}
-            loadingFallback={<HistorySkeleton />}
-          >
-            {({ data: payments, meta }) => (
-              <div className="space-y-4">
-                <div className="overflow-hidden rounded-md border">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Date</TableHead>
-                        <TableHead>Against</TableHead>
-                        <TableHead className="text-right">Amount</TableHead>
-                        <TableHead>Note</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {payments.length === 0 ? (
-                        <TableRow>
-                          <TableCell
-                            colSpan={4}
-                            className="py-8 text-center text-muted-foreground"
-                          >
-                            No payments yet
-                          </TableCell>
-                        </TableRow>
-                      ) : (
-                        payments.map((payment) => (
-                          <PaymentRow key={payment.id} payment={payment} />
-                        ))
-                      )}
-                    </TableBody>
-                  </Table>
-                </div>
-                <MetaPagination meta={meta} onPageChange={setPage} />
-              </div>
+      <div className="space-y-2">
+        <Card>
+          <CardHeader>
+            <CardTitle>Payments</CardTitle>
+            <CardDescription>
+              All payments received from this customer
+            </CardDescription>
+            {isAllowCreatePayment && (
+              <CardAction>
+                <Button
+                  size="sm"
+                  onClick={() => setOpenCustomerPaymentDialog(true)}
+                >
+                  <Plus />
+                  New payment
+                </Button>
+              </CardAction>
             )}
-          </QueryStateBoundary>
-        </CardContent>
-      </Card>
+          </CardHeader>
+          <CardContent>
+            <QueryStateBoundary
+              isLoading={isLoading}
+              isError={isError}
+              error={error}
+              data={data}
+              isEmpty={() => false}
+              loadingFallback={<HistorySkeleton />}
+            >
+              {({ data: payments, meta }) => (
+                <div className="space-y-4">
+                  <div className="overflow-hidden rounded-md border">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Date</TableHead>
+                          <TableHead>Sale</TableHead>
+                          <TableHead className="text-right">Amount</TableHead>
+                          <TableHead>Note</TableHead>
+                          <TableHead></TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {payments.length === 0 ? (
+                          <TableRow>
+                            <TableCell
+                              colSpan={5}
+                              className="py-8 text-center text-muted-foreground"
+                            >
+                              No payments yet
+                            </TableCell>
+                          </TableRow>
+                        ) : (
+                          payments.map((payment) => (
+                            <PaymentRow key={payment.id} payment={payment} />
+                          ))
+                        )}
+                      </TableBody>
+                    </Table>
+                  </div>
+                  <MetaPagination meta={meta} onPageChange={setPage} />
+                </div>
+              )}
+            </QueryStateBoundary>
+          </CardContent>
+        </Card>
+      </div>
 
       {isAllowCreatePayment && (
         <CustomerPaymentCreateDialog customerId={customerId} />
@@ -136,30 +146,56 @@ function PaymentRow({
   payment: ListCustomerPaymentsContractType["output"]["data"]["data"][number];
 }) {
   return (
-    <TableRow>
-      <TableCell className="text-muted-foreground">
-        <FormatDateCell format="dd MMM, yyyy" value={payment.createdAt} />
-      </TableCell>
-      <TableCell>
-        {payment.invoiceNo ? (
-          <span className="font-medium">{payment.invoiceNo}</span>
-        ) : (
-          <span className="text-muted-foreground">General payment</span>
-        )}
-      </TableCell>
-      <TableCell className="text-right font-medium tabular-nums">
-        {formatCurrency(payment.amount)}
-      </TableCell>
-      <TableCell className="max-w-xs">
-        {payment.note ? (
-          <span className="line-clamp-1" title={payment.note}>
-            {payment.note}
-          </span>
-        ) : (
-          <span className="text-muted-foreground">—</span>
-        )}
-      </TableCell>
-    </TableRow>
+    <>
+      <TableRow>
+        <TableCell>
+          <FormatDateCell
+            format="dd MMM, yyyy"
+            value={payment.createdAt}
+            className="block whitespace-nowrap"
+          />
+        </TableCell>
+        <TableCell>
+          {payment.saleId ? (
+            <div className="flex flex-col">
+              <span className="font-medium">
+                {payment.invoiceNo ? `Invoice ${payment.invoiceNo}` : "Sale"}
+              </span>
+              <span className="text-xs text-muted-foreground">
+                {payment.saleCreatedAt && (
+                  <FormatDateCell
+                    format="dd MMM, yyyy"
+                    value={payment.saleCreatedAt}
+                  />
+                )}
+                {payment.saleTotalAmount !== null && (
+                  <span>{` · Total ${formatCurrency(payment.saleTotalAmount)}`}</span>
+                )}
+              </span>
+            </div>
+          ) : (
+            <span className="text-muted-foreground">General payment</span>
+          )}
+        </TableCell>
+        <TableCell className="text-right font-medium tabular-nums">
+          {formatCurrency(payment.amount)}
+        </TableCell>
+        <TableCell className="max-w-xs">
+          {payment.note ? (
+            <span className="line-clamp-1" title={payment.note}>
+              {payment.note}
+            </span>
+          ) : (
+            <span className="text-muted-foreground">—</span>
+          )}
+        </TableCell>
+        <TableCell className="text-right">
+          {payment.saleId && (
+            <CustomerPaymentRowAction saleId={payment.saleId} />
+          )}
+        </TableCell>
+      </TableRow>
+    </>
   );
 }
 

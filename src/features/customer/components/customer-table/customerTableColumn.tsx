@@ -4,6 +4,8 @@ import { MapPin, Phone } from "lucide-react";
 import { FormatDateCell } from "@/components/FormatDateCell";
 import { DataTableColumnHeader } from "@/components/data-table/data-table-column-header";
 import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
+import { DUE_EPSILON } from "@/constants";
 import type { ColumnType } from "@/types/data-table";
 import { formatCurrency } from "@/utils/formatCurrency";
 
@@ -13,9 +15,28 @@ import { CustomerTableRowAction } from "./CustomerTableRowAction";
 type CustomerTableRowDataType =
   ListCustomerContractType["output"]["data"]["data"][number];
 
-const DUE_EPSILON = 0.005;
-
 export const customerTableColumn: ColumnType<CustomerTableRowDataType> = [
+  {
+    id: "select",
+    header: ({ table }) => (
+      <Checkbox
+        aria-label="Select all customers on this page"
+        checked={table.getIsAllPageRowsSelected()}
+        indeterminate={table.getIsSomePageRowsSelected()}
+        onCheckedChange={(checked) => table.toggleAllPageRowsSelected(checked)}
+      />
+    ),
+    cell: ({ row }) => (
+      <Checkbox
+        aria-label={`Select ${row.original.name}`}
+        checked={row.getIsSelected()}
+        disabled={!row.getCanSelect()}
+        onCheckedChange={(checked) => row.toggleSelected(checked)}
+      />
+    ),
+    enableSorting: false,
+    enableHiding: false,
+  },
   {
     id: "customer",
     accessorKey: "name",

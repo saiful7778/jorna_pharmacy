@@ -1,12 +1,15 @@
 import { useState } from "react";
 
 import { useQuery } from "@tanstack/react-query";
+import { Plus } from "lucide-react";
 
 import { FormatDateCell } from "@/components/FormatDateCell";
 import { MetaPagination } from "@/components/MetaPagination";
 import { QueryStateBoundary } from "@/components/tanstack-query/query-state-boundary";
+import { Button } from "@/components/ui/button";
 import {
   Card,
+  CardAction,
   CardContent,
   CardDescription,
   CardHeader,
@@ -21,75 +24,107 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { DEFAULT_PAGE_SIZE } from "@/constants";
+import { DEFAULT_PAGE_INDEX, DEFAULT_PAGE_SIZE } from "@/constants";
 import type { ListSaleContractType } from "@/features/sale/api/sale.contract";
+import { SaleCreateDialog } from "@/features/sale/components/SaleCreateDialog";
 import { SaleStatusBadge } from "@/features/sale/components/SaleStatusBadge";
+import { usePermissionCheck } from "@/hooks/use-permission-check";
 import { orpcTQClient } from "@/oRPC/orpc";
 import { formatCurrency } from "@/utils/formatCurrency";
 
+import { CustomerPurchaseRowAction } from "./CustomerPurchaseRowAction";
+
 export function CustomerPurchasesTab({ customerId }: { customerId: string }) {
-  const [page, setPage] = useState(1);
+  const [page, setPage] = useState(DEFAULT_PAGE_INDEX);
+  const [openCreateDialog, setOpenCreateDialog] = useState(false);
+  const isAllowSaleCreate = usePermissionCheck([
+    { level: "system", resource: "sale", action: "manage" },
+    { level: "system", resource: "sale", action: "create" },
+  ]);
 
   const { data, isLoading, isError, error } = useQuery(
     orpcTQClient.sale.list.queryOptions({
-      input: { customerId, page, limit: DEFAULT_PAGE_SIZE },
+      input: {
+        page,
+        limit: DEFAULT_PAGE_SIZE,
+        filter: {
+          customerId,
+        },
+      },
       select: (result) => result.data,
     })
   );
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Purchases</CardTitle>
-        <CardDescription>All purchases made by this customer</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <QueryStateBoundary
-          isLoading={isLoading}
-          isError={isError}
-          error={error}
-          data={data}
-          isEmpty={() => false}
-          loadingFallback={<HistorySkeleton />}
-        >
-          {({ data: purchases, meta }) => (
-            <div className="space-y-4">
-              <div className="overflow-hidden rounded-md border">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Date</TableHead>
-                      <TableHead>Invoice</TableHead>
-                      <TableHead className="text-right">Total</TableHead>
-                      <TableHead className="text-right">Paid</TableHead>
-                      <TableHead className="text-right">Due</TableHead>
-                      <TableHead>Status</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {purchases.length === 0 ? (
-                      <TableRow>
-                        <TableCell
-                          colSpan={6}
-                          className="py-8 text-center text-muted-foreground"
-                        >
-                          No purchases yet
-                        </TableCell>
-                      </TableRow>
-                    ) : (
-                      purchases.map((purchase) => (
-                        <PurchaseRow key={purchase.id} purchase={purchase} />
-                      ))
-                    )}
-                  </TableBody>
-                </Table>
-              </div>
-              <MetaPagination meta={meta} onPageChange={setPage} />
-            </div>
+    <div className="space-y-2">
+      <Card>
+        <CardHeader>
+          <CardTitle>Purchases</CardTitle>
+          <CardDescription>All purchases made by this customer</CardDescription>
+          {isAllowSaleCreate && (
+            <CardAction>
+              <Button size="sm" onClick={() => setOpenCreateDialog(true)}>
+                <Plus />
+                <span>New sale</span>
+              </Button>
+              <SaleCreateDialog
+                customerId={customerId}
+                open={openCreateDialog}
+                setOpen={setOpenCreateDialog}
+              />
+            </CardAction>
           )}
-        </QueryStateBoundary>
-      </CardContent>
-    </Card>
+        </CardHeader>
+        <CardContent>
+          <QueryStateBoundary
+            isLoading={isLoading}
+            isError={isError}
+            error={error}
+            data={data}
+            isEmpty={() => false}
+            loadingFallback={<HistorySkeleton />}
+          >
+            {({ data: purchases, meta }) => (
+              <div className="space-y-4">
+                <div className="overflow-hidden rounded-md border">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Date & invoice</TableHead>
+                        <TableHead className="text-right">Total</TableHead>
+                        <TableHead className="text-right">Paid</TableHead>
+                        <TableHead className="text-right">Due</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead>
+                          <span className="sr-only">Actions</span>
+                        </TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {purchases.length === 0 ? (
+                        <TableRow>
+                          <TableCell
+                            colSpan={6}
+                            className="py-8 text-center text-muted-foreground"
+                          >
+                            No purchases yet
+                          </TableCell>
+                        </TableRow>
+                      ) : (
+                        purchases.map((purchase) => (
+                          <PurchaseRow key={purchase.id} purchase={purchase} />
+                        ))
+                      )}
+                    </TableBody>
+                  </Table>
+                </div>
+                <MetaPagination meta={meta} onPageChange={setPage} />
+              </div>
+            )}
+          </QueryStateBoundary>
+        </CardContent>
+      </Card>
+    </div>
   );
 }
 
@@ -98,17 +133,19 @@ function PurchaseRow({
 }: {
   purchase: ListSaleContractType["output"]["data"]["data"][number];
 }) {
-  const due = purchase.totalAmount - purchase.paidAmount;
-
   return (
     <TableRow>
-      <TableCell className="text-muted-foreground">
-        <FormatDateCell format="dd MMM, yyyy" value={purchase.createdAt} />
-      </TableCell>
       <TableCell>
-        <span className="font-medium">{purchase.invoiceNo}</span>
+        <FormatDateCell
+          format="dd MMM, yyyy"
+          value={purchase.createdAt}
+          className="block whitespace-nowrap"
+        />
+        <span className="mt-0.5 block text-xs font-medium">
+          {purchase.invoiceNo}
+        </span>
       </TableCell>
-      <TableCell className="text-right tabular-nums">
+      <TableCell className="text-right font-medium tabular-nums">
         {formatCurrency(purchase.totalAmount)}
       </TableCell>
       <TableCell className="text-right tabular-nums">
@@ -116,15 +153,21 @@ function PurchaseRow({
       </TableCell>
       <TableCell
         className={
-          due > 0
-            ? "text-right font-medium text-destructive tabular-nums"
-            : "text-right tabular-nums"
+          purchase.dueAmount > 0
+            ? "text-right font-semibold text-destructive tabular-nums"
+            : "text-right text-muted-foreground tabular-nums"
         }
       >
-        {formatCurrency(Math.max(due, 0))}
+        {formatCurrency(purchase.dueAmount)}
       </TableCell>
       <TableCell>
-        <SaleStatusBadge due={due} paidAmount={purchase.paidAmount} />
+        <SaleStatusBadge
+          due={purchase.dueAmount}
+          paidAmount={purchase.paidAmount}
+        />
+      </TableCell>
+      <TableCell className="text-right">
+        <CustomerPurchaseRowAction saleData={purchase} />
       </TableCell>
     </TableRow>
   );

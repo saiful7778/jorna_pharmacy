@@ -1,13 +1,14 @@
 import { useState } from "react";
 
 import { Link } from "@tanstack/react-router";
-import { Edit, Eye } from "lucide-react";
+import { Edit, Eye, Trash2 } from "lucide-react";
 
 import DataTableRowMenu from "@/components/data-table/data-table-row-menu";
 import { DropdownMenuItem } from "@/components/ui/dropdown-menu";
 import { usePermissionCheck } from "@/hooks/use-permission-check";
 
 import type { ListCustomerContractType } from "../../api/customer.contract";
+import { CustomerDeleteDialog } from "../CustomerDeleteDialog";
 import { CustomerUpdateDialog } from "../CustomerUpdateDialog";
 
 export function CustomerTableRowAction({
@@ -16,8 +17,12 @@ export function CustomerTableRowAction({
   customerData: ListCustomerContractType["output"]["data"]["data"][number];
 }) {
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
+  const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const isAllowUpdate = usePermissionCheck([
     { level: "system", resource: "customer", action: "update" },
+  ]);
+  const isAllowDelete = usePermissionCheck([
+    { level: "system", resource: "customer", action: "delete" },
   ]);
 
   return (
@@ -42,6 +47,15 @@ export function CustomerTableRowAction({
             <span>Update</span>
           </DropdownMenuItem>
         )}
+        {isAllowDelete && (
+          <DropdownMenuItem
+            variant="destructive"
+            onClick={() => setOpenDeleteDialog(true)}
+          >
+            <Trash2 />
+            <span>Delete</span>
+          </DropdownMenuItem>
+        )}
       </DataTableRowMenu>
 
       {isAllowUpdate && (
@@ -50,6 +64,13 @@ export function CustomerTableRowAction({
           setOpen={setOpenUpdateDialog}
           customerId={customerData.id}
           customerData={customerData}
+        />
+      )}
+      {isAllowDelete && (
+        <CustomerDeleteDialog
+          open={openDeleteDialog}
+          setOpen={setOpenDeleteDialog}
+          customerId={customerData.id}
         />
       )}
     </>
