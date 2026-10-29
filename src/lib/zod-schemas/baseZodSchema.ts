@@ -44,6 +44,7 @@ export const passwordField = ({
         .max(20, `${fieldName} must not exceed 20 characters`);
 
 export const RangeSearchEnumSchema = z.enum([
+  "TODAY",
   "THIS_WEEK",
   "THIS_MONTH",
   "LAST_WEEK",

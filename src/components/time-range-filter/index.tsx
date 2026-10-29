@@ -1,8 +1,10 @@
 import { useCallback, useMemo, useState } from "react";
 
 import {
+  endOfDay,
   endOfMonth,
   endOfWeek,
+  startOfDay,
   startOfMonth,
   startOfWeek,
   subMonths,
@@ -52,6 +54,7 @@ interface TimeRangeFilterProps {
 }
 
 const PRESET_KEYS = [
+  RangeSearchEnumSchema.enum.TODAY,
   RangeSearchEnumSchema.enum.THIS_WEEK,
   RangeSearchEnumSchema.enum.THIS_MONTH,
   RangeSearchEnumSchema.enum.LAST_WEEK,
@@ -62,6 +65,10 @@ const presetRanges: Record<
   (typeof PRESET_KEYS)[number],
   () => { start: Date; end: Date }
 > = {
+  TODAY: () => {
+    const now = new Date();
+    return { start: startOfDay(now), end: endOfDay(now) };
+  },
   THIS_WEEK: () => {
     const now = new Date();
     return {
