@@ -10,9 +10,9 @@ payments. Scope: `src/features/customer/**` and the customer routes under
 | ----------- | ------ |
 | Implemented | 3      |
 | Partial     | 3      |
-| Missing     | 10     |
+| Missing     | 11     |
 | Obsolete    | 2      |
-| **Total**   | **18** |
+| **Total**   | **19** |
 
 ## Customer payment create dialog
 
@@ -192,6 +192,15 @@ payments. Scope: `src/features/customer/**` and the customer routes under
 - **Then** Delete is shown only with `sale.delete`, and confirming it soft-deletes the sale and refreshes the tab
 - **Notes:** The New sale button is hidden without `sale.manage` or `sale.create`. Needs a mocked oRPC client and permission mocks.
 
+### CUST-019 · Customer payment stats are limited to the created-at range when one is given
+
+- **Covers:** `customerPaymentStatsProcedure` — `src/features/customer/api/customerPayment.procedure.ts`; `customerPaymentStatsContract` filter — `src/features/customer/api/customerPayment.contract.ts`
+- **Type:** integration · **Priority:** P1 · **Status:** Missing
+- **Given** a customer with a sale and a payment created inside the range and another sale and payment created before it
+- **When** the stats are requested with `filter.createdAt` set to the range
+- **Then** `totalSales`, `saleCount`, `totalPaid`, and `paymentCount` count only the rows inside the range, and `dueAmount` equals `totalSales - totalPaid` for that range
+- **Notes:** With no `createdAt` filter, the totals cover all active rows, as before. Needs a seeded D1 database.
+
 ## Source map
 
 | Source file                                                                         | Test file                                                               | Cases                                                      |
@@ -204,7 +213,7 @@ payments. Scope: `src/features/customer/**` and the customer routes under
 | `src/features/customer/components/CustomerPaymentsTable.tsx`                        | _none yet_                                                              | CUST-017                                                   |
 | `src/features/customer/api/customerDelete.procedure.ts`                             | `src/features/customer/api/customerDelete.procedure.test.ts`            | CUST-007, CUST-008, CUST-009, CUST-010, CUST-011, CUST-014 |
 | `src/features/customer/api/customer.procedure.ts`                                   | _none yet_                                                              | CUST-015                                                   |
-| `src/features/customer/api/customerPayment.procedure.ts`                            | _none yet_                                                              | CUST-015                                                   |
+| `src/features/customer/api/customerPayment.procedure.ts`                            | _none yet_                                                              | CUST-015, CUST-019                                         |
 | `src/features/customer/components/customer-bin-table/CustomerBinTable.tsx`          | _none yet_                                                              | CUST-012                                                   |
 | `src/features/customer/components/customer-bin-table/CustomerBinTableRowAction.tsx` | _none yet_                                                              | CUST-012                                                   |
 | `src/routes/dashboard/_dashboardLayout/customers/index.tsx`                         | _none yet_                                                              | CUST-013                                                   |

@@ -187,12 +187,14 @@ export const customerPaymentStatsProcedure = customerImpl.payment.stats
     const customerPaginateOption = buildPaginateOptions(
       {
         customerId: CustomerPaymentTable.customerId,
+        createdAt: CustomerPaymentTable.createdAt,
       },
       input
     );
     const salerPaginateOption = buildPaginateOptions(
       {
         customerId: SaleTable.customerId,
+        createdAt: SaleTable.createdAt,
       },
       input
     );
