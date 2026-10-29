@@ -77,7 +77,7 @@ function GridTableHead({
       data-slot="grid-table-head"
       role="columnheader"
       className={cn(
-        "p-2 text-left font-medium text-foreground [&:not(:last-child)]:border-r",
+        "flex h-full items-center p-2 text-left font-medium text-foreground [&:not(:last-child)]:border-r",
         colSpanClasses[span],
         className
       )}
