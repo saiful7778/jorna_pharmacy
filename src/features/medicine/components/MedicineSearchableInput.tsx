@@ -60,6 +60,7 @@ export function MedicineSearchableInput({
   onReset,
   companyId,
   showAddon = true,
+  defaultOpen = false,
   ...props
 }: MedicineSearchableInputProps) {
   const [search, setSearch] = useState<string | undefined>(undefined);
@@ -75,7 +76,7 @@ export function MedicineSearchableInput({
           companyId,
         },
       },
-      enabled: Boolean(search?.trim()),
+      enabled: defaultOpen || Boolean(search?.trim()),
       select: (result) => result.data,
     })
   );
@@ -83,6 +84,7 @@ export function MedicineSearchableInput({
   return (
     <SearchableInput
       {...props}
+      defaultOpen={defaultOpen}
       firstAddon={showAddon && <Search className="size-4" />}
       secondAddon={showAddon && <Pill className="size-4" />}
       onChange={onChange}
