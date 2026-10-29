@@ -3,6 +3,7 @@ import {
   BuildingComplex,
   Contact,
   House,
+  Landmark,
   Receipt,
   Settings,
   ShieldUser,
@@ -36,6 +37,18 @@ export const sidebarMenuLinks: Array<SidebarGroupMenuLinkType> = [
         path: "/dashboard",
         pathRegex: /^\/dashboard\/?$/,
         icon: <House />,
+      },
+    ],
+  },
+  {
+    groupName: "Finance",
+    items: [
+      {
+        title: "Daily Sale",
+        path: "/dashboard/sale-closings",
+        pathRegex: /^\/dashboard\/sale-closings\/?$/,
+        permissions: manageOrList("sale_closing"),
+        icon: <Landmark />,
       },
     ],
   },

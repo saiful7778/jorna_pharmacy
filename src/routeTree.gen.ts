@@ -23,6 +23,7 @@ import { Route as ApiRpcSplatRouteImport } from './routes/api/rpc.$'
 import { Route as DashboardDashboardLayoutIndexRouteImport } from './routes/dashboard/_dashboardLayout/index'
 import { Route as DashboardDashboardLayoutProfileRouteImport } from './routes/dashboard/_dashboardLayout/profile'
 import { Route as DashboardDashboardLayoutRolesRouteImport } from './routes/dashboard/_dashboardLayout/roles'
+import { Route as DashboardDashboardLayoutSaleClosingsRouteImport } from './routes/dashboard/_dashboardLayout/sale-closings'
 import { Route as DashboardDashboardLayoutCompaniesIndexRouteImport } from './routes/dashboard/_dashboardLayout/companies/index'
 import { Route as DashboardDashboardLayoutCompaniesCompanyIdRouteImport } from './routes/dashboard/_dashboardLayout/companies/$companyId'
 import { Route as DashboardDashboardLayoutCompaniesPaymentsRouteImport } from './routes/dashboard/_dashboardLayout/companies/payments'
@@ -113,6 +114,12 @@ const DashboardDashboardLayoutRolesRoute =
   DashboardDashboardLayoutRolesRouteImport.update({
     id: '/roles',
     path: '/roles',
+    getParentRoute: () => DashboardDashboardLayoutRoute,
+  } as any)
+const DashboardDashboardLayoutSaleClosingsRoute =
+  DashboardDashboardLayoutSaleClosingsRouteImport.update({
+    id: '/sale-closings',
+    path: '/sale-closings',
     getParentRoute: () => DashboardDashboardLayoutRoute,
   } as any)
 const DashboardDashboardLayoutCompaniesIndexRoute =
@@ -229,6 +236,7 @@ export interface FileRoutesByFullPath {
   '/api/rpc/$': typeof ApiRpcSplatRoute
   '/dashboard/profile': typeof DashboardDashboardLayoutProfileRoute
   '/dashboard/roles': typeof DashboardDashboardLayoutRolesRoute
+  '/dashboard/sale-closings': typeof DashboardDashboardLayoutSaleClosingsRoute
   '/dashboard/': typeof DashboardDashboardLayoutIndexRoute
   '/dashboard/companies/$companyId': typeof DashboardDashboardLayoutCompaniesCompanyIdRoute
   '/dashboard/companies/payments': typeof DashboardDashboardLayoutCompaniesPaymentsRoute
@@ -259,6 +267,7 @@ export interface FileRoutesByTo {
   '/api/rpc/$': typeof ApiRpcSplatRoute
   '/dashboard/profile': typeof DashboardDashboardLayoutProfileRoute
   '/dashboard/roles': typeof DashboardDashboardLayoutRolesRoute
+  '/dashboard/sale-closings': typeof DashboardDashboardLayoutSaleClosingsRoute
   '/dashboard': typeof DashboardDashboardLayoutIndexRoute
   '/dashboard/companies/$companyId': typeof DashboardDashboardLayoutCompaniesCompanyIdRoute
   '/dashboard/companies/payments': typeof DashboardDashboardLayoutCompaniesPaymentsRoute
@@ -291,6 +300,7 @@ export interface FileRoutesById {
   '/api/rpc/$': typeof ApiRpcSplatRoute
   '/dashboard/_dashboardLayout/profile': typeof DashboardDashboardLayoutProfileRoute
   '/dashboard/_dashboardLayout/roles': typeof DashboardDashboardLayoutRolesRoute
+  '/dashboard/_dashboardLayout/sale-closings': typeof DashboardDashboardLayoutSaleClosingsRoute
   '/dashboard/_dashboardLayout/': typeof DashboardDashboardLayoutIndexRoute
   '/dashboard/_dashboardLayout/companies/$companyId': typeof DashboardDashboardLayoutCompaniesCompanyIdRoute
   '/dashboard/_dashboardLayout/companies/payments': typeof DashboardDashboardLayoutCompaniesPaymentsRoute
@@ -324,6 +334,7 @@ export interface FileRouteTypes {
     | '/api/rpc/$'
     | '/dashboard/profile'
     | '/dashboard/roles'
+    | '/dashboard/sale-closings'
     | '/dashboard/'
     | '/dashboard/companies/$companyId'
     | '/dashboard/companies/payments'
@@ -354,6 +365,7 @@ export interface FileRouteTypes {
     | '/api/rpc/$'
     | '/dashboard/profile'
     | '/dashboard/roles'
+    | '/dashboard/sale-closings'
     | '/dashboard'
     | '/dashboard/companies/$companyId'
     | '/dashboard/companies/payments'
@@ -385,6 +397,7 @@ export interface FileRouteTypes {
     | '/api/rpc/$'
     | '/dashboard/_dashboardLayout/profile'
     | '/dashboard/_dashboardLayout/roles'
+    | '/dashboard/_dashboardLayout/sale-closings'
     | '/dashboard/_dashboardLayout/'
     | '/dashboard/_dashboardLayout/companies/$companyId'
     | '/dashboard/_dashboardLayout/companies/payments'
@@ -511,6 +524,13 @@ declare module '@tanstack/react-router' {
       path: '/roles'
       fullPath: '/dashboard/roles'
       preLoaderRoute: typeof DashboardDashboardLayoutRolesRouteImport
+      parentRoute: typeof DashboardDashboardLayoutRoute
+    }
+    '/dashboard/_dashboardLayout/sale-closings': {
+      id: '/dashboard/_dashboardLayout/sale-closings'
+      path: '/sale-closings'
+      fullPath: '/dashboard/sale-closings'
+      preLoaderRoute: typeof DashboardDashboardLayoutSaleClosingsRouteImport
       parentRoute: typeof DashboardDashboardLayoutRoute
     }
     '/dashboard/_dashboardLayout/companies/': {
@@ -678,6 +698,7 @@ const DashboardDashboardLayoutSettingsSettingsLayoutRouteWithChildren =
 interface DashboardDashboardLayoutRouteChildren {
   DashboardDashboardLayoutProfileRoute: typeof DashboardDashboardLayoutProfileRoute
   DashboardDashboardLayoutRolesRoute: typeof DashboardDashboardLayoutRolesRoute
+  DashboardDashboardLayoutSaleClosingsRoute: typeof DashboardDashboardLayoutSaleClosingsRoute
   DashboardDashboardLayoutIndexRoute: typeof DashboardDashboardLayoutIndexRoute
   DashboardDashboardLayoutCompaniesCompanyIdRoute: typeof DashboardDashboardLayoutCompaniesCompanyIdRoute
   DashboardDashboardLayoutCompaniesPaymentsRoute: typeof DashboardDashboardLayoutCompaniesPaymentsRoute
@@ -696,6 +717,8 @@ const DashboardDashboardLayoutRouteChildren: DashboardDashboardLayoutRouteChildr
   {
     DashboardDashboardLayoutProfileRoute: DashboardDashboardLayoutProfileRoute,
     DashboardDashboardLayoutRolesRoute: DashboardDashboardLayoutRolesRoute,
+    DashboardDashboardLayoutSaleClosingsRoute:
+      DashboardDashboardLayoutSaleClosingsRoute,
     DashboardDashboardLayoutIndexRoute: DashboardDashboardLayoutIndexRoute,
     DashboardDashboardLayoutCompaniesCompanyIdRoute:
       DashboardDashboardLayoutCompaniesCompanyIdRoute,

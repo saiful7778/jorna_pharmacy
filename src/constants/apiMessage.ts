@@ -104,6 +104,15 @@ export const API_MESSAGES = {
     HAS_SALES:
       "Purchase has medicine batches that have been sold and cannot be moved to the bin.",
   },
+  SALE_CLOSING: {
+    GET_ALL: "Sale closings loaded successfully.",
+    GET_STATS: "Sale closing stats loaded successfully.",
+    GET_DETAILS: "Sale closing details loaded successfully.",
+    CREATE: "Sale closing created successfully.",
+    NOT_CREATE: "Sale closing could not be created.",
+    NOT_FOUND: "Sale closing not found.",
+    ALREADY_CLOSED_TODAY: "A sale closing has already been created today.",
+  },
   COMPANY: {
     GET_DETAILS: "Company details loaded successfully.",
     GET_ALL_FOR_SEARCH: "Companies loaded successfully",
