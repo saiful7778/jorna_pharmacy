@@ -30,7 +30,6 @@ import { usePermissionCheck } from "@/hooks/use-permission-check";
 import { orpcTQClient } from "@/oRPC/orpc";
 import { formatCurrency } from "@/utils/formatCurrency";
 
-import type { CompanyDetailsContractType } from "../../api/company.contract";
 import { CompanyUpdateDialog } from "../CompanyUpdateDialog";
 
 export function CompanyDetailsTab({ companyId }: { companyId: string }) {
@@ -58,145 +57,136 @@ export function CompanyDetailsTab({ companyId }: { companyId: string }) {
         data={data}
         loadingFallback={<CompanyDetailsSkeleton />}
       >
-        {(company) => (
-          <div className="space-y-4">
-            <CompanySummaryStats summary={company.summary} />
+        {(company) => {
+          const hasDue = company.summary.dueAmount > BALANCE_EPSILON;
+          const hasAdvance = company.summary.dueAmount < -BALANCE_EPSILON;
+          return (
+            <div className="space-y-4">
+              <div className="grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-2 md:gap-4">
+                <SummaryStat
+                  label="Total purchases"
+                  value={formatCurrency(company.summary.totalPurchases)}
+                  icon={<Receipt aria-hidden />}
+                  color="info"
+                  trend={`${company.summary.purchaseCount} purchase${company.summary.purchaseCount === 1 ? "" : "s"}`}
+                  trendDirection="neutral"
+                />
+                <SummaryStat
+                  label="Total paid"
+                  value={formatCurrency(company.summary.totalPaid)}
+                  icon={<HandCoins aria-hidden />}
+                  color="success"
+                  trend={`${company.summary.paymentCount} payment${company.summary.paymentCount === 1 ? "" : "s"}`}
+                  trendDirection="neutral"
+                />
+                <SummaryStat
+                  label={hasAdvance ? "Advance balance" : "Due amount"}
+                  value={formatCurrency(Math.abs(company.summary.dueAmount))}
+                  icon={<Wallet aria-hidden />}
+                  color={hasDue ? "error" : "success"}
+                  trend={
+                    hasDue
+                      ? "Payment pending"
+                      : hasAdvance
+                        ? "Advance payment received"
+                        : "Account settled"
+                  }
+                  trendDirection={hasDue ? "down" : "neutral"}
+                />
+              </div>
 
-            <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-              <Card className="lg:col-span-2">
-                <CardHeader>
-                  <CardTitle>Contact & location</CardTitle>
-                  <CardDescription>Company contact info</CardDescription>
-                  <CardAction>
-                    {isAllowUpdate && (
-                      <Button
-                        size="icon"
-                        variant="outline"
-                        onClick={() => setOpenUpdateDialog(true)}
-                      >
-                        <Edit />
-                      </Button>
-                    )}
-                  </CardAction>
-                </CardHeader>
-                <CardContent>
-                  <dl className="grid gap-6 sm:grid-cols-2">
-                    <DetailsItem
-                      icon={<Phone aria-hidden className="size-4" />}
-                      title="Phone"
-                    >
-                      {company.phone ? (
-                        <span className="tabular-nums">{company.phone}</span>
-                      ) : (
-                        <EmptyValue />
+              <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+                <Card className="lg:col-span-2">
+                  <CardHeader>
+                    <CardTitle>Contact & location</CardTitle>
+                    <CardDescription>Company contact info</CardDescription>
+                    <CardAction>
+                      {isAllowUpdate && (
+                        <Button
+                          size="icon"
+                          variant="outline"
+                          onClick={() => setOpenUpdateDialog(true)}
+                        >
+                          <Edit />
+                        </Button>
                       )}
-                    </DetailsItem>
-                    <DetailsItem
-                      icon={<MapPin aria-hidden className="size-4" />}
-                      title="Address"
-                    >
-                      {company.address ? company.address : <EmptyValue />}
-                    </DetailsItem>
-                    <DetailsItem
-                      icon={<NotepadText aria-hidden className="size-4" />}
-                      title="Note"
-                    >
-                      {company.note ? company.note : <EmptyValue />}
-                    </DetailsItem>
-                  </dl>
-                </CardContent>
-              </Card>
+                    </CardAction>
+                  </CardHeader>
+                  <CardContent>
+                    <dl className="grid gap-6 sm:grid-cols-2">
+                      <DetailsItem
+                        icon={<Phone aria-hidden className="size-4" />}
+                        title="Phone"
+                      >
+                        {company.phone ? (
+                          <span className="tabular-nums">{company.phone}</span>
+                        ) : (
+                          <EmptyValue />
+                        )}
+                      </DetailsItem>
+                      <DetailsItem
+                        icon={<MapPin aria-hidden className="size-4" />}
+                        title="Address"
+                      >
+                        {company.address ? company.address : <EmptyValue />}
+                      </DetailsItem>
+                      <DetailsItem
+                        icon={<NotepadText aria-hidden className="size-4" />}
+                        title="Note"
+                      >
+                        {company.note ? company.note : <EmptyValue />}
+                      </DetailsItem>
+                    </dl>
+                  </CardContent>
+                </Card>
 
-              <Card>
-                <CardHeader>
-                  <CardTitle>Record</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <dl className="grid gap-6">
-                    <DetailsItem
-                      icon={<CalendarDays aria-hidden className="size-4" />}
-                      title="Created at"
-                    >
-                      <FormatDateCell
-                        format="dd MMM, yyyy hh:mm aa"
-                        value={company.createdAt}
-                      />
-                    </DetailsItem>
-                    <DetailsItem
-                      icon={<CalendarDays aria-hidden className="size-4" />}
-                      title="Last updated"
-                    >
-                      <FormatDateCell
-                        format="dd MMM, yyyy hh:mm aa"
-                        value={company.updatedAt}
-                      />
-                    </DetailsItem>
-                  </dl>
-                </CardContent>
-              </Card>
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Record</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <dl className="grid gap-6">
+                      <DetailsItem
+                        icon={<CalendarDays aria-hidden className="size-4" />}
+                        title="Created at"
+                      >
+                        <FormatDateCell
+                          format="dd MMM, yyyy hh:mm aa"
+                          value={company.createdAt}
+                        />
+                      </DetailsItem>
+                      <DetailsItem
+                        icon={<CalendarDays aria-hidden className="size-4" />}
+                        title="Last updated"
+                      >
+                        <FormatDateCell
+                          format="dd MMM, yyyy hh:mm aa"
+                          value={company.updatedAt}
+                        />
+                      </DetailsItem>
+                    </dl>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {isAllowUpdate && (
+                <CompanyUpdateDialog
+                  open={openUpdateDialog}
+                  setOpen={setOpenUpdateDialog}
+                  companyId={companyId}
+                  companyData={{
+                    name: company.name,
+                    isActive: company.isActive,
+                    address: company.address,
+                    note: company.note,
+                    phone: company.phone,
+                  }}
+                />
+              )}
             </div>
-
-            {isAllowUpdate && (
-              <CompanyUpdateDialog
-                open={openUpdateDialog}
-                setOpen={setOpenUpdateDialog}
-                companyId={companyId}
-                companyData={{
-                  name: company.name,
-                  isActive: company.isActive,
-                  address: company.address,
-                  note: company.note,
-                  phone: company.phone,
-                }}
-              />
-            )}
-          </div>
-        )}
+          );
+        }}
       </QueryStateBoundary>
-    </div>
-  );
-}
-
-function CompanySummaryStats({
-  summary,
-}: {
-  summary: CompanyDetailsContractType["output"]["data"]["summary"];
-}) {
-  const hasDue = summary.dueAmount > BALANCE_EPSILON;
-  const hasAdvance = summary.dueAmount < -BALANCE_EPSILON;
-
-  return (
-    <div className="grid grid-cols-[repeat(auto-fit,minmax(100px,1fr))] gap-4">
-      <SummaryStat
-        label="Total purchases"
-        value={formatCurrency(summary.totalPurchases)}
-        icon={<Receipt aria-hidden />}
-        color="info"
-        trend={`${summary.purchaseCount} purchase${summary.purchaseCount === 1 ? "" : "s"}`}
-        trendDirection="neutral"
-      />
-      <SummaryStat
-        label="Total paid"
-        value={formatCurrency(summary.totalPaid)}
-        icon={<HandCoins aria-hidden />}
-        color="success"
-        trend={`${summary.paymentCount} payment${summary.paymentCount === 1 ? "" : "s"}`}
-        trendDirection="neutral"
-      />
-      <SummaryStat
-        label={hasAdvance ? "Advance balance" : "Due amount"}
-        value={formatCurrency(Math.abs(summary.dueAmount))}
-        icon={<Wallet aria-hidden />}
-        color={hasDue ? "error" : "success"}
-        trend={
-          hasDue
-            ? "Payment pending"
-            : hasAdvance
-              ? "Advance payment received"
-              : "Account settled"
-        }
-        trendDirection={hasDue ? "down" : "neutral"}
-      />
     </div>
   );
 }

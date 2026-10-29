@@ -207,7 +207,7 @@ function CompanyPaymentDetails({ companyId }: { companyId: string }) {
         data={paymentStatsQuery.data}
         isEmpty={() => false}
         loadingFallback={
-          <div className="grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-4">
+          <div className="grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-2 md:gap-4">
             {Array.from({ length: 3 }).map((_, idx) => (
               <Skeleton key={idx} className="h-28 w-full" />
             ))}
@@ -219,7 +219,7 @@ function CompanyPaymentDetails({ companyId }: { companyId: string }) {
           const hasAdvance = stats.dueAmount < -BALANCE_EPSILON;
 
           return (
-            <div className="grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-4">
+            <div className="grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-2 md:gap-4">
               <SummaryStat
                 label="Total purchases"
                 value={formatCurrency(stats.totalPurchases)}

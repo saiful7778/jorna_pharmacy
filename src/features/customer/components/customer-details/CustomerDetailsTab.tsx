@@ -64,7 +64,7 @@ export function CustomerDetailsTab({ customerId }: { customerId: string }) {
 
           return (
             <div className="space-y-4">
-              <div className="grid grid-cols-[repeat(auto-fit,minmax(100px,1fr))] gap-4">
+              <div className="grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-2 md:gap-4">
                 <SummaryStat
                   label="Total sales"
                   value={formatCurrency(summary.totalSales)}

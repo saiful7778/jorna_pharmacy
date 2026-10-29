@@ -34,7 +34,7 @@ export function PurchaseStats({ startTime, endTime }: PurchaseStatsProps) {
       data={data}
       isEmpty={() => false}
       loadingFallback={
-        <div className="grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-4">
+        <div className="grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-2 md:gap-4">
           {Array.from({ length: 3 }).map((_, index) => (
             <Skeleton key={index} className="h-28 w-full" />
           ))}
@@ -46,7 +46,7 @@ export function PurchaseStats({ startTime, endTime }: PurchaseStatsProps) {
         const hasAdvance = stats.dueAmount < -BALANCE_EPSILON;
 
         return (
-          <div className="grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-4">
+          <div className="grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-2 md:gap-4">
             <SummaryStat
               label="Total purchases"
               value={formatCurrency(stats.totalPurchases)}
