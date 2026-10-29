@@ -19,7 +19,7 @@ import type {
   SidebarMenuLinkType,
 } from "@/types";
 
-function manageOrList(
+export function manageOrList(
   resource: PermissionType["resource"]
 ): Array<PermissionType> {
   return [

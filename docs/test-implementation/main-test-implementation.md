@@ -83,14 +83,16 @@ ID prefixes are listed per document. IDs are stable: never renumber an existing 
 
 ## Document index
 
-| Area            | Document                                   | Source scope                                                                               |
-| --------------- | ------------------------------------------ | ------------------------------------------------------------------------------------------ |
-| Company         | [company.md](./company.md)                 | `src/features/company/**`, `src/routes/dashboard/_dashboardLayout/companies/**`            |
-| Customer        | [customer.md](./customer.md)               | `src/features/customer/**`                                                                 |
-| Dashboard shell | [dashboard-shell.md](./dashboard-shell.md) | `src/components/shared/dashboard-shell/DashboardShellHeader.tsx`                           |
-| Grid table      | [grid-table.md](./grid-table.md)           | `src/components/ui/grid-table.tsx`                                                         |
-| Purchase        | [purchase.md](./purchase.md)               | `src/features/purchase/**`, `src/routes/dashboard/_dashboardLayout/companies/purchases/**` |
-| Sale            | [sale.md](./sale.md)                       | `src/features/sale/**`, `src/routes/dashboard/_dashboardLayout/sales/**`                   |
+| Area            | Document                                       | Source scope                                                                               |
+| --------------- | ---------------------------------------------- | ------------------------------------------------------------------------------------------ |
+| Company         | [company.md](./company.md)                     | `src/features/company/**`, `src/routes/dashboard/_dashboardLayout/companies/**`            |
+| Customer        | [customer.md](./customer.md)                   | `src/features/customer/**`                                                                 |
+| Dashboard home  | [dashboard-home.md](./dashboard-home.md)       | `src/features/dashboard/**`, `src/routes/dashboard/_dashboardLayout/index.tsx`             |
+| Dashboard shell | [dashboard-shell.md](./dashboard-shell.md)     | `src/components/shared/dashboard-shell/DashboardShellHeader.tsx`                           |
+| Grid table      | [grid-table.md](./grid-table.md)               | `src/components/ui/grid-table.tsx`                                                         |
+| Purchase        | [purchase.md](./purchase.md)                   | `src/features/purchase/**`, `src/routes/dashboard/_dashboardLayout/companies/purchases/**` |
+| Sale            | [sale.md](./sale.md)                           | `src/features/sale/**`, `src/routes/dashboard/_dashboardLayout/sales/**`                   |
+| Time range      | [time-range-filter.md](./time-range-filter.md) | `src/components/time-range-filter/**`, `src/lib/zod-schemas/baseZodSchema.ts`              |
 
 ## Out of scope
 
