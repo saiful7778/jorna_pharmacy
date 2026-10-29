@@ -150,18 +150,19 @@ function buildRandomUsersData(
 /**
  * Seeds users into the database
  * @param roles - Array of existing role data models
+ * @param options.includeRandomUsers - When false, only the default users are seeded
  * @returns Array of created user data models
  */
 export async function seedUsers(
   db: DatabaseType,
-  roles: Array<RoleDataModel>
+  roles: Array<RoleDataModel>,
+  { includeRandomUsers = true }: { includeRandomUsers?: boolean } = {}
 ): Promise<Array<UserDataModel>> {
   console.log("🌱 Seeding users...");
 
-  const remainingCount = Math.max(
-    0,
-    seedConfigs.targets.users - DEFAULT_USERS.length
-  );
+  const remainingCount = includeRandomUsers
+    ? Math.max(0, seedConfigs.targets.users - DEFAULT_USERS.length)
+    : 0;
 
   const allowedRoles = roles.filter(({ roleName }) =>
     SYSTEM_ROLES.includes(roleName)

@@ -1,4 +1,5 @@
 import { clearAll } from "../clearAll";
+import { seedUsers } from "../dev-seed/user.seed";
 import { seedPermission } from "../permission.seed";
 import { seedRolePermission } from "../rolePermission.seed";
 import { seedRoles } from "../roles.seed";
@@ -19,12 +20,14 @@ async function main() {
       roles,
       permissions
     );
+    const users = await seedUsers(db, roles, { includeRandomUsers: false });
 
     console.log("\n📊 Seed Summary:");
 
     console.log(`Roles: ${roles.length}`);
     console.log(`Permissions: ${permissions.length}`);
     console.log(`Roles and Permissions: ${rolesAndPermissions.length}`);
+    console.log(`Users: ${users.length}`);
 
     console.log("\n🎉 Seed completed successfully!");
   } finally {
