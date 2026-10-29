@@ -6,6 +6,7 @@ import {
 } from "@tanstack/react-router";
 
 import { SiteLogo } from "@/components/SiteLogo";
+import { DeveloperCredit } from "@/components/shared/DeveloperCredit";
 import { FieldDescription } from "@/components/ui/field";
 import { APP_NAME, DEFAULT_AUTH_PATH } from "@/constants";
 import { head } from "@/lib/head";
@@ -43,6 +44,7 @@ function AuthLayout() {
             Privacy Policy
           </Link>
         </FieldDescription>
+        <DeveloperCredit className="text-center" />
       </div>
     </div>
   );

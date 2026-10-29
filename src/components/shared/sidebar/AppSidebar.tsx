@@ -1,4 +1,5 @@
 import { SidebarLogo } from "@/components/SidebarLogo";
+import { DeveloperCredit } from "@/components/shared/DeveloperCredit";
 import {
   Sidebar,
   SidebarContent,
@@ -26,6 +27,7 @@ export function AppSidebar({ ...props }: AppSidebarProps) {
       </SidebarContent>
       <SidebarFooter>
         <SidebarFooterMenu />
+        <DeveloperCredit className="px-2 group-data-[collapsible=icon]:hidden" />
       </SidebarFooter>
       <SidebarRail />
     </Sidebar>
