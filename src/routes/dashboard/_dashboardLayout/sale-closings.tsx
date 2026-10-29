@@ -17,6 +17,7 @@ import { DashboardShellSkeleton } from "@/components/shared/dashboard-shell/Dash
 import { requirePermissions } from "@/features/auth/auth.functions";
 import { SaleClosingCreateButton } from "@/features/sale-closings/components/SaleClosingCreateDialog";
 import { SaleClosingManagementTable } from "@/features/sale-closings/components/sale-closing-table/SaleClosingManagementTable";
+import { usePermissionCheck } from "@/hooks/use-permission-check";
 import { head } from "@/lib/head";
 import { querySearchSchema, rangeFilterSchema } from "@/lib/querySearchSchema";
 import { orpcTQClient } from "@/oRPC/orpc";
@@ -63,6 +64,10 @@ export const Route = createFileRoute(
 });
 
 function RouteComponent() {
+  const isAllowCreate = usePermissionCheck([
+    { level: "system", resource: "sale_closing", action: "create" },
+  ]);
+
   return (
     <DashboardShell
       header={
@@ -72,7 +77,7 @@ function RouteComponent() {
             Review sale closings, cash reconciliation and variances
           </DashboardShellDescription>
           <DashboardShellHeaderActive>
-            <SaleClosingCreateButton />
+            {isAllowCreate && <SaleClosingCreateButton />}
           </DashboardShellHeaderActive>
         </DashboardShellHeader>
       }

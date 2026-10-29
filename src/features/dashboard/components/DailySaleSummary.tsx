@@ -5,6 +5,7 @@ import { QueryStateBoundary } from "@/components/tanstack-query/query-state-boun
 import { Button } from "@/components/ui/button";
 import {
   Card,
+  CardAction,
   CardContent,
   CardDescription,
   CardFooter,
@@ -12,6 +13,8 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { SaleClosingCreateButton } from "@/features/sale-closings/components/SaleClosingCreateDialog";
+import { usePermissionCheck } from "@/hooks/use-permission-check";
 import { orpcTQClient } from "@/oRPC/orpc";
 import { buildDateRangeFilter } from "@/utils/buildDateRangeFilter";
 import { formatCurrency } from "@/utils/formatCurrency";
@@ -34,11 +37,16 @@ export function DailySaleSummary({
     })
   );
 
+  const isAllowCreate = usePermissionCheck([
+    { level: "system", resource: "sale_closing", action: "create" },
+  ]);
+
   return (
     <Card>
       <CardHeader>
         <CardTitle>Daily sale</CardTitle>
         <CardDescription>Cash closings in the selected range</CardDescription>
+        <CardAction>{isAllowCreate && <SaleClosingCreateButton />}</CardAction>
       </CardHeader>
       <CardContent>
         <QueryStateBoundary

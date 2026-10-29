@@ -17,7 +17,6 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { FieldGroup } from "@/components/ui/field";
-import { usePermissionCheck } from "@/hooks/use-permission-check";
 
 import { useSaleClosingCreate } from "../api/saleClosing.api.hook";
 import {
@@ -35,18 +34,13 @@ const getFormInitialValue = (): SaleClosingCreateInputType => ({
 
 export function SaleClosingCreateButton() {
   const setOpen = useAtomSet(openSaleClosingCreateDialog);
-  const isAllowCreate = usePermissionCheck([
-    { level: "system", resource: "sale_closing", action: "create" },
-  ]);
 
   return (
     <>
-      {isAllowCreate && (
-        <Button onClick={() => setOpen(true)}>
-          <Plus />
-          <span>New closing</span>
-        </Button>
-      )}
+      <Button onClick={() => setOpen(true)}>
+        <Plus />
+        <span>New closing</span>
+      </Button>
       <SaleClosingCreateDialog />
     </>
   );
