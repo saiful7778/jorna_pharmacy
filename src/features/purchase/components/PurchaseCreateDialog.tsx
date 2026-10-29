@@ -9,7 +9,6 @@ import {
   type UseFormReturn,
 } from "react-hook-form";
 
-import { DateTimePickerField } from "@/components/form-fields/DateTimePickerField";
 import { InputField } from "@/components/form-fields/InputField";
 import { SelectField } from "@/components/form-fields/SelectField";
 import { Button } from "@/components/ui/button";
@@ -340,10 +339,13 @@ function PurchaseMedicineItems({
         <GridTable>
           <GridTableHeader>
             <GridTableRow>
-              <GridTableHead span={4}>
-                <Label>Medicine name</Label>
-              </GridTableHead>
               <GridTableHead span={1}>
+                <Label>NO#</Label>
+              </GridTableHead>
+              <GridTableHead span={4}>
+                <Label>Medicine</Label>
+              </GridTableHead>
+              <GridTableHead span={2}>
                 <Label>Qty</Label>
               </GridTableHead>
               <GridTableHead span={2}>
@@ -351,9 +353,6 @@ function PurchaseMedicineItems({
               </GridTableHead>
               <GridTableHead span={2}>
                 <Label>Sell / unit</Label>
-              </GridTableHead>
-              <GridTableHead span={2}>
-                <Label>Expiry date</Label>
               </GridTableHead>
               <GridTableHead span={1} />
             </GridTableRow>
@@ -418,10 +417,14 @@ function PurchaseMedicineItem({
   return (
     <div className="border-t">
       <GridTableRow>
+        <GridTableCell span={1}>
+          <div className="flex h-7 items-center px-2 text-xs">{`${fieldIdx + 1}.`}</div>
+        </GridTableCell>
         <GridTableCell span={4}>
           <MedicineSearchableInputField
             control={control}
             showAddon={false}
+            defaultOpen
             name={`items.${fieldIdx}.medicineName`}
             placeholder="Search or type medicine name"
             className="rounded-none border-none"
@@ -432,7 +435,7 @@ function PurchaseMedicineItem({
             disabled={isPending}
           />
         </GridTableCell>
-        <GridTableCell span={1}>
+        <GridTableCell span={2}>
           <InputField
             control={control}
             name={`items.${fieldIdx}.qtyPurchased`}
@@ -451,7 +454,7 @@ function PurchaseMedicineItem({
             control={control}
             name={`items.${fieldIdx}.costPerUnit`}
             className="rounded-none border-none"
-            placeholder="Cost"
+            placeholder="Cost price"
             type="number"
             min={0}
             inputMode="decimal"
@@ -474,16 +477,6 @@ function PurchaseMedicineItem({
             disabled={isPending}
           />
         </GridTableCell>
-        <GridTableCell span={2}>
-          <DateTimePickerField
-            control={control}
-            name={`items.${fieldIdx}.expiryDate`}
-            placeholder="Expiry date"
-            triggerClassName="w-full rounded-none border-none"
-            showTimeSelection={false}
-            disabled={isPending}
-          />
-        </GridTableCell>
         <GridTableCell span={1}>
           <div className="flex justify-center">
             <Button size="icon" variant="destructive" onClick={onRemove}>
@@ -493,8 +486,8 @@ function PurchaseMedicineItem({
         </GridTableCell>
       </GridTableRow>
       {isNew && (
-        <GridTableRow className="items-start border-t">
-          <GridTableCell span={2}>
+        <GridTableRow className="border-t">
+          <GridTableCell span={3}>
             <InputField
               control={control}
               name={`items.${fieldIdx}.genericName`}
@@ -503,7 +496,7 @@ function PurchaseMedicineItem({
               disabled={isPending}
             />
           </GridTableCell>
-          <GridTableCell span={2}>
+          <GridTableCell span={3}>
             <InputField
               control={control}
               name={`items.${fieldIdx}.strength`}
@@ -522,7 +515,7 @@ function PurchaseMedicineItem({
               disabled={isPending}
             />
           </GridTableCell>
-          <GridTableCell span={4}>
+          <GridTableCell span={3}>
             <InputField
               control={control}
               name={`items.${fieldIdx}.baseUnit`}
@@ -531,7 +524,6 @@ function PurchaseMedicineItem({
               disabled={isPending}
             />
           </GridTableCell>
-          <GridTableCell span={1} />
         </GridTableRow>
       )}
     </div>

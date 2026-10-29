@@ -14,9 +14,9 @@ Cases were moved here from [company.md](./company.md) when the purchase code lef
 | ----------- | ------ |
 | Implemented | 6      |
 | Partial     | 0      |
-| Missing     | 6      |
+| Missing     | 7      |
 | Obsolete    | 0      |
-| **Total**   | **12** |
+| **Total**   | **13** |
 
 ## Purchase list and details
 
@@ -140,6 +140,16 @@ Cases were moved here from [company.md](./company.md) when the purchase code lef
 - **Then** the delete mutation runs for that purchase, the dialog closes on success, and the purchases list refreshes without it
 - **Notes:** Without `purchase.delete` the Delete item is hidden, and View purchase stays available. Needs a mocked oRPC client and a permission mock. Previously COMP-030.
 
+### PUR-013 · Create purchase medicine items reflow into stacked fields on mobile
+
+- **Covers:** `PurchaseMedicineItems`, `PurchaseMedicineItem` — `src/features/purchase/components/PurchaseCreateDialog.tsx`
+- **Type:** component · **Priority:** P2 · **Status:** Missing
+- **Given** the New Purchase dialog with one medicine item added, rendered at a mobile and a desktop viewport
+- **When** the item renders
+- **Then** on mobile the table header is hidden and the medicine name, qty, cost, and sell fields stack in a two-column grid, with the remove button in the last grid slot. The generic name, strength, medicine type, and base unit fields follow in the same two-column grid once the item is new.
+- **Then** on desktop the header is shown and each field spans its original column width (5, 2, 2, 2, 1 for the main row and 3, 2, 3, 3 for the details row)
+- **Notes:** Layout is class-based (Tailwind `md:` breakpoint). Assert the classes on the header and cells, or check computed layout in a Storybook story. Behavior (inputs, validation, remove) is covered by PUR-009-style tests once added.
+
 ## Source map
 
 | Source file                                                                         | Test file                                                    | Cases                        |
@@ -163,7 +173,7 @@ Cases were moved here from [company.md](./company.md) when the purchase code lef
 | `src/features/purchase/components/purchase-bin-table/PurchaseBinTableRowAction.tsx` | —                                                            | PUR-009                      |
 | `src/features/purchase/components/company-details/CompanyPurchasesTab.tsx`          | _none yet_                                                   | PUR-011, PUR-012             |
 | `src/features/purchase/components/company-details/CompanyPurchaseRowAction.tsx`     | _none yet_                                                   | PUR-012                      |
-| `src/features/purchase/components/PurchaseCreateDialog.tsx`                         | _none yet_                                                   | — (see `grid-table.md`)      |
+| `src/features/purchase/components/PurchaseCreateDialog.tsx`                         | _none yet_                                                   | PUR-013                      |
 | `src/features/purchase/components/PurchaseSelectorField.tsx`                        | _none yet_                                                   | — (used by company payments) |
 | `src/features/purchase/components/PurchaseStats.tsx`                                | _none yet_                                                   | —                            |
 | `src/routes/dashboard/_dashboardLayout/companies/purchases/index.tsx`               | —                                                            | PUR-008                      |
