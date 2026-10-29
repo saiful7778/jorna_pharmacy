@@ -29,7 +29,7 @@ export const SaleClosingTable = sqliteTable(
     id: db_id,
     periodStart: db_date("period_start").notNull(),
     periodEnd: db_date("period_end").notNull(),
-    companyPaid: db_money("vendor_paid").default(0),
+    companyPaid: db_money("company_paid").default(0),
     totalSales: db_money("total_sales").notNull(),
     openingCash: db_money("opening_cash").default(0),
     cashReceived: db_money("cash_received").notNull(),

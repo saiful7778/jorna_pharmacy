@@ -50,6 +50,13 @@
       "when": 1793220848924,
       "tag": "0006_add_sale_close",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "6",
+      "when": 1793250538926,
+      "tag": "0007_update_name",
+      "breakpoints": true
     }
   ]
 }

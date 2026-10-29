@@ -1,0 +1,1 @@
+ALTER TABLE `sale_closings` RENAME COLUMN "vendor_paid" TO "company_paid";
