@@ -1,5 +1,6 @@
 import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
 
+import { DashboardShellFooter } from "@/components/shared/dashboard-shell/DashboardShellFooter";
 import { AppSidebar } from "@/components/shared/sidebar/AppSidebar";
 import { Topbar } from "@/components/shared/topbar";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
@@ -57,9 +58,10 @@ function RouteComponent() {
         <AppSidebar />
         <SidebarInset>
           <Topbar />
-          <main className="min-h-[calc(100vh-84px)] flex-1">
+          <main className="min-h-[calc(100vh-125px)] flex-1">
             <Outlet />
           </main>
+          <DashboardShellFooter />
         </SidebarInset>
       </SidebarProvider>
     </AuthStoreProvider>
