@@ -14,9 +14,9 @@ stay reserved.
 | ----------- | ------ |
 | Implemented | 2      |
 | Partial     | 3      |
-| Missing     | 12     |
+| Missing     | 13     |
 | Obsolete    | 14     |
-| **Total**   | **31** |
+| **Total**   | **32** |
 
 ## Company details summary
 
@@ -263,6 +263,15 @@ stay reserved.
 - **Type:** component · **Priority:** P1 · **Status:** Obsolete
 - **Notes:** Moved to `src/features/purchase/`.
 
+### COMP-032 · Company payment stats are limited to the created-at range when one is given
+
+- **Covers:** `companyPaymentStatsProcedure` — `src/features/company/api/companyPayment.procedure.ts`; `companyPaymentStatsContract` filter — `src/features/company/api/companyPayment.contract.ts`
+- **Type:** integration · **Priority:** P1 · **Status:** Missing
+- **Given** a company with a purchase and a payment created inside the range and another purchase and payment created before it
+- **When** the stats are requested with `filter.createdAt` set to the range
+- **Then** `totalPurchases`, `purchaseCount`, `totalPaid`, and `paymentCount` count only the rows inside the range, and `dueAmount` equals `totalPurchases - totalPaid` for that range
+- **Notes:** With no `createdAt` filter, the totals cover all active rows, as before. Needs a seeded D1 database.
+
 ### COMP-031 · Company payment row menu views the linked purchase only when one exists
 
 - **Covers:** `CompanyPaymentRowAction` — `src/features/company/components/company-details/CompanyPaymentRowAction.tsx`; `CompanyPaymentsTab` — `src/features/company/components/company-details/CompanyPaymentsTab.tsx`; `CompanyPaymentsTable` (shared by the tab and the payments page) — `src/features/company/components/CompanyPaymentsTable.tsx`; payments page — `src/routes/dashboard/_dashboardLayout/companies/payments.tsx`
@@ -283,7 +292,7 @@ stay reserved.
 | `src/features/company/components/company-bin-table/CompanyBinTableRowAction.tsx` | _none yet_                                                 | COMP-014                                                             |
 | `src/routes/dashboard/_dashboardLayout/companies/index.tsx`                      | _none yet_                                                 | COMP-015                                                             |
 | `src/features/company/components/company-details/CompanyDetailsTab.tsx`          | _none yet_                                                 | COMP-002                                                             |
-| `src/features/company/api/companyPayment.procedure.ts`                           | _none yet_                                                 | COMP-017, COMP-029                                                   |
+| `src/features/company/api/companyPayment.procedure.ts`                           | _none yet_                                                 | COMP-017, COMP-029, COMP-032                                         |
 | `src/features/company/components/company-details/CompanyPaymentsTab.tsx`         | _none yet_                                                 | COMP-004, COMP-029, COMP-031                                         |
 | `src/features/company/components/company-details/CompanyPaymentRowAction.tsx`    | _none yet_                                                 | COMP-031                                                             |
 | `src/features/company/components/CompanyPaymentsTable.tsx`                       | _none yet_                                                 | COMP-031                                                             |

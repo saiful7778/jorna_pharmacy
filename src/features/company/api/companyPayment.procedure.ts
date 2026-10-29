@@ -209,12 +209,14 @@ export const companyPaymentStatsProcedure = companyImpl.payment.stats
     const companyPaginateOption = buildPaginateOptions(
       {
         companyId: CompanyPaymentTable.companyId,
+        createdAt: CompanyPaymentTable.createdAt,
       },
       input
     );
     const purchasePaginateOption = buildPaginateOptions(
       {
         companyId: PurchaseTable.companyId,
+        createdAt: PurchaseTable.createdAt,
       },
       input
     );
