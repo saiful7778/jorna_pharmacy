@@ -122,6 +122,52 @@ export type SaleStatsContractType = InferContractRouterType<
   typeof saleStatsContract
 >;
 
+const saleTrendContract = saleBaseContract
+  .route({
+    method: "GET",
+    path: "/sales/trend",
+    description: "Get sale revenue and collected amount per local day",
+    tags,
+  })
+  .input(
+    z.object({
+      filter: z
+        .object({
+          createdAt: z
+            .object({
+              from: z.coerce.date().describe("Created at from date").optional(),
+              to: z.coerce.date().describe("Created at to date").optional(),
+            })
+            .optional(),
+        })
+        .optional(),
+      utcOffsetMinutes: z
+        .number()
+        .int()
+        .min(-840)
+        .max(840)
+        .default(0)
+        .describe(
+          "Client UTC offset in minutes, used to group sales by local day"
+        ),
+    })
+  )
+  .output(
+    apiOutputSchema(
+      z.array(
+        z.object({
+          date: z.string().describe("Local day as YYYY-MM-DD"),
+          saleCount: z.number(),
+          revenue: z.number(),
+          collected: z.number(),
+        })
+      )
+    )
+  );
+export type SaleTrendContractType = InferContractRouterType<
+  typeof saleTrendContract
+>;
+
 const saleCreateContract = saleBaseContract
   .route({
     method: "POST",
@@ -197,6 +243,7 @@ export type SaleDetailsContractType = InferContractRouterType<
 export const saleContract = {
   list: listSaleContract,
   stats: saleStatsContract,
+  trend: saleTrendContract,
   create: saleCreateContract,
   details: saleDetailsContract,
   ...saleDeleteContract,

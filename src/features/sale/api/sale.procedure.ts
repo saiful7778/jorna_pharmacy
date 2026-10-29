@@ -172,6 +172,45 @@ export const saleStatsProcedure = saleImpl.stats
     });
   });
 
+export const saleTrendProcedure = saleImpl.trend
+  .use(
+    userPermissionMiddleware([
+      { level: "system", resource: "sale", action: "manage" },
+      { level: "system", resource: "sale", action: "list" },
+    ])
+  )
+  .handler(async ({ context, input }) => {
+    const { where } = buildPaginateOptions(
+      { createdAt: SaleTable.createdAt },
+      { filter: input.filter }
+    );
+
+    const offsetSeconds = input.utcOffsetMinutes * 60;
+    const day = sql<string>`strftime('%Y-%m-%d', ${SaleTable.createdAt} / 1000 + ${offsetSeconds}, 'unixepoch')`;
+
+    const rows = await context.db
+      .select({
+        date: day,
+        saleCount: sql<number>`COUNT(*)`,
+        revenue: sql<number>`COALESCE(SUM(${SaleTable.totalAmount}), 0)`,
+        collected: sql<number>`COALESCE(SUM(${SaleTable.paidAmount}), 0)`,
+      })
+      .from(SaleTable)
+      .where(and(isNull(SaleTable.deletedAt), where))
+      .groupBy(day)
+      .orderBy(asc(day));
+
+    return apiResponse(
+      API_MESSAGES.SALE.GET_TREND,
+      rows.map((row) => ({
+        date: row.date,
+        saleCount: Number(row.saleCount),
+        revenue: Number(row.revenue),
+        collected: Number(row.collected),
+      }))
+    );
+  });
+
 export const saleDetailsProcedure = saleImpl.details
   .use(
     userPermissionMiddleware([

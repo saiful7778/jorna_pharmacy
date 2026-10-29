@@ -60,6 +60,7 @@ export const API_MESSAGES = {
   SALE: {
     GET_ALL: "Sales loaded successfully.",
     GET_STATS: "Sale statistics loaded successfully.",
+    GET_TREND: "Sale trend loaded successfully.",
     GET_DETAILS: "Sale details loaded successfully.",
     GET_ALL_BIN: "Sale bin loaded successfully.",
     NOT_FOUND: "Sale not found.",

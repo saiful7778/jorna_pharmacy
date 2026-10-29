@@ -4,6 +4,7 @@ import {
   saleDetailsProcedure,
   saleImpl,
   saleStatsProcedure,
+  saleTrendProcedure,
 } from "./sale.procedure";
 import {
   deleteAllSaleProcedure,
@@ -19,6 +20,7 @@ export const saleRouter = saleImpl.router({
   list: listSaleProcedure,
   listBin: listSaleBinProcedure,
   stats: saleStatsProcedure,
+  trend: saleTrendProcedure,
   create: saleCreateProcedure,
   details: saleDetailsProcedure,
   delete: deleteSaleProcedure,
