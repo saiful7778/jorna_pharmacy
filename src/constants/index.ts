@@ -21,6 +21,38 @@ export const breadcrumbRoutes: Array<BreadcrumbRouteType> = [
     path: "/dashboard",
     children: [
       {
+        title: "Daily Sale",
+        path: "/dashboard/sale-closings",
+      },
+      {
+        title: "Sales",
+        path: "/dashboard/sales",
+      },
+      {
+        title: "Customers",
+        path: "/dashboard/customers",
+        children: [
+          {
+            title: "Customer Payments",
+            path: "/dashboard/customers/payments",
+          },
+        ],
+      },
+      {
+        title: "Company",
+        path: "/dashboard/companies",
+        children: [
+          {
+            title: "Company Payments",
+            path: "/dashboard/companies/payments",
+          },
+          {
+            title: "Company Purchases",
+            path: "/dashboard/companies/purchases",
+          },
+        ],
+      },
+      {
         title: "All Users",
         path: "/dashboard/users",
       },
