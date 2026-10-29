@@ -351,8 +351,11 @@ function SaleMedicineItems({
         <GridTable>
           <GridTableHeader>
             <GridTableRow>
-              <GridTableHead span={5}>
-                <Label>Medicine name</Label>
+              <GridTableHead span={1}>
+                <Label>NO#</Label>
+              </GridTableHead>
+              <GridTableHead span={4}>
+                <Label>Medicine</Label>
               </GridTableHead>
               <GridTableHead span={2}>
                 <Label>Stock</Label>
@@ -431,7 +434,10 @@ function SaleMedicineItem({
 
   return (
     <GridTableRow className="border-t">
-      <GridTableCell span={5}>
+      <GridTableCell span={1}>
+        <div className="flex h-7 items-center px-2 text-xs">{`${fieldIdx + 1}.`}</div>
+      </GridTableCell>
+      <GridTableCell span={4}>
         <MedicineSearchableInputField
           control={control}
           showAddon={false}
