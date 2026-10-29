@@ -78,13 +78,13 @@ their feature folders; the per-day sales endpoint `sale.trend` is covered here a
 - **Then** the URL search updates with that range and its start and end times, and every figure on the page uses those times
 - **Notes:** Freeze time with fake timers.
 
-### DASH-005 · Payments card sends the selected range and shows only the columns the user can read
+### DASH-005 · Payments cards send the selected range and show only the cards the user can read
 
 - **Covers:** `PaymentsSummary` — `src/features/dashboard/components/PaymentsSummary.tsx`
 - **Type:** component · **Priority:** P1 · **Status:** Missing
 - **Given** a selected range, and a user who can read customer payments but not company payments
-- **When** the card renders
-- **Then** the customer column requests stats with `filter.createdAt` set to the range and shows "Received" and "Net due"; the company column is not rendered
+- **When** the cards render
+- **Then** the Customers card requests stats with `filter.createdAt` set to the range and shows "Received" and "Net due"; the Companies card is not rendered. When the user can read both, Customers and Companies are two separate cards side by side
 - **Notes:** Backend filtering is covered by CUST-019 and COMP-032.
 
 ### DASH-006 · A message is shown when the user has no dashboard figures

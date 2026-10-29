@@ -7,6 +7,7 @@ import { QueryStateBoundary } from "@/components/tanstack-query/query-state-boun
 import { Button } from "@/components/ui/button";
 import {
   Card,
+  CardAction,
   CardContent,
   CardDescription,
   CardHeader,
@@ -32,26 +33,18 @@ export function PaymentsSummary({
   showCompanies,
 }: PaymentsSummaryProps) {
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Payments</CardTitle>
-        <CardDescription>
-          Money in and out in the selected range
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="grid gap-6 md:grid-cols-2">
-        {showCustomers && (
-          <CustomerColumn startTime={startTime} endTime={endTime} />
-        )}
-        {showCompanies && (
-          <CompanyColumn startTime={startTime} endTime={endTime} />
-        )}
-      </CardContent>
-    </Card>
+    <div className="grid gap-4 md:grid-cols-2 md:gap-6">
+      {showCustomers && (
+        <CustomerPaymentsCard startTime={startTime} endTime={endTime} />
+      )}
+      {showCompanies && (
+        <CompanyPaymentsCard startTime={startTime} endTime={endTime} />
+      )}
+    </div>
   );
 }
 
-function CustomerColumn({
+function CustomerPaymentsCard({
   startTime,
   endTime,
 }: {
@@ -68,35 +61,46 @@ function CustomerColumn({
   );
 
   return (
-    <PaymentColumn
-      title="Customers"
-      link={{ to: "/dashboard/customers/payments", label: "Customer payments" }}
+    <PaymentCard
+      title="Customer payments"
+      action={
+        <Button
+          variant="outline"
+          size="sm"
+          nativeButton={false}
+          render={<Link to="/dashboard/companies/payments" />}
+        >
+          <span>Payments</span>
+        </Button>
+      }
     >
-      <QueryStateBoundary
-        isLoading={isLoading}
-        isError={isError}
-        error={error}
-        data={data}
-        isEmpty={() => false}
-        loadingFallback={<Skeleton className="h-20 w-full" />}
-      >
-        {(stats) => (
-          <PaymentRows
-            received={{ label: "Received", value: stats.totalPaid }}
-            balance={{
-              label: "Net due",
-              amount: stats.dueAmount,
-              owedLabel: "Still owed by customers",
-              advanceLabel: "Customers paid ahead",
-            }}
-          />
-        )}
-      </QueryStateBoundary>
-    </PaymentColumn>
+      <div className="space-y-4">
+        <QueryStateBoundary
+          isLoading={isLoading}
+          isError={isError}
+          error={error}
+          data={data}
+          isEmpty={() => false}
+          loadingFallback={<Skeleton className="h-20 w-full" />}
+        >
+          {(stats) => (
+            <PaymentRows
+              received={{ label: "Received", value: stats.totalPaid }}
+              balance={{
+                label: "Net due",
+                amount: stats.dueAmount,
+                owedLabel: "Still owed by customers",
+                advanceLabel: "Customers paid ahead",
+              }}
+            />
+          )}
+        </QueryStateBoundary>
+      </div>
+    </PaymentCard>
   );
 }
 
-function CompanyColumn({
+function CompanyPaymentsCard({
   startTime,
   endTime,
 }: {
@@ -113,9 +117,18 @@ function CompanyColumn({
   );
 
   return (
-    <PaymentColumn
-      title="Companies"
-      link={{ to: "/dashboard/companies/payments", label: "Company payments" }}
+    <PaymentCard
+      title="Company payments"
+      action={
+        <Button
+          variant="outline"
+          size="sm"
+          nativeButton={false}
+          render={<Link to="/dashboard/companies/payments" />}
+        >
+          <span>Payments</span>
+        </Button>
+      }
     >
       <QueryStateBoundary
         isLoading={isLoading}
@@ -137,35 +150,30 @@ function CompanyColumn({
           />
         )}
       </QueryStateBoundary>
-    </PaymentColumn>
+    </PaymentCard>
   );
 }
 
-function PaymentColumn({
+function PaymentCard({
   title,
-  link,
+  action,
   children,
 }: {
   title: string;
-  link: {
-    to: "/dashboard/customers/payments" | "/dashboard/companies/payments";
-    label: string;
-  };
+  action?: React.ReactNode;
   children: ReactNode;
 }) {
   return (
-    <div className="space-y-3">
-      <h3 className="text-sm font-semibold text-foreground">{title}</h3>
-      {children}
-      <Button
-        variant="outline"
-        size="sm"
-        nativeButton={false}
-        render={<Link to={link.to} />}
-      >
-        {link.label}
-      </Button>
-    </div>
+    <Card>
+      <CardHeader>
+        <CardTitle>{title}</CardTitle>
+        <CardDescription>
+          Money in and out in the selected range
+        </CardDescription>
+        {action && <CardAction>{action}</CardAction>}
+      </CardHeader>
+      <CardContent>{children}</CardContent>
+    </Card>
   );
 }
 
