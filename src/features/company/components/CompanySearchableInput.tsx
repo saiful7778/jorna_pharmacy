@@ -37,6 +37,7 @@ export function CompanySearchableInput({
   onChange,
   onValueChange,
   onReset,
+  defaultOpen = false,
   ...props
 }: CompanySearchableInputProps) {
   const [search, setSearch] = useState<string | undefined>(undefined);
@@ -49,6 +50,7 @@ export function CompanySearchableInput({
         page: DEFAULT_PAGE_INDEX,
         limit: 5,
       },
+      enable: defaultOpen || Boolean(search?.trim()),
       select: (result) => result.data,
     })
   );
@@ -63,6 +65,7 @@ export function CompanySearchableInput({
   return (
     <SearchableInput
       {...props}
+      defaultOpen={defaultOpen}
       firstAddon={<Search className="size-4" />}
       secondAddon={
         <InputGroupButton
