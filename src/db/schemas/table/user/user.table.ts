@@ -41,7 +41,7 @@ export const UserTable = sqliteTable(
     banExpires: db_date("ban_expires"),
 
     // settings
-    timezone: text("timezone").default("UTC").notNull(),
+    timezone: text("timezone").default("Asia/Dhaka").notNull(),
     locale: text("locale").default("en-US").notNull(),
     currency: text("currency").default("USD").notNull(),
 

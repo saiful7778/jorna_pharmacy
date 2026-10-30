@@ -114,12 +114,6 @@ function createRandomUser(
       insertUserSchema.shape.banReason,
       isBanned ? faker.lorem.sentence() : null
     )
-    .supply(insertUserSchema.shape.timezone, faker.location.timeZone())
-    .supply(
-      insertUserSchema.shape.locale,
-      faker.location.countryCode("alpha-2")
-    )
-    .supply(insertUserSchema.shape.currency, faker.finance.currency().code)
     .generate();
 
   return {
