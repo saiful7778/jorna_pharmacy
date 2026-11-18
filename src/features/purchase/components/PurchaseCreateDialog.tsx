@@ -9,6 +9,7 @@ import {
   type UseFormReturn,
 } from "react-hook-form";
 
+import { DateTimePickerField } from "@/components/form-fields/DateTimePickerField";
 import { InputField } from "@/components/form-fields/InputField";
 import { SelectField } from "@/components/form-fields/SelectField";
 import { Button } from "@/components/ui/button";
@@ -35,10 +36,12 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { MEDICINE_TYPE } from "@/db/schemas/enums/enum-values";
+import type { MedicineTypeEnumType } from "@/db/schemas/enums/zod-db-enums";
 import type { CompanyOptionType } from "@/features/company/components/CompanySearchableInput";
 import { CompanySearchableInputField } from "@/features/company/components/CompanySearchableInputField";
 import type { MedicineOptionType } from "@/features/medicine/components/MedicineSearchableInput";
 import { MedicineSearchableInputField } from "@/features/medicine/components/MedicineSearchableInputField";
+import { medicineTypeToBaseUnit } from "@/features/medicine/medicine.constant";
 import { formatCurrency } from "@/utils/formatCurrency";
 
 import { usePurchaseCreate } from "../api/purchase.api.hook";
@@ -414,6 +417,17 @@ function PurchaseMedicineItem({
     [setValue, fieldIdx]
   );
 
+  const onMedicineTypeSelect = useCallback(
+    (value: string) => {
+      const medicineType = value as MedicineTypeEnumType;
+      const baseUnit = medicineTypeToBaseUnit[medicineType];
+      setValue(`items.${fieldIdx}.baseUnit`, baseUnit, {
+        shouldDirty: true,
+      });
+    },
+    [setValue, fieldIdx]
+  );
+
   return (
     <div className="border-t">
       <GridTableRow>
@@ -512,15 +526,17 @@ function PurchaseMedicineItem({
               className="rounded-none border-none"
               placeholder="Medicine type"
               options={medicineTypeOptions}
+              onValueChange={onMedicineTypeSelect}
               disabled={isPending}
             />
           </GridTableCell>
           <GridTableCell span={3}>
-            <InputField
+            <DateTimePickerField
               control={control}
-              name={`items.${fieldIdx}.baseUnit`}
-              className="rounded-none border-none"
-              placeholder="Base unit (e.g. strip)"
+              name={`items.${fieldIdx}.expiryDate`}
+              placeholder="Expiry date"
+              triggerClassName="rounded-none border-none"
+              showTimeSelection={false}
               disabled={isPending}
             />
           </GridTableCell>

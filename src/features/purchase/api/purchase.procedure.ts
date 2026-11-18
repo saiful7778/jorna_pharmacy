@@ -28,6 +28,7 @@ import {
 } from "@/db/schemas";
 import { buildPaginateOptions, buildPaginationMeta } from "@/db/utils";
 import { chunkByParams } from "@/db/utils/chunk-by-params";
+import { medicineTypeToBaseUnit } from "@/features/medicine/medicine.constant";
 import { apiResponse } from "@/lib/apiResponse";
 import {
   authMiddleware,
@@ -243,6 +244,7 @@ export const purchaseCreateProcedure = purchaseImpl.create
         }
 
         medicineId = crypto.randomUUID();
+        const baseUnit = medicineTypeToBaseUnit[item.medicineType];
         newMedicines.push({
           id: medicineId,
           name: item.medicineName,
@@ -250,7 +252,7 @@ export const purchaseCreateProcedure = purchaseImpl.create
           strength: item.strength,
           companyId,
           type: item.medicineType,
-          baseUnit: item.baseUnit,
+          baseUnit: item.baseUnit ?? baseUnit,
         });
       }
 
