@@ -49,6 +49,7 @@ export const RangeSearchEnumSchema = z.enum([
   "THIS_MONTH",
   "LAST_WEEK",
   "LAST_MONTH",
+  "CUSTOM_DAY",
   "CUSTOM_WEEK",
   "CUSTOM_MONTH",
 ]);

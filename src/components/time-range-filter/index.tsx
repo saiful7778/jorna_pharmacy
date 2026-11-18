@@ -39,6 +39,7 @@ import {
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
+import { DateRangeSelect } from "./date-range-select";
 import { MonthRangeSelect } from "./month-range-select";
 import { WeekRangeSelect } from "./week-range-select";
 
@@ -126,6 +127,7 @@ export function TimeRangeFilter({
   setRangeSearch,
 }: TimeRangeFilterProps) {
   const [openDropdown, setOpenDropdown] = useState(false);
+  const [openCustomDayDialog, setOpenCustomDayDialog] = useState(false);
   const [openCustomWeekDialog, setOpenCustomWeekDialog] = useState(false);
   const [openCustomMonthDialog, setOpenCustomMonthDialog] = useState(false);
 
@@ -149,6 +151,18 @@ export function TimeRangeFilter({
         endTime: end.toISOString(),
       });
       setOpenDropdown(false);
+    },
+    [setRangeSearch]
+  );
+
+  const handleApplyCustomDay = useCallback(
+    (range: DateRange) => {
+      setRangeSearch({
+        range: RangeSearchEnumSchema.enum.CUSTOM_DAY,
+        startTime: range.start,
+        endTime: range.end,
+      });
+      setOpenCustomDayDialog(false);
     },
     [setRangeSearch]
   );
@@ -243,6 +257,12 @@ export function TimeRangeFilter({
               ))}
             </DropdownMenuRadioGroup>
 
+            <DropdownMenuItem onClick={() => setOpenCustomDayDialog(true)}>
+              <CalendarDays />
+              <span>
+                {formatEnumValue(RangeSearchEnumSchema.enum.CUSTOM_DAY)}
+              </span>
+            </DropdownMenuItem>
             <DropdownMenuItem onClick={() => setOpenCustomWeekDialog(true)}>
               <CalendarDays />
               <span>
@@ -281,6 +301,18 @@ export function TimeRangeFilter({
           </Tooltip>
         )}
       </div>
+
+      <CustomRangeDialog
+        open={openCustomDayDialog}
+        onOpenChange={setOpenCustomDayDialog}
+        title="Select Date Range"
+        description="Pick a start and end date for searching"
+      >
+        <DateRangeSelect
+          defaultRange={activeRange}
+          onApply={handleApplyCustomDay}
+        />
+      </CustomRangeDialog>
 
       <CustomRangeDialog
         open={openCustomWeekDialog}
