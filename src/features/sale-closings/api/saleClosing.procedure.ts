@@ -175,8 +175,8 @@ export const saleClosingCreateProcedure = saleClosingImpl.create
       .values({
         periodStart,
         periodEnd: now,
-        totalSales: input.totalSales,
-        cashReceived: input.totalSales,
+        totalSales: input.totalSales - input.totalSalary,
+        cashReceived: input.totalSales - input.totalSalary,
         totalSalary: input.totalSalary,
         closedBy: context.user.id,
       })
