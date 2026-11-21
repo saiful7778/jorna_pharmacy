@@ -11,7 +11,7 @@ export function DashboardShellFooter({
     <footer
       data-slot="dashboard-shell-footer"
       className={cn(
-        "border-t px-4 py-3 text-xs text-muted-foreground sm:px-6 md:flex md:items-center md:justify-between",
+        "sticky right-0 bottom-0 border-t bg-background px-4 py-3 text-xs text-muted-foreground sm:px-6 md:flex md:items-center md:justify-between",
         className
       )}
       {...props}
