@@ -16,6 +16,7 @@ interface DataTableProps<TData> extends React.ComponentProps<"div"> {
   table: TanstackTable<TData>;
   actionBar?: React.ReactNode;
   showPagination?: boolean;
+  emptyMessage?: React.ReactNode;
 }
 
 export function DataTable<TData>({
@@ -24,6 +25,7 @@ export function DataTable<TData>({
   children,
   className,
   showPagination = true,
+  emptyMessage = "No results.",
   ...props
 }: DataTableProps<TData>) {
   "use no memo";
@@ -85,7 +87,7 @@ export function DataTable<TData>({
                   colSpan={table.getAllColumns().length}
                   className="h-24 text-center"
                 >
-                  No results.
+                  {emptyMessage}
                 </TableCell>
               </TableRow>
             )}
