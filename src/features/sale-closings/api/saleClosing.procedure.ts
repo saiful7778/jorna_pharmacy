@@ -175,8 +175,10 @@ export const saleClosingCreateProcedure = saleClosingImpl.create
       .values({
         periodStart,
         periodEnd: now,
-        totalSales: input.totalSales - input.totalSalary,
-        cashReceived: input.totalSales - input.totalSalary,
+        // Stored gross: salary is its own outflow, subtracted once by
+        // calculateExpectedCash, so it must not be netted out here as well.
+        totalSales: input.totalSales,
+        cashReceived: input.totalSales,
         totalSalary: input.totalSalary,
         closedBy: context.user.id,
       })

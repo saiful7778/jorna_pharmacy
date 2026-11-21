@@ -12,7 +12,10 @@ import { SaleClosingTable, UserTable } from "@/db/schemas";
 import type { ORPCContext } from "@/types/orpc.types";
 
 import { saleClosingCreateSchema } from "../saleClosing.schema";
-import { saleClosingCreateProcedure } from "./saleClosing.procedure";
+import {
+  saleClosingCreateProcedure,
+  saleClosingDetailsProcedure,
+} from "./saleClosing.procedure";
 
 vi.mock("@/oRPC/middleware/auth.middleware", async () => {
   const { os } = await import("@orpc/server");
@@ -26,20 +29,9 @@ vi.mock("@/oRPC/middleware/auth.middleware", async () => {
 
 const USER_ID = "11111111-1111-4111-8111-111111111111";
 
-// full-schema.sql predates sale_closings, so the table comes from its migrations
-const SALE_CLOSING_MIGRATIONS = [
-  "0006_add_sale_close.sql",
-  "0007_update_name.sql",
-];
-
 async function applySchema(db: MockDatabaseType) {
   const schemaPath = path.resolve(process.cwd(), "full-schema.sql");
   await db.$client.exec(readFileSync(schemaPath, "utf8"));
-
-  for (const migration of SALE_CLOSING_MIGRATIONS) {
-    const migrationPath = path.resolve(process.cwd(), "migrations", migration);
-    await db.$client.exec(readFileSync(migrationPath, "utf8"));
-  }
 }
 
 function createContext(db: MockDatabaseType) {
@@ -100,6 +92,15 @@ describe("sale closing create procedure", () => {
       periodStart: new Date("2026-10-29T00:00:00.000Z"),
       periodEnd: new Date("2026-10-29T10:00:00.000Z"),
     });
+
+    // Salary is an outflow on its own, so it must be subtracted exactly once
+    const { data: fetchedClosing } = await call(
+      saleClosingDetailsProcedure,
+      { saleClosingId: result.data.id },
+      createContext(db)
+    );
+
+    expect(fetchedClosing.expectedCash).toBe(9500);
   });
 
   it("rejects a second closing on the same day", async () => {
