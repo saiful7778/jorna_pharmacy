@@ -31,7 +31,7 @@ import type { ListSaleContractType } from "@/features/sale/api/sale.contract";
 import { orpcTQClient } from "@/oRPC/orpc";
 import { formatCurrency } from "@/utils/formatCurrency";
 
-type CustomerSaleItem = ListSaleContractType["output"]["data"]["data"][number];
+type SaleItem = ListSaleContractType["output"]["data"]["data"][number];
 
 interface SaleSelectorFieldProps<
   TFieldValues extends FieldValues,
@@ -194,12 +194,12 @@ function SaleSelectorFieldRender<TFieldValues extends FieldValues>({
   );
 }
 
-function saleLabel(sale: CustomerSaleItem) {
+function saleLabel(sale: SaleItem) {
   const due = sale.totalAmount - sale.paidAmount;
   return `${sale.invoiceNo} · due ${formatCurrency(due)}`;
 }
 
-function SaleItem({ sale }: { sale: CustomerSaleItem }) {
+function SaleItem({ sale }: { sale: SaleItem }) {
   const due = sale.totalAmount - sale.paidAmount;
 
   return (
