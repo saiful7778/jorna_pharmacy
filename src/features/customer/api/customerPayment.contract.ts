@@ -43,6 +43,12 @@ const listCustomerPaymentsContract = customerPaymentBaseContract
       orderFields: [],
       filter: z.object({
         customerId: z.uuid().optional(),
+        createdAt: z
+          .object({
+            from: z.coerce.date().describe("Created at from date").optional(),
+            to: z.coerce.date().describe("Created at to date").optional(),
+          })
+          .optional(),
       }),
     })
   )
