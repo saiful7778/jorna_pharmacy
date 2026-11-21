@@ -273,8 +273,6 @@ export const customerDetailsProcedure = customerImpl.details
     const totalPaid = Number(paymentTotals[0]?.total ?? 0);
     const lastPurchaseAt = saleTotals[0]?.lastPurchaseAt;
 
-    console.log(saleTotals);
-
     const dueAmount = totalSales - totalPaid;
 
     return apiResponse(API_MESSAGES.CUSTOMER.GET_DETAILS, {

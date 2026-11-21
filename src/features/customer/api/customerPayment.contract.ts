@@ -52,6 +52,7 @@ const listCustomerPaymentsContract = customerPaymentBaseContract
         selectCustomerPaymentSchema
           .pick({
             id: true,
+            customerId: true,
             saleId: true,
             amount: true,
             note: true,
@@ -61,6 +62,8 @@ const listCustomerPaymentsContract = customerPaymentBaseContract
             invoiceNo: z.string().nullable(),
             saleTotalAmount: z.number().nullable(),
             saleCreatedAt: z.date().nullable(),
+            customerName: z.string().nullable(),
+            customerPhone: z.string().nullable(),
           })
       )
     )

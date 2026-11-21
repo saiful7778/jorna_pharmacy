@@ -8,11 +8,11 @@ payments. Scope: `src/features/customer/**` and the customer routes under
 
 | Status      | Count  |
 | ----------- | ------ |
-| Implemented | 3      |
+| Implemented | 4      |
 | Partial     | 3      |
 | Missing     | 11     |
 | Obsolete    | 2      |
-| **Total**   | **19** |
+| **Total**   | **20** |
 
 ## Customer payment create dialog
 
@@ -178,7 +178,19 @@ payments. Scope: `src/features/customer/**` and the customer routes under
 - **Then** the Date column shows the payment date. The Sale column shows `Invoice <no>` with the sale date and `Total` beneath it for a linked payment, or `General payment` for a payment with no sale. Then come right-aligned Amount and Note, and an Action column with a row menu only for linked payments
 - **When** the user opens the row menu and selects View sale
 - **Then** the sale details dialog opens for that payment's sale (`SaleViewDialog`)
-- **Notes:** The empty state spans all five columns. The list output adds `saleTotalAmount` and `saleCreatedAt` (nullable) from the joined sale. Needs a mocked oRPC client and router search state.
+- **Notes:** The empty state spans all five columns when the Customer column is hidden (six when it is shown). The list output adds `saleTotalAmount`, `saleCreatedAt`, `customerName`, and `customerPhone` (all nullable). Needs a mocked oRPC client and router search state.
+
+### CUST-020 · Customers payments page shows the customer name and phone for each payment
+
+- **Covers:** `CustomerPaymentsTable` — `src/features/customer/components/CustomerPaymentsTable.tsx`; `listCustomerPaymentsProcedure` customer fields — `src/features/customer/api/customerPayment.procedure.ts`; `listCustomerPaymentsContract` output — `src/features/customer/api/customerPayment.contract.ts`
+- **Type:** component · **Priority:** P2 · **Status:** Implemented
+- **Given** payments from customer A (with a phone) and customer B (without one)
+- **When** the table renders with `showCustomer` (the customers payments page)
+- **Then** a Customer column follows Date, showing the customer name linking to `/dashboard/customers/<id>` with the phone beneath it, or `No phone` when the customer has none
+- **When** the table renders without `showCustomer` (a single customer's payments tab)
+- **Then** the Customer column and names are not rendered, and the header has five columns
+- **Then** the empty state spans six columns with the Customer column and five without it
+- **Notes:** The list rows include `customerId`, `customerName`, and `customerPhone` from a left join to customers. The link falls back to `Unknown customer` when the joined name is missing.
 
 ### CUST-018 · Customer purchases tab creates a sale for the customer and offers view and delete per sale
 
@@ -210,10 +222,10 @@ payments. Scope: `src/features/customer/**` and the customer routes under
 | `src/features/customer/components/customer-details/CustomerPurchaseRowAction.tsx`   | _none yet_                                                              | CUST-018                                                   |
 | `src/features/customer/components/customer-details/CustomerPaymentsTab.tsx`         | _none yet_                                                              | CUST-003, CUST-017                                         |
 | `src/features/customer/components/customer-details/CustomerPaymentRowAction.tsx`    | _none yet_                                                              | CUST-017                                                   |
-| `src/features/customer/components/CustomerPaymentsTable.tsx`                        | _none yet_                                                              | CUST-017                                                   |
+| `src/features/customer/components/CustomerPaymentsTable.tsx`                        | `src/features/customer/components/CustomerPaymentsTable.test.tsx`       | CUST-017, CUST-020                                         |
 | `src/features/customer/api/customerDelete.procedure.ts`                             | `src/features/customer/api/customerDelete.procedure.test.ts`            | CUST-007, CUST-008, CUST-009, CUST-010, CUST-011, CUST-014 |
 | `src/features/customer/api/customer.procedure.ts`                                   | _none yet_                                                              | CUST-015                                                   |
-| `src/features/customer/api/customerPayment.procedure.ts`                            | _none yet_                                                              | CUST-015, CUST-019                                         |
+| `src/features/customer/api/customerPayment.procedure.ts`                            | _none yet_                                                              | CUST-015, CUST-019, CUST-020                               |
 | `src/features/customer/components/customer-bin-table/CustomerBinTable.tsx`          | _none yet_                                                              | CUST-012                                                   |
 | `src/features/customer/components/customer-bin-table/CustomerBinTableRowAction.tsx` | _none yet_                                                              | CUST-012                                                   |
 | `src/routes/dashboard/_dashboardLayout/customers/index.tsx`                         | _none yet_                                                              | CUST-013                                                   |

@@ -1,3 +1,6 @@
+import { Link } from "@tanstack/react-router";
+import { Phone } from "lucide-react";
+
 import { FormatDateCell } from "@/components/FormatDateCell";
 import { MetaPagination } from "@/components/MetaPagination";
 import {
@@ -18,9 +21,11 @@ type CustomerPaymentsData = ListCustomerPaymentsContractType["output"]["data"];
 export function CustomerPaymentsTable({
   paymentsData,
   onPageChange,
+  showCustomer = false,
 }: {
   paymentsData: CustomerPaymentsData;
   onPageChange: (page: number) => void;
+  showCustomer?: boolean;
 }) {
   return (
     <div className="space-y-4">
@@ -29,6 +34,7 @@ export function CustomerPaymentsTable({
           <TableHeader>
             <TableRow>
               <TableHead>Date</TableHead>
+              {showCustomer && <TableHead>Customer</TableHead>}
               <TableHead>Sale</TableHead>
               <TableHead className="text-right">Amount</TableHead>
               <TableHead>Note</TableHead>
@@ -39,7 +45,7 @@ export function CustomerPaymentsTable({
             {paymentsData.data.length === 0 ? (
               <TableRow>
                 <TableCell
-                  colSpan={5}
+                  colSpan={showCustomer ? 6 : 5}
                   className="py-8 text-center text-muted-foreground"
                 >
                   No payments yet
@@ -47,7 +53,11 @@ export function CustomerPaymentsTable({
               </TableRow>
             ) : (
               paymentsData.data.map((payment) => (
-                <PaymentRow key={payment.id} payment={payment} />
+                <PaymentRow
+                  key={payment.id}
+                  payment={payment}
+                  showCustomer={showCustomer}
+                />
               ))
             )}
           </TableBody>
@@ -60,8 +70,10 @@ export function CustomerPaymentsTable({
 
 function PaymentRow({
   payment,
+  showCustomer,
 }: {
   payment: CustomerPaymentsData["data"][number];
+  showCustomer: boolean;
 }) {
   return (
     <TableRow>
@@ -72,6 +84,11 @@ function PaymentRow({
           className="block whitespace-nowrap"
         />
       </TableCell>
+      {showCustomer && (
+        <TableCell>
+          <CustomerCell payment={payment} />
+        </TableCell>
+      )}
       <TableCell>
         {payment.saleId ? (
           <div className="flex flex-col">
@@ -110,5 +127,34 @@ function PaymentRow({
         {payment.saleId && <CustomerPaymentRowAction saleId={payment.saleId} />}
       </TableCell>
     </TableRow>
+  );
+}
+
+function CustomerCell({
+  payment,
+}: {
+  payment: CustomerPaymentsData["data"][number];
+}) {
+  return (
+    <div className="max-w-56 min-w-36">
+      <Link
+        to="/dashboard/customers/$customerId"
+        params={{ customerId: payment.customerId }}
+        search={{ tab: "details" }}
+        className="link font-medium"
+      >
+        {payment.customerName ?? "Unknown customer"}
+      </Link>
+      {payment.customerPhone ? (
+        <span className="mt-0.5 flex min-w-0 items-center gap-1 text-xs text-muted-foreground">
+          <Phone aria-hidden="true" className="size-3 shrink-0" />
+          <span className="truncate tabular-nums">{payment.customerPhone}</span>
+        </span>
+      ) : (
+        <span className="mt-0.5 block text-xs text-muted-foreground">
+          No phone
+        </span>
+      )}
+    </div>
   );
 }

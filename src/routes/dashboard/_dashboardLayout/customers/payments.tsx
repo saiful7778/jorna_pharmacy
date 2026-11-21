@@ -3,7 +3,7 @@ import { useState } from "react";
 import { Atom, useAtom, useAtomSet } from "@effect-atom/atom-react";
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Eye, HandCoins, Plus, Receipt, User, Wallet } from "lucide-react";
+import { Eye, HandCoins, Plus, Receipt, Wallet } from "lucide-react";
 
 import { SummaryStat } from "@/components/SummaryStat";
 import { DataTableEmpty } from "@/components/data-table/data-table-empty";
@@ -21,13 +21,6 @@ import {
 import { DashboardShellSkeleton } from "@/components/shared/dashboard-shell/DashboardShellSkeleton";
 import { QueryStateBoundary } from "@/components/tanstack-query/query-state-boundary";
 import { Button } from "@/components/ui/button";
-import {
-  Empty,
-  EmptyDescription,
-  EmptyHeader,
-  EmptyMedia,
-  EmptyTitle,
-} from "@/components/ui/empty";
 import { RefreshButton } from "@/components/ui/refresh-button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Spinner } from "@/components/ui/spinner";
@@ -97,29 +90,19 @@ function RouteComponent() {
           onChange={(value) => {
             setCustomerSearch(value);
           }}
+          onReset={() => {
+            setCustomerId(undefined);
+            setCustomerSearch("");
+          }}
           onOptionSelect={(customerData) => setCustomerId(customerData.id)}
         />
-        {customerId ? (
-          <CustomerPaymentDetails customerId={customerId} />
-        ) : (
-          <Empty className="min-h-[50dvh]">
-            <EmptyHeader>
-              <EmptyMedia className="size-10" variant="icon">
-                <User className="size-8" strokeWidth={1} />
-              </EmptyMedia>
-              <EmptyTitle>No customer</EmptyTitle>
-              <EmptyDescription>
-                First select a customer to see payments
-              </EmptyDescription>
-            </EmptyHeader>
-          </Empty>
-        )}
+        <CustomerPaymentDetails customerId={customerId} />
       </div>
     </DashboardShell>
   );
 }
 
-function CustomerPaymentDetails({ customerId }: { customerId: string }) {
+function CustomerPaymentDetails({ customerId }: { customerId?: string }) {
   const [page, setPage] = useState(DEFAULT_PAGE_INDEX);
   const setCustomerPaymentCreateDialog = useAtomSet(
     openCustomerPaymentCreateDialog
@@ -163,34 +146,36 @@ function CustomerPaymentDetails({ customerId }: { customerId: string }) {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center gap-2">
-        <Button
-          variant="outline"
-          nativeButton={false}
-          render={
-            <Link
-              to="/dashboard/customers/$customerId"
-              params={{ customerId }}
-              search={{ tab: "details" }}
-            />
-          }
-        >
-          <Eye />
-          <span>Customer Details</span>
-        </Button>
-        <div className="ml-auto flex items-center gap-2">
-          {isAllowCreate && (
-            <>
-              <Button onClick={() => setCustomerPaymentCreateDialog(true)}>
-                <Plus />
-                <span>Add Payment</span>
-              </Button>
-              <CustomerPaymentCreateDialog customerId={customerId} />
-            </>
-          )}
-          <RefreshButton isLoading={false} onButtonClick={handleRefresh} />
+      {customerId && (
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            nativeButton={false}
+            render={
+              <Link
+                to="/dashboard/customers/$customerId"
+                params={{ customerId }}
+                search={{ tab: "details" }}
+              />
+            }
+          >
+            <Eye />
+            <span>Customer Details</span>
+          </Button>
+          <div className="ml-auto flex items-center gap-2">
+            {isAllowCreate && (
+              <>
+                <Button onClick={() => setCustomerPaymentCreateDialog(true)}>
+                  <Plus />
+                  <span>Add Payment</span>
+                </Button>
+                <CustomerPaymentCreateDialog customerId={customerId} />
+              </>
+            )}
+            <RefreshButton isLoading={false} onButtonClick={handleRefresh} />
+          </div>
         </div>
-      </div>
+      )}
       <QueryStateBoundary
         isLoading={paymentStatsQuery.isLoading}
         isError={paymentStatsQuery.isError}
@@ -258,6 +243,7 @@ function CustomerPaymentDetails({ customerId }: { customerId: string }) {
           <CustomerPaymentsTable
             paymentsData={paymentsData}
             onPageChange={setPage}
+            showCustomer
           />
         )}
       </QueryStateBoundary>
