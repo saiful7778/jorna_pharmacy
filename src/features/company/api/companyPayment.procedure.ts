@@ -42,6 +42,8 @@ export const listCompanyPaymentsProcedure = companyImpl.payment.list
         .select({
           id: CompanyPaymentTable.id,
           companyId: CompanyPaymentTable.companyId,
+          companyName: CompanyTable.name,
+          companyPhone: CompanyTable.phone,
           purchaseId: CompanyPaymentTable.purchaseId,
           purchaseInvoiceNo: PurchaseTable.companyInvoiceNo,
           purchaseTotalAmount: PurchaseTable.totalAmount,
@@ -51,6 +53,10 @@ export const listCompanyPaymentsProcedure = companyImpl.payment.list
           createdAt: CompanyPaymentTable.createdAt,
         })
         .from(CompanyPaymentTable)
+        .leftJoin(
+          CompanyTable,
+          eq(CompanyTable.id, CompanyPaymentTable.companyId)
+        )
         .leftJoin(
           PurchaseTable,
           eq(PurchaseTable.id, CompanyPaymentTable.purchaseId)

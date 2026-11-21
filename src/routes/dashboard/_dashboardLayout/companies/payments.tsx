@@ -3,14 +3,7 @@ import { useState } from "react";
 import { Atom, useAtom } from "@effect-atom/atom-react";
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import {
-  BuildingComplex,
-  Eye,
-  HandCoins,
-  Plus,
-  Receipt,
-  Wallet,
-} from "lucide-react";
+import { Eye, HandCoins, Plus, Receipt, Wallet } from "lucide-react";
 
 import { SummaryStat } from "@/components/SummaryStat";
 import { DataTableEmpty } from "@/components/data-table/data-table-empty";
@@ -28,13 +21,6 @@ import {
 import { DashboardShellSkeleton } from "@/components/shared/dashboard-shell/DashboardShellSkeleton";
 import { QueryStateBoundary } from "@/components/tanstack-query/query-state-boundary";
 import { Button } from "@/components/ui/button";
-import {
-  Empty,
-  EmptyDescription,
-  EmptyHeader,
-  EmptyMedia,
-  EmptyTitle,
-} from "@/components/ui/empty";
 import { RefreshButton } from "@/components/ui/refresh-button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Spinner } from "@/components/ui/spinner";
@@ -99,6 +85,7 @@ function RouteComponent() {
           defaultOpen
           onReset={() => {
             setCompanyId(undefined);
+            setCompanySearch("");
           }}
           value={companySearch}
           onChange={(value) => {
@@ -106,27 +93,13 @@ function RouteComponent() {
           }}
           onOptionSelect={(companyData) => setCompanyId(companyData.id)}
         />
-        {companyId ? (
-          <CompanyPaymentDetails companyId={companyId} />
-        ) : (
-          <Empty className="min-h-[50dvh]">
-            <EmptyHeader>
-              <EmptyMedia className="size-10" variant="icon">
-                <BuildingComplex className="size-8" strokeWidth={1} />
-              </EmptyMedia>
-              <EmptyTitle>No companies</EmptyTitle>
-              <EmptyDescription>
-                First select a company to see payments
-              </EmptyDescription>
-            </EmptyHeader>
-          </Empty>
-        )}
+        <CompanyPaymentDetails companyId={companyId} />
       </div>
     </DashboardShell>
   );
 }
 
-function CompanyPaymentDetails({ companyId }: { companyId: string }) {
+function CompanyPaymentDetails({ companyId }: { companyId?: string }) {
   const [page, setPage] = useState(DEFAULT_PAGE_INDEX);
   const [openDialog, setOpenDialog] = useState<boolean>(false);
   const isAllowCreate = usePermissionCheck([
@@ -169,22 +142,24 @@ function CompanyPaymentDetails({ companyId }: { companyId: string }) {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between gap-2">
-        <Button
-          variant="outline"
-          nativeButton={false}
-          render={
-            <Link
-              to="/dashboard/companies/$companyId"
-              params={{ companyId }}
-              search={{ tab: "details" }}
-            />
-          }
-        >
-          <Eye />
-          <span>Company Details</span>
-        </Button>
-        <div className="flex items-center gap-2">
-          {isAllowCreate && (
+        {companyId && (
+          <Button
+            variant="outline"
+            nativeButton={false}
+            render={
+              <Link
+                to="/dashboard/companies/$companyId"
+                params={{ companyId }}
+                search={{ tab: "details" }}
+              />
+            }
+          >
+            <Eye />
+            <span>Company Details</span>
+          </Button>
+        )}
+        <div className="ml-auto flex items-center gap-2">
+          {companyId && isAllowCreate && (
             <>
               <Button onClick={() => setOpenDialog(true)}>
                 <Plus />
@@ -267,6 +242,7 @@ function CompanyPaymentDetails({ companyId }: { companyId: string }) {
           <CompanyPaymentsTable
             paymentsData={paymentsData}
             onPageChange={setPage}
+            showCompany
           />
         )}
       </QueryStateBoundary>

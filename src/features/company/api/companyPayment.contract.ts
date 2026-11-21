@@ -59,6 +59,8 @@ const listCompanyPaymentsContract = companyPaymentBaseContract
             createdAt: true,
           })
           .extend({
+            companyName: z.string().nullable(),
+            companyPhone: z.string().nullable(),
             purchase: z
               .object({
                 companyInvoiceNo: z.string().nullable(),

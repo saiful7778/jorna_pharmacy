@@ -12,11 +12,11 @@ stay reserved.
 
 | Status      | Count  |
 | ----------- | ------ |
-| Implemented | 2      |
+| Implemented | 3      |
 | Partial     | 3      |
 | Missing     | 13     |
 | Obsolete    | 14     |
-| **Total**   | **32** |
+| **Total**   | **33** |
 
 ## Company details summary
 
@@ -255,7 +255,21 @@ stay reserved.
 - **Given** a company with a payment against a purchase that has an invoice number, a payment against a purchase with no invoice number, and a general payment
 - **When** the payments tab renders, and `company.payment.list` is requested
 - **Then** each payment row returns `purchase` (`null` for a general payment; otherwise `companyInvoiceNo`, `totalAmount`, `paidAmount`, and a non-negative `dueAmount`), and the first column shows the date with `Invoice <no>`, `No invoice no`, or `General payment` beneath it, followed by right-aligned Amount, the Purchase column (total and status badge, or `—`), and Note
-- **Notes:** The empty state spans all five columns. Needs a mocked oRPC client and a D1/Drizzle fixture for the join. The Purchase column uses the shared `PurchaseStatusBadge` from `src/features/purchase/`.
+- **Notes:** The empty state spans all five columns when the Company column is hidden (six when it is shown). Needs a mocked oRPC client and a D1/Drizzle fixture for the join. The Purchase column uses the shared `PurchaseStatusBadge` from `src/features/purchase/`.
+
+### COMP-033 · Companies payments page shows the company name and phone for each payment
+
+- **Covers:** `CompanyPaymentsTable` — `src/features/company/components/CompanyPaymentsTable.tsx`; `listCompanyPaymentsProcedure` company fields — `src/features/company/api/companyPayment.procedure.ts`; `listCompanyPaymentsContract` output — `src/features/company/api/companyPayment.contract.ts`; payments page — `src/routes/dashboard/_dashboardLayout/companies/payments.tsx`
+- **Type:** component · **Priority:** P2 · **Status:** Implemented
+- **Given** payments from company A (with a phone) and company B (without one)
+- **When** the table renders with `showCompany` (the companies payments page)
+- **Then** a Company column follows Date, showing the company name linking to `/dashboard/companies/<id>` with the phone beneath it, or `No phone` when the company has none
+- **When** the table renders without `showCompany` (a single company's payments tab)
+- **Then** the Company column and names are not rendered, and the header has five columns
+- **Then** the empty state spans six columns with the Company column and five without it
+- **When** no company is selected on the payments page
+- **Then** the page lists payments across all companies, the Company column is shown, and the Company Details and Add Payment actions stay hidden until a company is selected
+- **Notes:** The list rows include `companyName` and `companyPhone` from a left join to companies. The link falls back to `Unknown company` when the joined name is missing.
 
 ### COMP-030 · Company purchase row menu views a purchase and moves it to the bin
 
@@ -284,21 +298,21 @@ stay reserved.
 
 ## Source map
 
-| Source file                                                                      | Test file                                                  | Cases                                                                |
-| -------------------------------------------------------------------------------- | ---------------------------------------------------------- | -------------------------------------------------------------------- |
-| `src/features/company/api/company.procedure.ts`                                  | _none yet_                                                 | COMP-001, COMP-017                                                   |
-| `src/features/company/api/companyDelete.procedure.ts`                            | `src/features/company/api/companyDelete.procedure.test.ts` | COMP-009, COMP-010, COMP-011, COMP-012, COMP-013, COMP-016, COMP-020 |
-| `src/features/company/components/company-bin-table/CompanyBinTable.tsx`          | _none yet_                                                 | COMP-014                                                             |
-| `src/features/company/components/company-bin-table/CompanyBinTableRowAction.tsx` | _none yet_                                                 | COMP-014                                                             |
-| `src/routes/dashboard/_dashboardLayout/companies/index.tsx`                      | _none yet_                                                 | COMP-015                                                             |
-| `src/features/company/components/company-details/CompanyDetailsTab.tsx`          | _none yet_                                                 | COMP-002                                                             |
-| `src/features/company/api/companyPayment.procedure.ts`                           | _none yet_                                                 | COMP-017, COMP-029, COMP-032                                         |
-| `src/features/company/components/company-details/CompanyPaymentsTab.tsx`         | _none yet_                                                 | COMP-004, COMP-029, COMP-031                                         |
-| `src/features/company/components/company-details/CompanyPaymentRowAction.tsx`    | _none yet_                                                 | COMP-031                                                             |
-| `src/features/company/components/CompanyPaymentsTable.tsx`                       | _none yet_                                                 | COMP-031                                                             |
-| `src/features/company/components/CompanyPaymentCreateDialog.tsx`                 | _none yet_                                                 | COMP-017                                                             |
-| `src/routes/dashboard/_dashboardLayout/companies/payments.tsx`                   | _none yet_                                                 | COMP-031                                                             |
-| `src/components/DeleteDialog.tsx`                                                | _none yet_                                                 | COMP-007                                                             |
-| `src/features/company/components/CompanyDeleteDialog.tsx`                        | _none yet_                                                 | COMP-007                                                             |
-| `src/features/company/components/company-table/CompanyTableRowAction.tsx`        | _none yet_                                                 | COMP-007                                                             |
-| `src/routes/dashboard/_dashboardLayout/companies/$companyId.tsx`                 | _none yet_                                                 | COMP-008                                                             |
+| Source file                                                                      | Test file                                                       | Cases                                                                |
+| -------------------------------------------------------------------------------- | --------------------------------------------------------------- | -------------------------------------------------------------------- |
+| `src/features/company/api/company.procedure.ts`                                  | _none yet_                                                      | COMP-001, COMP-017                                                   |
+| `src/features/company/api/companyDelete.procedure.ts`                            | `src/features/company/api/companyDelete.procedure.test.ts`      | COMP-009, COMP-010, COMP-011, COMP-012, COMP-013, COMP-016, COMP-020 |
+| `src/features/company/components/company-bin-table/CompanyBinTable.tsx`          | _none yet_                                                      | COMP-014                                                             |
+| `src/features/company/components/company-bin-table/CompanyBinTableRowAction.tsx` | _none yet_                                                      | COMP-014                                                             |
+| `src/routes/dashboard/_dashboardLayout/companies/index.tsx`                      | _none yet_                                                      | COMP-015                                                             |
+| `src/features/company/components/company-details/CompanyDetailsTab.tsx`          | _none yet_                                                      | COMP-002                                                             |
+| `src/features/company/api/companyPayment.procedure.ts`                           | _none yet_                                                      | COMP-017, COMP-029, COMP-032, COMP-033                               |
+| `src/features/company/components/company-details/CompanyPaymentsTab.tsx`         | _none yet_                                                      | COMP-004, COMP-029, COMP-031                                         |
+| `src/features/company/components/company-details/CompanyPaymentRowAction.tsx`    | _none yet_                                                      | COMP-031                                                             |
+| `src/features/company/components/CompanyPaymentsTable.tsx`                       | `src/features/company/components/CompanyPaymentsTable.test.tsx` | COMP-031, COMP-033                                                   |
+| `src/features/company/components/CompanyPaymentCreateDialog.tsx`                 | _none yet_                                                      | COMP-017                                                             |
+| `src/routes/dashboard/_dashboardLayout/companies/payments.tsx`                   | _none yet_                                                      | COMP-031, COMP-033                                                   |
+| `src/components/DeleteDialog.tsx`                                                | _none yet_                                                      | COMP-007                                                             |
+| `src/features/company/components/CompanyDeleteDialog.tsx`                        | _none yet_                                                      | COMP-007                                                             |
+| `src/features/company/components/company-table/CompanyTableRowAction.tsx`        | _none yet_                                                      | COMP-007                                                             |
+| `src/routes/dashboard/_dashboardLayout/companies/$companyId.tsx`                 | _none yet_                                                      | COMP-008                                                             |

@@ -1,3 +1,6 @@
+import { Link } from "@tanstack/react-router";
+import { Phone } from "lucide-react";
+
 import { FormatDateCell } from "@/components/FormatDateCell";
 import { MetaPagination } from "@/components/MetaPagination";
 import {
@@ -19,9 +22,11 @@ type CompanyPaymentsData = ListCompanyPaymentsContractType["output"]["data"];
 export function CompanyPaymentsTable({
   paymentsData,
   onPageChange,
+  showCompany = false,
 }: {
   paymentsData: CompanyPaymentsData;
   onPageChange: (page: number) => void;
+  showCompany?: boolean;
 }) {
   return (
     <div className="space-y-4">
@@ -30,6 +35,7 @@ export function CompanyPaymentsTable({
           <TableHeader>
             <TableRow>
               <TableHead>Date</TableHead>
+              {showCompany && <TableHead>Company</TableHead>}
               <TableHead>Purchase</TableHead>
               <TableHead className="text-right">Amount</TableHead>
               <TableHead>Note</TableHead>
@@ -42,7 +48,7 @@ export function CompanyPaymentsTable({
             {paymentsData.data.length === 0 ? (
               <TableRow>
                 <TableCell
-                  colSpan={5}
+                  colSpan={showCompany ? 6 : 5}
                   className="py-8 text-center text-muted-foreground"
                 >
                   No payments yet
@@ -50,7 +56,11 @@ export function CompanyPaymentsTable({
               </TableRow>
             ) : (
               paymentsData.data.map((payment) => (
-                <PaymentRow key={payment.id} payment={payment} />
+                <PaymentRow
+                  key={payment.id}
+                  payment={payment}
+                  showCompany={showCompany}
+                />
               ))
             )}
           </TableBody>
@@ -63,8 +73,10 @@ export function CompanyPaymentsTable({
 
 function PaymentRow({
   payment,
+  showCompany,
 }: {
   payment: CompanyPaymentsData["data"][number];
+  showCompany: boolean;
 }) {
   return (
     <TableRow>
@@ -75,6 +87,11 @@ function PaymentRow({
           className="block whitespace-nowrap"
         />
       </TableCell>
+      {showCompany && (
+        <TableCell>
+          <CompanyCell payment={payment} />
+        </TableCell>
+      )}
       <TableCell>
         {payment.purchase ? (
           <div className="flex flex-col items-start gap-1">
@@ -114,5 +131,34 @@ function PaymentRow({
         )}
       </TableCell>
     </TableRow>
+  );
+}
+
+function CompanyCell({
+  payment,
+}: {
+  payment: CompanyPaymentsData["data"][number];
+}) {
+  return (
+    <div className="max-w-56 min-w-36">
+      <Link
+        to="/dashboard/companies/$companyId"
+        params={{ companyId: payment.companyId }}
+        search={{ tab: "details" }}
+        className="link font-medium"
+      >
+        {payment.companyName ?? "Unknown company"}
+      </Link>
+      {payment.companyPhone ? (
+        <span className="mt-0.5 flex min-w-0 items-center gap-1 text-xs text-muted-foreground">
+          <Phone aria-hidden="true" className="size-3 shrink-0" />
+          <span className="truncate tabular-nums">{payment.companyPhone}</span>
+        </span>
+      ) : (
+        <span className="mt-0.5 block text-xs text-muted-foreground">
+          No phone
+        </span>
+      )}
+    </div>
   );
 }
