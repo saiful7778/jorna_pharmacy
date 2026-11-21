@@ -27,6 +27,8 @@ table company_payments {
   amount real [not null]
   note text
   created_by text
+  deleted_at integer
+  deleted_by text
   created_at integer [not null, default: `(unixepoch() * 1000)`]
   updated_at integer [not null, default: `(unixepoch() * 1000)`]
 
@@ -48,6 +50,8 @@ table companies {
   address text
   note text
   is_active integer [not null, default: 1]
+  deleted_at integer
+  deleted_by text
   created_at integer [not null, default: `(unixepoch() * 1000)`]
   updated_at integer [not null, default: `(unixepoch() * 1000)`]
 
@@ -63,6 +67,8 @@ table customer_payments {
   amount real [not null]
   note text
   created_by text
+  deleted_at integer
+  deleted_by text
   created_at integer [not null, default: `(unixepoch() * 1000)`]
   updated_at integer [not null, default: `(unixepoch() * 1000)`]
 
@@ -84,6 +90,8 @@ table customers {
   address text
   note text
   is_active integer [not null, default: 1]
+  deleted_at integer
+  deleted_by text
   created_at integer [not null, default: `(unixepoch() * 1000)`]
   updated_at integer [not null, default: `(unixepoch() * 1000)`]
 
@@ -176,6 +184,8 @@ table purchase_returns {
   total_amount real [not null]
   reason text
   created_by text
+  deleted_at integer
+  deleted_by text
   created_at integer [not null, default: `(unixepoch() * 1000)`]
   updated_at integer [not null, default: `(unixepoch() * 1000)`]
 
@@ -198,6 +208,8 @@ table purchases {
   paid_amount real [not null, default: 0]
   note text
   created_by text
+  deleted_at integer
+  deleted_by text
   created_at integer [not null, default: `(unixepoch() * 1000)`]
   updated_at integer [not null, default: `(unixepoch() * 1000)`]
 
@@ -232,6 +244,30 @@ table roles {
 
   indexes {
     role_name [name: 'role_name_unique', unique]
+  }
+}
+
+table sale_closings {
+  id text [pk, not null]
+  period_start integer [not null]
+  period_end integer [not null]
+  company_paid real [default: 0]
+  total_sales real [not null]
+  opening_cash real [default: 0]
+  cash_received real [not null]
+  total_expenses real [not null, default: 0]
+  total_salary real [not null]
+  counted_cash real
+  closed_by text
+  note text
+  created_at integer [not null, default: `(unixepoch() * 1000)`]
+  updated_at integer [not null, default: `(unixepoch() * 1000)`]
+
+  indexes {
+    
+    
+    closed_by [name: 'saleClosing_closedBy_idx']
+    period_start [name: 'saleClosing_periodStart_idx']
   }
 }
 
@@ -282,6 +318,8 @@ table sales {
   total_amount real [not null]
   paid_amount real [not null, default: 0]
   created_by text
+  deleted_at integer
+  deleted_by text
   created_at integer [not null, default: `(unixepoch() * 1000)`]
   updated_at integer [not null, default: `(unixepoch() * 1000)`]
 
@@ -403,7 +441,7 @@ table users {
   banned integer [default: 0]
   ban_reason text
   ban_expires integer
-  timezone text [not null, default: 'UTC']
+  timezone text [not null, default: 'Asia/Dhaka']
   locale text [not null, default: 'en-US']
   currency text [not null, default: 'USD']
   created_at integer [not null, default: `(unixepoch() * 1000)`]
@@ -460,6 +498,8 @@ ref: purchase_returns.created_by > users.id
 ref: role_permissions.role_id > roles.id
 
 ref: role_permissions.permission_id > permissions.id
+
+ref: sale_closings.closed_by > users.id
 
 ref: sale_items.sale_id > sales.id
 

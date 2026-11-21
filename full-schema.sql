@@ -5,6 +5,8 @@ CREATE TABLE `companies` (
 	`address` text,
 	`note` text,
 	`is_active` integer DEFAULT true NOT NULL,
+	`deleted_at` integer,
+	`deleted_by` text,
 	`created_at` integer DEFAULT (unixepoch() * 1000) NOT NULL,
 	`updated_at` integer DEFAULT (unixepoch() * 1000) NOT NULL
 );
@@ -17,6 +19,8 @@ CREATE TABLE `company_payments` (
 	`amount` real NOT NULL,
 	`note` text,
 	`created_by` text,
+	`deleted_at` integer,
+	`deleted_by` text,
 	`created_at` integer DEFAULT (unixepoch() * 1000) NOT NULL,
 	`updated_at` integer DEFAULT (unixepoch() * 1000) NOT NULL,
 	FOREIGN KEY (`company_id`) REFERENCES `companies`(`id`) ON UPDATE no action ON DELETE restrict,
@@ -35,6 +39,8 @@ CREATE TABLE `customers` (
 	`address` text,
 	`note` text,
 	`is_active` integer DEFAULT true NOT NULL,
+	`deleted_at` integer,
+	`deleted_by` text,
 	`created_at` integer DEFAULT (unixepoch() * 1000) NOT NULL,
 	`updated_at` integer DEFAULT (unixepoch() * 1000) NOT NULL
 );
@@ -48,6 +54,8 @@ CREATE TABLE `customer_payments` (
 	`amount` real NOT NULL,
 	`note` text,
 	`created_by` text,
+	`deleted_at` integer,
+	`deleted_by` text,
 	`created_at` integer DEFAULT (unixepoch() * 1000) NOT NULL,
 	`updated_at` integer DEFAULT (unixepoch() * 1000) NOT NULL,
 	FOREIGN KEY (`customer_id`) REFERENCES `customers`(`id`) ON UPDATE no action ON DELETE restrict,
@@ -87,6 +95,8 @@ CREATE TABLE `purchases` (
 	`paid_amount` real DEFAULT 0 NOT NULL,
 	`note` text,
 	`created_by` text,
+	`deleted_at` integer,
+	`deleted_by` text,
 	`created_at` integer DEFAULT (unixepoch() * 1000) NOT NULL,
 	`updated_at` integer DEFAULT (unixepoch() * 1000) NOT NULL,
 	FOREIGN KEY (`company_id`) REFERENCES `companies`(`id`) ON UPDATE no action ON DELETE restrict,
@@ -122,6 +132,8 @@ CREATE TABLE `purchase_returns` (
 	`total_amount` real NOT NULL,
 	`reason` text,
 	`created_by` text,
+	`deleted_at` integer,
+	`deleted_by` text,
 	`created_at` integer DEFAULT (unixepoch() * 1000) NOT NULL,
 	`updated_at` integer DEFAULT (unixepoch() * 1000) NOT NULL,
 	FOREIGN KEY (`compnay_id`) REFERENCES `companies`(`id`) ON UPDATE no action ON DELETE restrict,
@@ -198,6 +210,8 @@ CREATE TABLE `sales` (
 	`total_amount` real NOT NULL,
 	`paid_amount` real DEFAULT 0 NOT NULL,
 	`created_by` text,
+	`deleted_at` integer,
+	`deleted_by` text,
 	`created_at` integer DEFAULT (unixepoch() * 1000) NOT NULL,
 	`updated_at` integer DEFAULT (unixepoch() * 1000) NOT NULL,
 	FOREIGN KEY (`customer_id`) REFERENCES `customers`(`id`) ON UPDATE no action ON DELETE restrict,
@@ -251,7 +265,7 @@ CREATE TABLE `users` (
 	`banned` integer DEFAULT false,
 	`ban_reason` text,
 	`ban_expires` integer,
-	`timezone` text DEFAULT 'UTC' NOT NULL,
+	`timezone` text DEFAULT 'Asia/Dhaka' NOT NULL,
 	`locale` text DEFAULT 'en-US' NOT NULL,
 	`currency` text DEFAULT 'USD' NOT NULL,
 	`created_at` integer DEFAULT (unixepoch() * 1000) NOT NULL,
@@ -332,6 +346,27 @@ CREATE TABLE `accounts` (
 
 CREATE UNIQUE INDEX `account_accountProvider_accountId_idx` ON `accounts` (`provider_id`,`account_id`);
 CREATE INDEX `account_userId_idx` ON `accounts` (`user_id`);
+CREATE TABLE `sale_closings` (
+	`id` text PRIMARY KEY NOT NULL,
+	`period_start` integer NOT NULL,
+	`period_end` integer NOT NULL,
+	`company_paid` real DEFAULT 0,
+	`total_sales` real NOT NULL,
+	`opening_cash` real DEFAULT 0,
+	`cash_received` real NOT NULL,
+	`total_expenses` real DEFAULT 0 NOT NULL,
+	`total_salary` real NOT NULL,
+	`counted_cash` real,
+	`closed_by` text,
+	`note` text,
+	`created_at` integer DEFAULT (unixepoch() * 1000) NOT NULL,
+	`updated_at` integer DEFAULT (unixepoch() * 1000) NOT NULL,
+	FOREIGN KEY (`closed_by`) REFERENCES `users`(`id`) ON UPDATE no action ON DELETE set null,
+	CONSTRAINT "saleClosing_period_chk" CHECK("sale_closings"."period_end" > "sale_closings"."period_start")
+);
+
+CREATE INDEX `saleClosing_closedBy_idx` ON `sale_closings` (`closed_by`);
+CREATE INDEX `saleClosing_periodStart_idx` ON `sale_closings` (`period_start`);
 CREATE TABLE `sessions` (
 	`id` text PRIMARY KEY NOT NULL,
 	`token` text NOT NULL,
