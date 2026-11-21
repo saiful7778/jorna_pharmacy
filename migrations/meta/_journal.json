@@ -57,6 +57,13 @@
       "when": 1793250538926,
       "tag": "0007_update_name",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "6",
+      "when": 1795179192054,
+      "tag": "0008_large_kree",
+      "breakpoints": true
     }
   ]
 }
