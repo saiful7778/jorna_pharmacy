@@ -18,15 +18,19 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { DEFAULT_PAGE_INDEX, DEFAULT_PAGE_SIZE } from "@/constants";
 import { usePermissionCheck } from "@/hooks/use-permission-check";
 import { orpcTQClient } from "@/oRPC/orpc";
+import type { FiltersType } from "@/types/data-table";
 
 import {
   CustomerPaymentCreateDialog,
   openCustomerPaymentCreateDialog,
 } from "../CustomerPaymentCreateDialog";
-import { CustomerPaymentsTable } from "../CustomerPaymentsTable";
+import { CustomerPaymentsTable } from "../customer-payments-table/CustomerPaymentsTable";
 
 export function CustomerPaymentsTab({ customerId }: { customerId: string }) {
-  const [page, setPage] = useState(DEFAULT_PAGE_INDEX);
+  const [filters, setFilters] = useState<Omit<FiltersType, "search">>({
+    page: DEFAULT_PAGE_INDEX,
+    limit: DEFAULT_PAGE_SIZE,
+  });
   const setOpenCustomerPaymentDialog = useAtomSet(
     openCustomerPaymentCreateDialog
   );
@@ -42,8 +46,8 @@ export function CustomerPaymentsTab({ customerId }: { customerId: string }) {
   const { data, isLoading, isError, error } = useQuery(
     orpcTQClient.customer.payment.list.queryOptions({
       input: {
-        page,
-        limit: DEFAULT_PAGE_SIZE,
+        page: filters.page ?? DEFAULT_PAGE_INDEX,
+        limit: filters.limit ?? DEFAULT_PAGE_SIZE,
         filter: {
           customerId,
         },
@@ -84,8 +88,9 @@ export function CustomerPaymentsTab({ customerId }: { customerId: string }) {
             >
               {(paymentsData) => (
                 <CustomerPaymentsTable
-                  paymentsData={paymentsData}
-                  onPageChange={setPage}
+                  data={paymentsData}
+                  filters={filters}
+                  setFilters={setFilters}
                 />
               )}
             </QueryStateBoundary>
