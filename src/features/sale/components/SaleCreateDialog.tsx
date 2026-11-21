@@ -75,6 +75,7 @@ export function SaleCreateDialog({
   open: boolean;
   setOpen: (value: boolean) => void;
 }) {
+  "use no memo";
   const form = useForm<SaleCreateFormInputType, unknown, SaleCreateFormType>({
     resolver: zodResolver(saleCreateFormSchema),
     defaultValues: { ...formInitialValue, customerId },
@@ -82,14 +83,10 @@ export function SaleCreateDialog({
 
   const { reset, handleSubmit, control, setValue, getValues } = form;
 
-  const handleDialog = (value: boolean) => {
-    setOpen(value);
-  };
-
   const { mutate, isPending } = useSaleCreate<keyof SaleCreateType>({
     onSuccess: () => {
-      form.reset();
-      handleDialog(false);
+      reset();
+      setOpen(false);
     },
     onValidationErrors: (fields) => {
       fields.forEach(({ fieldName, message }) => {
@@ -134,10 +131,13 @@ export function SaleCreateDialog({
   }, [totalAmount, setValue, getValues]);
 
   useEffect(() => {
+    if (customerId) {
+      setValue("customerId", customerId);
+    }
     return () => {
       reset(formInitialValue);
     };
-  }, [reset]);
+  }, [reset, setValue, customerId]);
 
   const onSubmit = handleSubmit((values) => {
     mutate({
@@ -188,7 +188,7 @@ export function SaleCreateDialog({
   );
 
   return (
-    <Dialog open={open} onOpenChange={handleDialog}>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogResponsiveContent className="max-w-full rounded-none sm:max-w-5xl sm:rounded-lg">
         <DialogStickyHeader>
           <DialogTitle>New Sale</DialogTitle>
