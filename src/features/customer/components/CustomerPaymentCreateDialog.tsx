@@ -3,7 +3,7 @@ import { useEffect } from "react";
 import { Atom, useAtom } from "@effect-atom/atom-react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Wallet } from "lucide-react";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 
 import { InputAddonField } from "@/components/form-fields/InputAddonField";
 import { TextareaField } from "@/components/form-fields/TextareaField";
@@ -28,6 +28,7 @@ import {
   type CustomerPaymentCreateInputType,
   type CustomerPaymentCreateType,
 } from "../customer.schema";
+import { CustomerSelectorField } from "./CustomerSelectorField";
 
 export const openCustomerPaymentCreateDialog = Atom.make(false).pipe(
   Atom.keepAlive
@@ -39,11 +40,12 @@ export function CustomerPaymentCreateDialog({
   open: controlledOpen,
   setOpen: setControlledOpen,
 }: {
-  customerId: string;
+  customerId?: string;
   saleId?: string;
   open?: boolean;
   setOpen?: (value: boolean) => void;
 }) {
+  "use no memo";
   const [atomOpen, setAtomOpen] = useAtom(openCustomerPaymentCreateDialog);
   const open = controlledOpen ?? atomOpen;
   const setOpen = setControlledOpen ?? setAtomOpen;
@@ -55,25 +57,40 @@ export function CustomerPaymentCreateDialog({
   >({
     resolver: zodResolver(customerPaymentCreateSchema),
     defaultValues: {
-      customerId,
-      saleId,
+      customerId: customerId ?? "",
+      saleId: saleId ?? "",
       amount: "",
       note: "",
     },
   });
 
-  const { reset } = form;
+  const { reset, setValue } = form;
 
   useEffect(() => {
     if (!open) return;
 
-    reset({
-      customerId,
-      saleId,
-      amount: "",
-      note: "",
-    });
-  }, [open, reset, customerId, saleId]);
+    if (customerId) {
+      setValue("customerId", customerId);
+    }
+    if (saleId) {
+      setValue("saleId", saleId);
+    }
+
+    return () => {
+      reset({
+        customerId: undefined,
+        saleId: undefined,
+        amount: "",
+        note: "",
+      });
+    };
+  }, [open, reset, customerId, saleId, setValue]);
+
+  const formCustomerId = useWatch({
+    control: form.control,
+    name: "customerId",
+    defaultValue: customerId,
+  });
 
   const { mutate, isPending } = useCreateCustomerPayment<
     keyof CustomerPaymentCreateType
@@ -89,7 +106,7 @@ export function CustomerPaymentCreateDialog({
   });
 
   const handleSubmit = form.handleSubmit((values) => {
-    mutate({ ...values, customerId });
+    mutate(values);
   });
 
   const formId = "customer_payment_create_form";
@@ -107,11 +124,20 @@ export function CustomerPaymentCreateDialog({
         <DialogResponsiveBody>
           <form id={formId} onSubmit={handleSubmit}>
             <FieldGroup>
+              {!customerId && (
+                <CustomerSelectorField
+                  control={form.control}
+                  name="customerId"
+                  label="Customer"
+                  requiredField
+                  disabled={isPending}
+                />
+              )}
               {!saleId && (
                 <SaleSelectorField
                   control={form.control}
                   name="saleId"
-                  customerId={customerId}
+                  customerId={formCustomerId}
                   label="Against purchase"
                   description="Leave empty to record a general payment"
                   fetchApi={open}

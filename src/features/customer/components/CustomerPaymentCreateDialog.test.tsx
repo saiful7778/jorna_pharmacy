@@ -15,6 +15,10 @@ vi.mock("@/features/sale/components/SaleSelectorField", () => ({
   SaleSelectorField: () => null,
 }));
 
+vi.mock("./CustomerSelectorField", () => ({
+  CustomerSelectorField: () => null,
+}));
+
 vi.mock("@effect-atom/atom-react", async (importOriginal) => {
   const actual = await importOriginal<typeof EffectAtom>();
 
