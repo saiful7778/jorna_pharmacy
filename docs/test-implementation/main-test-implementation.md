@@ -92,6 +92,7 @@ ID prefixes are listed per document. IDs are stable: never renumber an existing 
 | Grid table      | [grid-table.md](./grid-table.md)               | `src/components/ui/grid-table.tsx`                                                         |
 | Purchase        | [purchase.md](./purchase.md)                   | `src/features/purchase/**`, `src/routes/dashboard/_dashboardLayout/companies/purchases/**` |
 | Sale            | [sale.md](./sale.md)                           | `src/features/sale/**`, `src/routes/dashboard/_dashboardLayout/sales/**`                   |
+| Sale closing    | [sale-closing.md](./sale-closing.md)           | `src/features/sale-closings/**`, `src/routes/dashboard/_dashboardLayout/sale-closings.tsx` |
 | Time range      | [time-range-filter.md](./time-range-filter.md) | `src/components/time-range-filter/**`, `src/lib/zod-schemas/baseZodSchema.ts`              |
 
 ## Out of scope
