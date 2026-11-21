@@ -37,7 +37,11 @@ import {
 import { errorMiddleware } from "@/oRPC/middleware/error.middleware";
 import type { ORPCContext } from "@/types/orpc.types";
 
-import { reserveInvoice } from "../invoiceResolver";
+import {
+  claimInvoiceStatement,
+  releaseInvoice,
+  reserveInvoice,
+} from "../invoiceResolver";
 import { saleContract } from "./sale.contract";
 
 export const saleImpl = implement(saleContract)
@@ -471,9 +475,10 @@ export const saleCreateProcedure = saleImpl.create
           paidAmount,
         } satisfies InsertSale)
         .returning(),
+      claimInvoiceStatement(context.db, invoice.id),
     ];
 
-    if (customerId) {
+    if (customerId && input.paidAmount > 0) {
       statements.push(
         context.db.insert(CustomerPaymentTable).values({
           customerId,
@@ -501,7 +506,17 @@ export const saleCreateProcedure = saleImpl.create
       );
     }
 
-    const [saleResult] = await context.db.batch(statements);
+    let saleResult: unknown;
+
+    try {
+      [saleResult] = await context.db.batch(statements);
+    } catch (error) {
+      // The batch rolled back, so release whatever reservation it left behind.
+      // Never let cleanup hide the write failure that caused it.
+      await releaseInvoice(context.db, invoice.id).catch(() => undefined);
+      throw error;
+    }
+
     const newSale = (saleResult as Array<SaleDataModel> | undefined)?.[0];
 
     if (!newSale) {

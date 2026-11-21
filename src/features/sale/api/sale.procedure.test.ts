@@ -15,6 +15,7 @@ import {
   MedicineTable,
   PurchaseItemTable,
   PurchaseTable,
+  SaleInvoiceTable,
   SaleItemTable,
   SaleTable,
   UserTable,
@@ -384,5 +385,127 @@ describe("sale create procedure", () => {
     ).rejects.toMatchObject({ code: "NOT_FOUND" });
 
     expect(await db.select().from(SaleTable)).toEqual([]);
+  });
+
+  it("links the invoice to the sale so a later sale gets a new invoice number", async () => {
+    await seedBatches(db, [
+      {
+        id: "batch-1",
+        qtyRemaining: 10,
+        sellPerUnit: 10,
+        costPerUnit: 6,
+        expiryDate: new Date("2027-01-01T00:00:00.000Z"),
+        createdAt: new Date("2026-01-01T00:00:00.000Z"),
+      },
+    ]);
+
+    const { context } = createContext(db);
+    const first = await call(
+      saleCreateProcedure,
+      createSaleInput({ quantity: 1, totalAmount: 10 }),
+      { context }
+    );
+
+    const [firstInvoice] = await db
+      .select()
+      .from(SaleInvoiceTable)
+      .where(eq(SaleInvoiceTable.id, first.data.invoiceId));
+
+    expect(firstInvoice).toMatchObject({
+      isLinked: true,
+      reservedBy: null,
+      reservedUntil: null,
+    });
+
+    const second = await call(
+      saleCreateProcedure,
+      createSaleInput({ quantity: 1, totalAmount: 10 }),
+      { context }
+    );
+
+    expect(second.data.invoiceId).not.toBe(first.data.invoiceId);
+    expect(await db.select().from(SaleTable)).toHaveLength(2);
+  });
+
+  it("never reuses an invoice that already belongs to a sale, even if it looks unreserved", async () => {
+    await seedBatches(db, [
+      {
+        id: "batch-1",
+        qtyRemaining: 10,
+        sellPerUnit: 10,
+        costPerUnit: 6,
+        expiryDate: new Date("2027-01-01T00:00:00.000Z"),
+        createdAt: new Date("2026-01-01T00:00:00.000Z"),
+      },
+    ]);
+
+    const { context } = createContext(db);
+    const first = await call(
+      saleCreateProcedure,
+      createSaleInput({ quantity: 1, totalAmount: 10 }),
+      { context }
+    );
+
+    // Reproduces rows written by the old code, which left the invoice unlinked
+    // with a lapsed reservation while a sale already pointed at it.
+    await db
+      .update(SaleInvoiceTable)
+      .set({ isLinked: false, reservedUntil: new Date(Date.now() - 60_000) })
+      .where(eq(SaleInvoiceTable.id, first.data.invoiceId));
+
+    const second = await call(
+      saleCreateProcedure,
+      createSaleInput({ quantity: 1, totalAmount: 10 }),
+      { context }
+    );
+
+    expect(second.data.invoiceId).not.toBe(first.data.invoiceId);
+    expect(await db.select().from(SaleTable)).toHaveLength(2);
+  });
+
+  it("releases the reserved invoice when the sale write fails", async () => {
+    await seedBatches(db, [
+      {
+        id: "batch-1",
+        qtyRemaining: 10,
+        sellPerUnit: 10,
+        costPerUnit: 6,
+        expiryDate: new Date("2027-01-01T00:00:00.000Z"),
+        createdAt: new Date("2026-01-01T00:00:00.000Z"),
+      },
+    ]);
+
+    // Reuse the first sale id so the second insert hits the primary key
+    const { context } = createContext(db);
+    await call(
+      saleCreateProcedure,
+      createSaleInput({ quantity: 1, totalAmount: 10 }),
+      { context }
+    );
+
+    const [existingSale] = await db.select().from(SaleTable);
+    vi.spyOn(crypto, "randomUUID").mockReturnValueOnce(
+      existingSale!.id as `${string}-${string}-${string}-${string}-${string}`
+    );
+
+    await expect(
+      call(
+        saleCreateProcedure,
+        createSaleInput({ quantity: 1, totalAmount: 10 }),
+        { context }
+      )
+    ).rejects.toBeTruthy();
+
+    const invoices = await db.select().from(SaleInvoiceTable);
+    const reusable = invoices.filter((invoice) => !invoice.isLinked);
+
+    expect(reusable).toHaveLength(1);
+    expect(reusable[0]).toMatchObject({
+      reservedBy: null,
+      reservedUntil: null,
+    });
+    expect(await db.select().from(SaleTable)).toHaveLength(1);
+
+    vi.restoreAllMocks();
   });
 });

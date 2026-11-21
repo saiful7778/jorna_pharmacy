@@ -1,10 +1,28 @@
-import { and, eq, gt, isNull, lt, or, sql } from "drizzle-orm";
+import { and, eq, isNull, lt, notExists, or, sql } from "drizzle-orm";
 
 import type { DatabaseType } from "@/db/clients/drizzle-client";
-import { SaleInvoiceTable } from "@/db/schemas";
+import { SaleInvoiceTable, SaleTable } from "@/db/schemas";
 
 const INVOICE_RESERVATION_MINUTES = 10;
 
+/**
+ * An invoice number belongs to the sale that used it, even when `is_linked` is
+ * stale, so an invoice already referenced by a sale is never handed out again.
+ */
+function notAttachedToSale(db: DatabaseType) {
+  return notExists(
+    db
+      .select({ id: sql`1` })
+      .from(SaleTable)
+      .where(eq(SaleTable.invoiceId, SaleInvoiceTable.id))
+  );
+}
+
+/**
+ * Reserves the lowest free invoice number for a few minutes. The reservation
+ * keeps two in-flight sales from picking the same number, and simply lapses if
+ * a sale is never written, so a number is never lost.
+ */
 export async function reserveInvoice(db: DatabaseType, userId: string) {
   const now = new Date();
   const reservedUntil = new Date(
@@ -20,7 +38,8 @@ export async function reserveInvoice(db: DatabaseType, userId: string) {
         or(
           isNull(SaleInvoiceTable.reservedUntil),
           lt(SaleInvoiceTable.reservedUntil, now)
-        )
+        ),
+        notAttachedToSale(db)
       )
     )
     .orderBy(sql`CAST(${SaleInvoiceTable.number} AS INTEGER)`)
@@ -58,30 +77,25 @@ export async function reserveInvoice(db: DatabaseType, userId: string) {
   return createdInvoice;
 }
 
-export async function claimInvoice(
-  db: DatabaseType,
-  invoiceId: string,
-  userId: string
-) {
-  const [claimedInvoice] = await db
+/**
+ * Builds the statement that ties a reserved invoice to its sale. Run it in the
+ * same batch as the sale insert so the invoice is claimed only once the sale
+ * exists, and both writes commit or roll back together.
+ */
+export function claimInvoiceStatement(db: DatabaseType, invoiceId: string) {
+  return db
     .update(SaleInvoiceTable)
-    .set({ isLinked: true })
-    .where(
-      and(
-        eq(SaleInvoiceTable.id, invoiceId),
-        eq(SaleInvoiceTable.isLinked, false),
-        eq(SaleInvoiceTable.reservedBy, userId),
-        gt(SaleInvoiceTable.reservedUntil, new Date())
-      )
-    )
-    .returning({ id: SaleInvoiceTable.id });
-
-  return claimedInvoice;
+    .set({ isLinked: true, reservedBy: null, reservedUntil: null })
+    .where(eq(SaleInvoiceTable.id, invoiceId));
 }
 
+/**
+ * Frees a reserved invoice that never made it into a sale. A number already
+ * attached to a sale is left untouched.
+ */
 export async function releaseInvoice(db: DatabaseType, invoiceId: string) {
   await db
     .update(SaleInvoiceTable)
-    .set({ isLinked: false })
-    .where(eq(SaleInvoiceTable.id, invoiceId));
+    .set({ isLinked: false, reservedBy: null, reservedUntil: null })
+    .where(and(eq(SaleInvoiceTable.id, invoiceId), notAttachedToSale(db)));
 }

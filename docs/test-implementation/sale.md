@@ -8,11 +8,11 @@ sale row actions. Scope: `src/features/sale/**` and the sales routes under
 
 | Status      | Count  |
 | ----------- | ------ |
-| Implemented | 14     |
-| Partial     | 2      |
-| Missing     | 16     |
+| Implemented | 18     |
+| Partial     | 1      |
+| Missing     | 17     |
 | Obsolete    | 0      |
-| **Total**   | **32** |
+| **Total**   | **36** |
 
 ## Sale table
 
@@ -204,11 +204,38 @@ sale row actions. Scope: `src/features/sale/**` and the sales routes under
 ### SALE-033 · A walk-in sale with no customer is recorded as fully paid
 
 - **Covers:** `saleCreateProcedure` — `src/features/sale/api/sale.procedure.ts`
-- **Type:** integration · **Priority:** P0 · **Status:** Partial
+- **Type:** integration · **Priority:** P0 · **Status:** Implemented
 - **Given** a sale with no customer ID or name, one item for 2 units priced at 10, and a submitted paid amount of 0
 - **When** the sale is created
 - **Then** the sale has no customer, and its `paidAmount` equals its `totalAmount` (20), ignoring the submitted paid amount
-- **Notes:** Test: `src/features/sale/api/sale.procedure.test.ts`. Partial because the test does not yet pass: `seedBase` fails on `companies.deleted_at`, which is missing from `full-schema.sql`. This failure predates this change and also affects the other create tests in the file.
+- **Notes:** Test: `src/features/sale/api/sale.procedure.test.ts`. `full-schema.sql` now matches the Drizzle schema, so the fixture uses it directly without replaying migrations.
+
+### SALE-034 · Sale create links its invoice so the number cannot be handed to another sale
+
+- **Covers:** `saleCreateProcedure` — `src/features/sale/api/sale.procedure.ts`; `claimInvoiceStatement` — `src/features/sale/invoiceResolver.ts`
+- **Type:** integration · **Priority:** P0 · **Status:** Implemented
+- **Given** a sale is created and an invoice number is reserved for it
+- **When** the sale is written
+- **Then** the invoice row is marked `isLinked` and its `reservedBy` and `reservedUntil` are cleared in the same batch as the sale, so a second sale receives a different invoice id and both sales are stored
+- **Notes:** Test: `src/features/sale/api/sale.procedure.test.ts`. Regression guard for `UNIQUE constraint failed: sales.invoice_id`, caused by invoices staying unlinked after a sale took them and being reused once the 10-minute reservation lapsed.
+
+### SALE-035 · An invoice already attached to a sale is never handed out again
+
+- **Covers:** `reserveInvoice` — `src/features/sale/invoiceResolver.ts`
+- **Type:** integration · **Priority:** P0 · **Status:** Implemented
+- **Given** a sale whose invoice row was left unlinked with a lapsed reservation, as older code wrote it
+- **When** another sale is created
+- **Then** that invoice is skipped and the new sale receives a different invoice id, leaving two sales
+- **Notes:** Test: `src/features/sale/api/sale.procedure.test.ts`. Exercises the `NOT EXISTS` guard on `sales.invoice_id` that protects existing production rows.
+
+### SALE-036 · A failed sale write returns its reserved invoice number
+
+- **Covers:** `saleCreateProcedure` — `src/features/sale/api/sale.procedure.ts`; `releaseInvoice` — `src/features/sale/invoiceResolver.ts`
+- **Type:** integration · **Priority:** P1 · **Status:** Implemented
+- **Given** a sale whose write fails after an invoice was reserved
+- **When** the request fails
+- **Then** the invoice is left unlinked with no reservation, so its number can be used again, and no sale row is stored
+- **Notes:** Test: `src/features/sale/api/sale.procedure.test.ts`. Asserted by forcing a duplicate sale id. `releaseInvoice` never frees a number that a sale already uses.
 
 ### SALE-018 · Batches of a soft-deleted purchase are not sold and not counted as stock
 
@@ -350,24 +377,25 @@ sale row actions. Scope: `src/features/sale/**` and the sales routes under
 
 ## Source map
 
-| Source file                                                              | Test file                                            | Cases                                    |
-| ------------------------------------------------------------------------ | ---------------------------------------------------- | ---------------------------------------- |
-| `src/constants/sidebarLinks.tsx`                                         | —                                                    | SALE-010                                 |
-| `src/features/sale/api/sale.procedure.ts`                                | `src/features/sale/api/sale.procedure.test.ts`       | SALE-009, SALE-013 to SALE-018, SALE-030 |
-| `src/features/medicine/api/medicine.procedure.ts`                        | —                                                    | SALE-018                                 |
-| `src/features/sale/api/saleDelete.procedure.ts`                          | `src/features/sale/api/saleDelete.procedure.test.ts` | SALE-019 to SALE-026                     |
-| `src/features/sale/api/saleDelete.contract.ts`                           | —                                                    | SALE-019 to SALE-026                     |
-| `src/features/sale/api/sale.api.hook.ts`                                 | —                                                    | SALE-020, SALE-026, SALE-029             |
-| `src/features/sale/components/SaleDeleteDialog.tsx`                      | —                                                    | SALE-029                                 |
-| `src/features/sale/components/SaleViewDialog.tsx`                        | —                                                    | SALE-031                                 |
-| `src/features/sale/components/SaleCreateDialog.tsx`                      | —                                                    | SALE-032                                 |
-| `src/features/sale/components/SaleStats.tsx`                             | `src/features/sale/components/SaleStats.test.tsx`    | SALE-011, SALE-012                       |
-| `src/features/sale/components/sale-table/SaleManagementTable.tsx`        | —                                                    | SALE-002 to SALE-005, SALE-032           |
-| `src/features/sale/components/sale-table/SaleTable.tsx`                  | —                                                    | SALE-001, SALE-029                       |
-| `src/features/sale/components/sale-table/saleTableColumn.tsx`            | —                                                    | SALE-001, SALE-008, SALE-029             |
-| `src/features/sale/components/sale-table/SaleTableRowAction.tsx`         | —                                                    | SALE-006, SALE-029, SALE-031             |
-| `src/features/sale/components/sale-bin-table/SaleBinManagementTable.tsx` | —                                                    | SALE-028                                 |
-| `src/features/sale/components/sale-bin-table/SaleBinTable.tsx`           | —                                                    | SALE-028                                 |
-| `src/features/sale/components/sale-bin-table/SaleBinTableRowAction.tsx`  | —                                                    | SALE-028                                 |
-| `src/features/sale/components/sale-bin-table/saleBinTableColumn.tsx`     | —                                                    | SALE-028                                 |
-| `src/routes/dashboard/_dashboardLayout/sales/index.tsx`                  | —                                                    | SALE-007, SALE-027                       |
+| Source file                                                              | Test file                                            | Cases                                                          |
+| ------------------------------------------------------------------------ | ---------------------------------------------------- | -------------------------------------------------------------- |
+| `src/constants/sidebarLinks.tsx`                                         | —                                                    | SALE-010                                                       |
+| `src/features/sale/api/sale.procedure.ts`                                | `src/features/sale/api/sale.procedure.test.ts`       | SALE-009, SALE-013 to SALE-018, SALE-030, SALE-033 to SALE-036 |
+| `src/features/sale/invoiceResolver.ts`                                   | `src/features/sale/api/sale.procedure.test.ts`       | SALE-034 to SALE-036                                           |
+| `src/features/medicine/api/medicine.procedure.ts`                        | —                                                    | SALE-018                                                       |
+| `src/features/sale/api/saleDelete.procedure.ts`                          | `src/features/sale/api/saleDelete.procedure.test.ts` | SALE-019 to SALE-026                                           |
+| `src/features/sale/api/saleDelete.contract.ts`                           | —                                                    | SALE-019 to SALE-026                                           |
+| `src/features/sale/api/sale.api.hook.ts`                                 | —                                                    | SALE-020, SALE-026, SALE-029                                   |
+| `src/features/sale/components/SaleDeleteDialog.tsx`                      | —                                                    | SALE-029                                                       |
+| `src/features/sale/components/SaleViewDialog.tsx`                        | —                                                    | SALE-031                                                       |
+| `src/features/sale/components/SaleCreateDialog.tsx`                      | —                                                    | SALE-032                                                       |
+| `src/features/sale/components/SaleStats.tsx`                             | `src/features/sale/components/SaleStats.test.tsx`    | SALE-011, SALE-012                                             |
+| `src/features/sale/components/sale-table/SaleManagementTable.tsx`        | —                                                    | SALE-002 to SALE-005, SALE-032                                 |
+| `src/features/sale/components/sale-table/SaleTable.tsx`                  | —                                                    | SALE-001, SALE-029                                             |
+| `src/features/sale/components/sale-table/saleTableColumn.tsx`            | —                                                    | SALE-001, SALE-008, SALE-029                                   |
+| `src/features/sale/components/sale-table/SaleTableRowAction.tsx`         | —                                                    | SALE-006, SALE-029, SALE-031                                   |
+| `src/features/sale/components/sale-bin-table/SaleBinManagementTable.tsx` | —                                                    | SALE-028                                                       |
+| `src/features/sale/components/sale-bin-table/SaleBinTable.tsx`           | —                                                    | SALE-028                                                       |
+| `src/features/sale/components/sale-bin-table/SaleBinTableRowAction.tsx`  | —                                                    | SALE-028                                                       |
+| `src/features/sale/components/sale-bin-table/saleBinTableColumn.tsx`     | —                                                    | SALE-028                                                       |
+| `src/routes/dashboard/_dashboardLayout/sales/index.tsx`                  | —                                                    | SALE-007, SALE-027                                             |
