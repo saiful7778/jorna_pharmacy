@@ -1,9 +1,8 @@
-import { useState } from "react";
-
-import { Atom, useAtom, useAtomSet } from "@effect-atom/atom-react";
+import { useAtomSet } from "@effect-atom/atom-react";
 import { useQuery } from "@tanstack/react-query";
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { Eye, HandCoins, Plus, Receipt, Wallet } from "lucide-react";
+import { createFileRoute } from "@tanstack/react-router";
+import { HandCoins, Plus, Receipt, Wallet } from "lucide-react";
+import z from "zod";
 
 import { SummaryStat } from "@/components/SummaryStat";
 import { DataTableEmpty } from "@/components/data-table/data-table-empty";
@@ -24,20 +23,18 @@ import { Button } from "@/components/ui/button";
 import { RefreshButton } from "@/components/ui/refresh-button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Spinner } from "@/components/ui/spinner";
-import {
-  BALANCE_EPSILON,
-  DEFAULT_PAGE_INDEX,
-  DEFAULT_PAGE_SIZE,
-} from "@/constants";
+import { BALANCE_EPSILON } from "@/constants";
 import { requirePermissions } from "@/features/auth/auth.functions";
 import {
   CustomerPaymentCreateDialog,
   openCustomerPaymentCreateDialog,
 } from "@/features/customer/components/CustomerPaymentCreateDialog";
-import { CustomerPaymentsTable } from "@/features/customer/components/CustomerPaymentsTable";
 import { CustomerSearchableInput } from "@/features/customer/components/CustomerSearchableInput";
+import { CustomerPaymentsTable } from "@/features/customer/components/customer-payments-table/CustomerPaymentsTable";
 import { usePermissionCheck } from "@/hooks/use-permission-check";
+import { useSearchFilter } from "@/hooks/use-search-filter";
 import { head } from "@/lib/head";
+import { querySearchSchema } from "@/lib/querySearchSchema";
 import { orpcTQClient } from "@/oRPC/orpc";
 import { formatCurrency } from "@/utils/formatCurrency";
 
@@ -54,6 +51,10 @@ export const Route = createFileRoute(
       context.user.id
     );
   },
+  validateSearch: querySearchSchema.extend({
+    customerId: z.uuid().optional(),
+    customerSearch: z.string().optional(),
+  }),
   head: ({ match }) =>
     head({
       pathname: match.pathname,
@@ -64,13 +65,9 @@ export const Route = createFileRoute(
   component: RouteComponent,
 });
 
-const customerIdAtom = Atom.make<string | undefined>(undefined).pipe(
-  Atom.keepAlive
-);
-
 function RouteComponent() {
-  const [customerId, setCustomerId] = useAtom(customerIdAtom);
-  const [customerSearch, setCustomerSearch] = useState("");
+  const search = Route.useSearch();
+  const { setFilters } = useSearchFilter(Route.id);
 
   return (
     <DashboardShell
@@ -83,27 +80,40 @@ function RouteComponent() {
         </DashboardShellHeader>
       }
     >
-      <div className="space-y-4 rounded-xl border bg-popover p-4">
+      <div className="space-y-4">
         <CustomerSearchableInput
           defaultOpen
-          value={customerSearch}
-          onChange={(value) => {
-            setCustomerSearch(value);
-          }}
-          onReset={() => {
-            setCustomerId(undefined);
-            setCustomerSearch("");
-          }}
-          onOptionSelect={(customerData) => setCustomerId(customerData.id)}
+          value={search.customerSearch ?? ""}
+          onChange={(value) =>
+            setFilters(
+              { customerSearch: value, customerId: undefined, page: 1 },
+              { replace: true }
+            )
+          }
+          onReset={() =>
+            setFilters({
+              customerId: undefined,
+              customerSearch: undefined,
+              page: 1,
+            })
+          }
+          onOptionSelect={(customerData) =>
+            setFilters({
+              customerId: customerData.id,
+              customerSearch: customerData.name,
+              page: 1,
+            })
+          }
         />
-        <CustomerPaymentDetails customerId={customerId} />
+        <CustomerPaymentDetails />
       </div>
     </DashboardShell>
   );
 }
 
-function CustomerPaymentDetails({ customerId }: { customerId?: string }) {
-  const [page, setPage] = useState(DEFAULT_PAGE_INDEX);
+function CustomerPaymentDetails() {
+  const { page, limit, customerId } = Route.useSearch();
+  const { setFilters } = useSearchFilter(Route.id);
   const setCustomerPaymentCreateDialog = useAtomSet(
     openCustomerPaymentCreateDialog
   );
@@ -119,7 +129,7 @@ function CustomerPaymentDetails({ customerId }: { customerId?: string }) {
     orpcTQClient.customer.payment.list.queryOptions({
       input: {
         page,
-        limit: DEFAULT_PAGE_SIZE,
+        limit,
         filter: {
           customerId,
         },
@@ -146,36 +156,18 @@ function CustomerPaymentDetails({ customerId }: { customerId?: string }) {
 
   return (
     <div className="space-y-4">
-      {customerId && (
-        <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            nativeButton={false}
-            render={
-              <Link
-                to="/dashboard/customers/$customerId"
-                params={{ customerId }}
-                search={{ tab: "details" }}
-              />
-            }
-          >
-            <Eye />
-            <span>Customer Details</span>
-          </Button>
-          <div className="ml-auto flex items-center gap-2">
-            {isAllowCreate && (
-              <>
-                <Button onClick={() => setCustomerPaymentCreateDialog(true)}>
-                  <Plus />
-                  <span>Add Payment</span>
-                </Button>
-                <CustomerPaymentCreateDialog customerId={customerId} />
-              </>
-            )}
-            <RefreshButton isLoading={false} onButtonClick={handleRefresh} />
-          </div>
-        </div>
-      )}
+      <div className="ml-auto flex items-center justify-end gap-2">
+        {isAllowCreate && (
+          <>
+            <Button onClick={() => setCustomerPaymentCreateDialog(true)}>
+              <Plus />
+              <span>Add Payment</span>
+            </Button>
+            <CustomerPaymentCreateDialog customerId={customerId} />
+          </>
+        )}
+        <RefreshButton isLoading={false} onButtonClick={handleRefresh} />
+      </div>
       <QueryStateBoundary
         isLoading={paymentStatsQuery.isLoading}
         isError={paymentStatsQuery.isError}
@@ -241,8 +233,14 @@ function CustomerPaymentDetails({ customerId }: { customerId?: string }) {
       >
         {(paymentsData) => (
           <CustomerPaymentsTable
-            paymentsData={paymentsData}
-            onPageChange={setPage}
+            data={paymentsData}
+            filters={{ page, limit }}
+            setFilters={(updatedFilters) =>
+              setFilters({
+                page: updatedFilters.page,
+                limit: updatedFilters.limit,
+              })
+            }
             showCustomer
           />
         )}

@@ -23,7 +23,7 @@ vi.mock("@/components/FormatDateCell", () => ({
   ),
 }));
 
-vi.mock("./customer-details/CustomerPaymentRowAction", () => ({
+vi.mock("../customer-details/CustomerPaymentRowAction", () => ({
   CustomerPaymentRowAction: () => null,
 }));
 
@@ -40,6 +40,9 @@ const META = {
   queryCount: 2,
   totalCount: 2,
 };
+
+const FILTERS = { page: 1, limit: 20 };
+const setFilters = vi.fn();
 
 function buildPayments() {
   return {
@@ -79,8 +82,9 @@ describe("CustomerPaymentsTable", () => {
   it("shows the customer name and phone linking to the customer when enabled", () => {
     render(
       <CustomerPaymentsTable
-        paymentsData={buildPayments()}
-        onPageChange={vi.fn()}
+        data={buildPayments()}
+        filters={FILTERS}
+        setFilters={setFilters}
         showCustomer
       />
     );
@@ -101,8 +105,9 @@ describe("CustomerPaymentsTable", () => {
   it("hides the customer column when the list is already scoped to one customer", () => {
     const { container } = render(
       <CustomerPaymentsTable
-        paymentsData={buildPayments()}
-        onPageChange={vi.fn()}
+        data={buildPayments()}
+        filters={FILTERS}
+        setFilters={setFilters}
       />
     );
 
@@ -115,16 +120,43 @@ describe("CustomerPaymentsTable", () => {
     expect(headerCells).toHaveLength(5);
   });
 
+  it("renders date, sale, amount, and note for every payment", () => {
+    render(
+      <CustomerPaymentsTable
+        data={buildPayments()}
+        filters={FILTERS}
+        setFilters={setFilters}
+      />
+    );
+
+    expect(screen.getAllByText("General payment")).toHaveLength(2);
+    expect(screen.getAllByRole("columnheader")).toHaveLength(5);
+  });
+
   it("spans the empty state across the customer column when it is shown", () => {
     render(
       <CustomerPaymentsTable
-        paymentsData={{ meta: META, data: [] }}
-        onPageChange={vi.fn()}
+        data={{ meta: META, data: [] }}
+        filters={FILTERS}
+        setFilters={setFilters}
         showCustomer
       />
     );
 
     const cell = screen.getByRole("cell", { name: "No payments yet" });
     expect(cell).toHaveAttribute("colspan", "6");
+  });
+
+  it("spans the empty state across five columns without the customer column", () => {
+    render(
+      <CustomerPaymentsTable
+        data={{ meta: META, data: [] }}
+        filters={FILTERS}
+        setFilters={setFilters}
+      />
+    );
+
+    const cell = screen.getByRole("cell", { name: "No payments yet" });
+    expect(cell).toHaveAttribute("colspan", "5");
   });
 });
